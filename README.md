@@ -42,6 +42,8 @@ Statements end with `;`, and blocks use `{ }`.
 | `na ta jadi`         | `else if`          |
 | `na ta`              | `else`             |
 | `jab le`             | `while`            |
+| `har` … `se` … `tak` | counting `for` loop |
+| `har` … `me`         | `for each` item of a list or string |
 | `bas kara`           | `break`            |
 | `aage badha`         | `continue`         |
 | `kaam`               | define a function  |
@@ -79,6 +81,36 @@ jadi (a > 10) {
 
 ### Loops
 
+`har` counts from one number to another. Both ends are included, just like "1 se 10 tak":
+
+```
+har i = 1 se 10 tak {
+  bol ho i;                 // 1, 2, … 10
+}
+
+har i = 10 se 0 tak kadam -2 {
+  bol ho i;                 // 10, 8, 6, 4, 2, 0 (kadam sets the step; it defaults to 1)
+}
+```
+
+`har … me` visits each item of a list, or each letter of a string:
+
+```
+har phal ["aam", "kela"] me {
+  bol ho phal;
+}
+```
+
+- The loop variable only exists inside the loop.
+- `se`, `tak`, `kadam` and `me` are only special inside a `har` loop's header. Everywhere else they're
+  ordinary names, so you can still use them as variables.
+- The start, end and step are worked out once, before the loop starts. Changing the loop variable or the
+  list inside the loop doesn't change which values the loop visits.
+- With a fractional step, values are rounded to 15 significant digits, so `har i = 0 se 1 tak kadam 0.1`
+  gives `0, 0.1, … 1` without floating-point leftovers like `0.30000000000000004`.
+
+`jab le` repeats while a condition is true:
+
 ```
 maan la i = 0;
 jab le (i < 10) {
@@ -88,6 +120,8 @@ jab le (i < 10) {
   bol ho i;
 }
 ```
+
+`bas kara` (break) and `aage badha` (continue) work in both kinds of loop.
 
 ### Functions
 

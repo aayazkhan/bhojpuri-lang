@@ -15,6 +15,21 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - A `random` option for `run()` / `new Interpreter()` that replaces `Math.random` for `sanyog`, so
   programs that use it can be tested.
 - Example `paasa.bhoj` (a dice game) that uses the new built-ins.
+- `har` loops: `har i = 1 se 10 tak { }` counts with both ends included, `kadam` sets the step
+  (`har i = 10 se 0 tak kadam -2`), and `har x list me { }` visits each item of a list or letter of a
+  string. `bas kara` and `aage badha` work inside them. The loop variable only exists inside the loop, and
+  the bounds (or the list) are read once before the loop starts. Values from a fractional `kadam` are
+  rounded to 15 significant digits so they print cleanly.
+- `se`, `tak`, `kadam` and `me` are only special inside a `har` header, so they can still be used as names.
+  They are listed in `LOOP_WORDS` in `src/keywords.js`, which `src/index.js` also exports.
+
+### Changed
+
+- `har` is now a keyword, so it can no longer be used as a variable name.
+- The examples that counted by hand with `jab le` (`pahada`, `fizzbuzz`, `chhatai`, `fibonacci`, `bazaar`,
+  `paasa`) now use `har`. In `bazaar.bhoj`, the helper `jod` is renamed `kul_jor` so it no longer shares a
+  name with the built-in `jod`.
+- The error for `bas kara` / `aage badha` outside a loop now mentions both `jab le` and `har`.
 
 ## [0.2.0] - 2026-09-24
 

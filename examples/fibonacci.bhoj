@@ -7,9 +7,7 @@ ka ho bhaiya
     lauta da fib(n - 1) + fib(n - 2);
   }
 
-  maan la i = 0;
-  jab le (i < 10) {
+  har i = 0 se 9 tak {
     bol ho "fib(" + i + ") =", fib(i);
-    i += 1;
   }
 chalat bani bhaiya

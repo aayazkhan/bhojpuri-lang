@@ -10,6 +10,7 @@ export const KEYWORDS = Object.freeze({
   ELSE_IF: "na ta jadi",
   ELSE: "na ta",
   WHILE: "jab le",
+  FOR: "har",
   BREAK: "bas kara",
   CONTINUE: "aage badha",
   FUNCTION: "kaam",
@@ -29,6 +30,7 @@ export const KEYWORD_MEANINGS = Object.freeze({
   ELSE_IF: "else if",
   ELSE: "else",
   WHILE: "while loop",
+  FOR: "for loop: har i = 1 se 10 tak { } or har x list me { }",
   BREAK: "break",
   CONTINUE: "continue",
   FUNCTION: "define a function",
@@ -36,6 +38,16 @@ export const KEYWORD_MEANINGS = Object.freeze({
   TRUE: "true",
   FALSE: "false",
   NULL: "null",
+});
+
+// Words that only have a special meaning inside a `har` loop header, e.g.
+// `har i = 1 se 10 tak kadam 2 { }` or `har x list me { }`. Everywhere else they are
+// ordinary names, so programs can still use them as variables. Each must be one word.
+export const LOOP_WORDS = Object.freeze({
+  FROM: "se",
+  TO: "tak",
+  STEP: "kadam",
+  IN: "me",
 });
 
 // Built-in functions. These are ordinary names, not keywords, so a program may

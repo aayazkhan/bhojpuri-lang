@@ -1,4 +1,4 @@
-import { KEYWORDS, BUILTINS } from "./keywords.js";
+import { KEYWORDS, LOOP_WORDS, BUILTINS } from "./keywords.js";
 import { runtimeError } from "./errors.js";
 import { MSG } from "./messages.js";
 
@@ -263,6 +263,9 @@ export class Interpreter {
         return;
       }
 
+      case "ForRange": return this.runFor(node, this.rangeValues(node, scope), scope);
+      case "ForEach": return this.runFor(node, this.eachValues(node, scope), scope);
+
       case "Function":
         scope.declare(node.name, new UserFunction(node, scope), node);
         return;
@@ -282,6 +285,53 @@ export class Interpreter {
       default:
         throw new Error(`Unknown statement type: ${node.type}`);
     }
+  }
+
+  /** Run a `har` loop body once per value, each time with a fresh loop variable. */
+  runFor(node, values, scope) {
+    let iterations = 0;
+    for (const value of values) {
+      if (++iterations > this.maxLoopIterations) {
+        throw runtimeError(MSG.tooManyIterations(this.maxLoopIterations), node);
+      }
+      const loopScope = new Scope(scope);
+      loopScope.declare(node.name, value, node);
+      const signal = this.exec(node.body, loopScope);
+      if (signal === BREAK) break;
+      if (signal instanceof ReturnSignal) return signal;
+    }
+  }
+
+  // The bounds are read once, before the loop starts. Values are computed as
+  // from + k * step so that fractional steps don't pile up rounding errors. With a
+  // fractional start or step, each value is rounded to 15 significant digits so
+  // 3 * 0.1 comes out as 0.3 (not 0.30000000000000004) and the end stays inclusive.
+  *rangeValues(node, scope) {
+    const bound = (expr, word) => {
+      const value = this.evaluate(expr, scope);
+      if (typeof value !== "number") throw runtimeError(MSG.loopBoundNotNumber(word, typeName(value)), expr);
+      return value;
+    };
+    const from = bound(node.from, LOOP_WORDS.FROM);
+    const to = bound(node.to, LOOP_WORDS.TO);
+    const step = node.step ? bound(node.step, LOOP_WORDS.STEP) : 1;
+    if (step === 0) throw runtimeError(MSG.zeroStep(), node.step);
+
+    const whole = Number.isInteger(from) && Number.isInteger(step);
+    for (let k = 0; ; k++) {
+      const value = whole ? from + k * step : Number((from + k * step).toPrecision(15));
+      if (step > 0 ? value > to : value < to) return;
+      yield value;
+    }
+  }
+
+  // Loops over a copy, so adding to or removing from the list inside the loop
+  // doesn't change which items are visited.
+  eachValues(node, scope) {
+    const value = this.evaluate(node.iterable, scope);
+    if (Array.isArray(value)) return [...value];
+    if (typeof value === "string") return value.split("");
+    throw runtimeError(MSG.notIterable(typeName(value)), node.iterable);
   }
 
   evaluate(node, scope) {

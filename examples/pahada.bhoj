@@ -1,9 +1,7 @@
-// 7 ke pahada (multiplication table)
+// 7 ke pahada (multiplication table): "har" loop 1 se 10 tak
 ka ho bhaiya
   maan la sankhya = 7;
-  maan la i = 1;
-  jab le (i <= 10) {
+  har i = 1 se 10 tak {
     bol ho sankhya, "x", i, "=", sankhya * i;
-    i += 1;
   }
 chalat bani bhaiya

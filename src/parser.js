@@ -1,16 +1,20 @@
 import { syntaxError } from "./errors.js";
 import { MSG } from "./messages.js";
+import { LOOP_WORDS } from "./keywords.js";
 
 /*
  * Grammar (recursive descent):
  *
  *   program    := PROGRAM_START statement* PROGRAM_END
- *   statement  := let | print | if | while | function | return
+ *   statement  := let | print | if | while | for | function | return
  *               | BREAK ";" | CONTINUE ";" | block | ";" | expr ";"
  *   let        := LET IDENT ("=" expr)? ("," IDENT ("=" expr)?)* ";"
  *   print      := PRINT expr ("," expr)* ";"
  *   if         := IF "(" expr ")" block (ELSE_IF "(" expr ")" block)* (ELSE block)?
  *   while      := WHILE "(" expr ")" block
+ *   for        := FOR IDENT "=" expr FROM expr TO expr (STEP expr)? block
+ *               | FOR IDENT expr IN block
+ *                  (FROM, TO, STEP and IN are LOOP_WORDS: plain names that are only special here)
  *   function   := FUNCTION IDENT "(" (IDENT ("," IDENT)*)? ")" block
  *   return     := RETURN expr? ";"
  *   block      := "{" statement* "}"
@@ -75,6 +79,17 @@ class Parser {
     return t.type === "punct" && t.value === p;
   }
 
+  /** Is the next token the loop word `id` (e.g. "se")? These are identifiers, not keywords. */
+  isLoopWord(id) {
+    const t = this.peek();
+    return t.type === "identifier" && t.value === LOOP_WORDS[id];
+  }
+
+  expectLoopWord(id) {
+    if (!this.isLoopWord(id)) throw this.unexpected(MSG.quote(LOOP_WORDS[id]));
+    return this.next();
+  }
+
   expectPunct(p) {
     if (!this.isPunct(p)) throw this.unexpected(MSG.quote(p));
     return this.next();
@@ -112,6 +127,7 @@ class Parser {
         case "PRINT": return this.parsePrint();
         case "IF": return this.parseIf();
         case "WHILE": return this.parseWhile();
+        case "FOR": return this.parseFor();
         case "FUNCTION": return this.parseFunction();
         case "RETURN": return this.parseReturn();
         case "BREAK":
@@ -176,10 +192,41 @@ class Parser {
   parseWhile() {
     const start = this.next();
     const test = this.parseCondition();
+    return { type: "While", test, body: this.parseLoopBody(), ...pos(start) };
+  }
+
+  // `har i = 1 se 10 tak kadam 2 { }` counts; `har x list me { }` visits each item.
+  parseFor() {
+    const start = this.next();
+    const variable = this.peek();
+    if (variable.type !== "identifier") throw this.unexpected(MSG.things.variableName);
+    this.next();
+
+    if (this.isPunct("=")) {
+      this.next();
+      const from = this.parseExpression();
+      this.expectLoopWord("FROM");
+      const to = this.parseExpression();
+      this.expectLoopWord("TO");
+      let step = null;
+      if (this.isLoopWord("STEP")) {
+        this.next();
+        step = this.parseExpression();
+      }
+      const body = this.parseLoopBody();
+      return { type: "ForRange", name: variable.value, from, to, step, body, ...pos(start) };
+    }
+
+    const iterable = this.parseExpression();
+    this.expectLoopWord("IN");
+    const body = this.parseLoopBody();
+    return { type: "ForEach", name: variable.value, iterable, body, ...pos(start) };
+  }
+
+  parseLoopBody() {
     this.loopDepth++;
     try {
-      const body = this.parseBlock();
-      return { type: "While", test, body, ...pos(start) };
+      return this.parseBlock();
     } finally {
       this.loopDepth--;
     }
