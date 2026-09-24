@@ -81,6 +81,8 @@ export const BUILTINS = Object.freeze({
   SLICE: "hissa",
   FIND: "khoj",
   SUM: "kul",
+  MAP: "badal",
+  FILTER: "chhaan",
 });
 
 export const BUILTIN_MEANINGS = Object.freeze({
@@ -106,4 +108,6 @@ export const BUILTIN_MEANINGS = Object.freeze({
   SLICE: "part of a list or string: hissa(x, start, end); end is optional",
   FIND: "where an item (or text) first appears, or -1",
   SUM: "the total of a list of numbers",
+  MAP: "a new list: a kaam applied to every item, badal(list, kaam(x) { ... })",
+  FILTER: "a new list of the items a kaam says sach to, chhaan(list, kaam(x) { ... })",
 });

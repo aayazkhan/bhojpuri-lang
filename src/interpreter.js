@@ -75,7 +75,7 @@ export function display(value, seen = new Set()) {
   if (value === null) return KEYWORDS.NULL;
   if (value === true) return KEYWORDS.TRUE;
   if (value === false) return KEYWORDS.FALSE;
-  if (isFunction(value)) return `<${KEYWORDS.FUNCTION} ${value.name}>`;
+  if (isFunction(value)) return value.name ? `<${KEYWORDS.FUNCTION} ${value.name}>` : `<${KEYWORDS.FUNCTION}>`;
   if (Array.isArray(value) || isDict(value)) {
     if (seen.has(value)) return Array.isArray(value) ? "[...]" : "{...}";
     seen.add(value);
@@ -163,7 +163,7 @@ function getEntry(dict, key, node) {
   return dict.get(key);
 }
 
-function createGlobals({ random, input }) {
+function createGlobals({ random, input, call }) {
   const globals = new Scope();
   const expectList = (name, value, node) => {
     if (!Array.isArray(value)) throw runtimeError(MSG.builtinArgType(name, "list", typeName(value)), node);
@@ -176,6 +176,9 @@ function createGlobals({ random, input }) {
   };
   const expectDict = (name, value, node) => {
     if (!isDict(value)) throw runtimeError(MSG.builtinArgType(name, "kosh", typeName(value)), node);
+  };
+  const expectFunction = (name, value, node) => {
+    if (!isFunction(value)) throw runtimeError(MSG.builtinArgType(name, "kaam", typeName(value)), node);
   };
   const expectListOrString = (name, value, node) => {
     if (!Array.isArray(value) && typeof value !== "string") {
@@ -241,6 +244,18 @@ function createGlobals({ random, input }) {
       expectList(BUILTINS.JOIN, list, node);
       expectString(BUILTINS.JOIN, separator, node);
       return list.map((item) => display(item)).join(separator);
+    }),
+    // Call a function on each item: a new list of the results (map).
+    new NativeFunction(BUILTINS.MAP, 2, ([list, fn], node) => {
+      expectList(BUILTINS.MAP, list, node);
+      expectFunction(BUILTINS.MAP, fn, node);
+      return [...list].map((item) => call(fn, [item], node));
+    }),
+    // A new list of the items the function says sach to (filter).
+    new NativeFunction(BUILTINS.FILTER, 2, ([list, fn], node) => {
+      expectList(BUILTINS.FILTER, list, node);
+      expectFunction(BUILTINS.FILTER, fn, node);
+      return [...list].filter((item) => truthy(call(fn, [item], node)));
     }),
     // A new sorted list; the original is left as it was.
     new NativeFunction(BUILTINS.SORT, 1, ([list], node) => {
@@ -341,7 +356,8 @@ export class Interpreter {
   }
 
   programScope() {
-    return new Scope(createGlobals({ random: this.random, input: this.input }));
+    const call = (fn, args, node) => this.call(fn, args, node);
+    return new Scope(createGlobals({ random: this.random, input: this.input, call }));
   }
 
   /** A scope for the interactive prompt: it lasts between inputs, and names can be declared again. */
@@ -503,6 +519,8 @@ export class Interpreter {
       case "Identifier": return scope.get(node.name, node);
       case "ListLiteral": return node.elements.map((element) => this.evaluate(element, scope));
 
+      case "FunctionExpression": return new UserFunction(node, scope);
+
       case "Template":
         return node.parts.map((part) => (typeof part === "string" ? part : display(this.evaluate(part, scope)))).join("");
 
@@ -593,7 +611,7 @@ export class Interpreter {
 
     if (!(callee instanceof UserFunction)) throw runtimeError(MSG.notAFunction(typeName(callee)), node);
     if (args.length !== callee.params.length) {
-      throw runtimeError(MSG.wrongArgCount(callee.name, callee.params.length, args.length), node);
+      throw runtimeError(MSG.wrongArgCount(callee.name ?? KEYWORDS.FUNCTION, callee.params.length, args.length), node);
     }
 
     const scope = new Scope(callee.closure);

@@ -1,4 +1,4 @@
-// Bazaar ke hisaab: list, index aur built-in kaam (lambai, daal, nikaal, kul, khoj, chhaant, ulta)
+// Bazaar ke hisaab: list, index aur built-in kaam (lambai, daal, nikaal, kul, khoj, chhaant, ulta, chhaan, badal)
 ka ho bhaiya
   maan la saaman = ["aalu", "pyaaz", "sattu"];
   maan la daam = [30, 40, 120];
@@ -12,6 +12,7 @@ ka ho bhaiya
   bol ho "Kul hisaab:", kul(daam), "rupiya";
 
   bol ho "Sattu kahan ba?", khoj(saaman, "sattu"), "— mahanga se sasta:", ulta(chhaant(daam));
+  bol ho "50 se kam daam:", chhaan(daam, kaam(d) { lauta da d < 50 }), "— GST jod ke:", badal(daam, kaam(d) { lauta da d * 1.05 });
 
   maan la hataawal = nikaal(saaman);
   bol ho hataawal, "hata dihal gail. Bachal:", saaman;

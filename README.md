@@ -65,9 +65,8 @@ bhojpuri> dugna(21)
 bhojpuri> chalat bani bhaiya
 ```
 
-- **No markers needed:** there's no `ka ho bhaiya`. The `;` can be left out at the end of the line and just
-  before a `}`, as in `jadi (x > 0) { bol ho "haan" }`. Two statements on one line still need a `;` between
-  them, and `.bhoj` files still need every `;`.
+- **No markers needed:** there's no `ka ho bhaiya`, and the `;` at the end of the line is optional (as it is
+  before a `}` everywhere). Two statements on one line still need a `;` between them.
 - **Values are shown:** typing a value shows it, with strings in quotes. Statements, assignments and `khaali`
   show nothing.
 - **Everything is remembered:** variables and functions carry over between lines. You can run
@@ -83,7 +82,8 @@ bhojpuri> chalat bani bhaiya
 ## The language
 
 Every program starts with `ka ho bhaiya` and ends with `chalat bani bhaiya`.
-Statements end with `;`, and blocks use `{ }`.
+Statements end with `;`, and blocks use `{ }`. The `;` can be left out just before a `}`, so short blocks
+like `jadi (x > 0) { bol ho "haan" }` read cleanly.
 
 | Bhojpuri             | Meaning            |
 | -------------------- | ------------------ |
@@ -220,6 +220,25 @@ bol ho ginti();             // 3
 Recursion can go about 1,000 calls deep (roughly Python's default). Deeper recursion gives an error
 instead of crashing.
 
+#### Functions without names
+
+`kaam(x) { ... }` without a name makes a function right where a value is expected. That's handy for
+passing a small function to another one:
+
+```
+maan la dugna = kaam(x) { lauta da x * 2 };
+bol ho dugna(21);                                           // 42
+
+maan la ank = [1, 2, 3, 4, 5, 6];
+bol ho badal(ank, kaam(x) { lauta da x * 10 });             // [10, 20, 30, 40, 50, 60]
+bol ho chhaan(ank, kaam(x) { lauta da x % 2 == 0 });        // [2, 4, 6]
+bol ho badal(["aam", "kela"], bada);                        // ["AAM", "KELA"]
+```
+
+`badal` ("change") calls the function on every item and gives a new list of the results. `chhaan`
+("sift") gives a new list of the items the function says `sach` to. Both leave the original list alone, and
+any function works: one without a name, one made with `kaam naam(...)`, or a built-in like `bada`.
+
 ### Lists
 
 ```
@@ -291,6 +310,8 @@ har k ramu me {                 // loop over the keys
 | `hissa(x, start, end)` | part of a list or string (see below)   |
 | `khoj(x, item)`      | where `item` first appears in a list (or text in a string), or `-1` |
 | `kul(list)`          | the total of a list of numbers           |
+| `badal(list, kaam)`  | a new list: the `kaam` applied to every item (see [Functions without names](#functions-without-names)) |
+| `chhaan(list, kaam)` | a new list of the items the `kaam` says `sach` to |
 
 ```
 maan la umar = sankhya("24");
