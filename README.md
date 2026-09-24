@@ -16,7 +16,8 @@ chalat bani bhaiya
 
 ```bash
 npm install -g @aayazk/bhojpuri-lang   # gives you the `bhojpuri` command
-bhojpuri program.bhoj
+bhojpuri program.bhoj                  # run a program
+bhojpuri                               # open the interactive prompt
 ```
 
 Or run a file without installing anything:
@@ -30,6 +31,7 @@ npx @aayazk/bhojpuri-lang program.bhoj
 ```bash
 npm test                              # run the test suite
 node bin/bhojpuri.js examples/fizzbuzz.bhoj
+node bin/bhojpuri.js                  # interactive prompt
 npm run playground                    # browser playground at http://localhost:3000
 ```
 
@@ -39,6 +41,39 @@ To get a global `bhojpuri` command while developing:
 npm link
 bhojpuri examples/hello.bhoj
 ```
+
+## Interactive prompt
+
+Run `bhojpuri` without a file to try things out one line at a time:
+
+```
+$ bhojpuri
+Bhojpuri Lang 0.4.0 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
+bhojpuri> 2 + 3 * 4
+14
+bhojpuri> maan la naam = "Ramu"
+bhojpuri> bol ho "Pranam,", naam
+Pranam, Ramu
+bhojpuri> kaam dugna(x) {
+...   lauta da x * 2;
+... }
+bhojpuri> dugna(21)
+42
+bhojpuri> chalat bani bhaiya
+```
+
+- **No markers needed:** there's no `ka ho bhaiya`, and the `;` at the end of a line is optional.
+- **Values are shown:** typing a value shows it, with strings in quotes. Statements, assignments and `khaali`
+  show nothing.
+- **Everything is remembered:** variables and functions carry over between lines. You can run
+  `maan la x = ...` again to start a variable over.
+- **Multi-line code:** while a `{`, `(` or `[` is still open, the prompt changes to `...` and keeps reading.
+- **Errors don't end the session.** The arrow keys bring back earlier lines, Ctrl+C throws away the current
+  line, and `chalat bani bhaiya` or Ctrl+D leaves.
+- **A line starting with `{` is a block.** To see a kosh, wrap it in brackets (`({ "a": 1 })`) or put it in a
+  variable first.
+- **Piped input:** lines piped into `bhojpuri` without a file run the same way, without the prompts:
+  `printf '2 + 3\nsanyog(1, 6)\n' | bhojpuri`.
 
 ## The language
 
@@ -61,6 +96,8 @@ Statements end with `;`, and blocks use `{ }`.
 | `aage badha`         | `continue`         |
 | `kaam`               | define a function  |
 | `lauta da`           | `return`           |
+| `koshish kara` … `galti pe` | `try` … `catch` |
+| `phenk da`           | `throw`            |
 | `sach` / `jhooth`    | `true` / `false`   |
 | `khaali`             | `null`             |
 
@@ -226,8 +263,14 @@ har k ramu me {                 // loop over the keys
 | `tod(text, sep)`     | split text into a list: `tod("a,b", ",")` is `["a", "b"]` |
 | `jod(list, sep)`     | join a list into text: `jod(["a", "b"], "-")` is `"a-b"` |
 | `chaabi(kosh)`       | list of the keys, in the order they were added |
-| `ba(kosh, key)`      | `sach` if the key exists                 |
+| `ba(x, item)`        | `sach` if a kosh has the key, a list has the item, or a string contains the text |
 | `hataw(kosh, key)`   | remove a key and return its value (`khaali` if it wasn't there) |
+| `poochh(question)`   | ask a question and return the typed answer as text (see [Input](#input)) |
+| `chhaant(list)`      | a new, sorted list: all numbers, or all strings |
+| `ulta(x)`            | a list or string, reversed               |
+| `hissa(x, start, end)` | part of a list or string (see below)   |
+| `khoj(x, item)`      | where `item` first appears in a list (or text in a string), or `-1` |
+| `kul(list)`          | the total of a list of numbers           |
 
 ```
 maan la umar = sankhya("24");
@@ -236,10 +279,87 @@ bol ho jod(tod("aalu pyaaz sattu", " "), ", ");  // aalu, pyaaz, sattu
 bol ho "Paasa:", sanyog(1, 6);
 ```
 
+Working with lists:
+
+```
+maan la ank = [42, 7, 19, 3];
+bol ho chhaant(ank);          // [3, 7, 19, 42]   (ank itself doesn't change)
+bol ho ulta(ank);             // [3, 19, 7, 42]
+bol ho hissa(ank, 1, 3);      // [7, 19]          from index 1 up to (not including) 3
+bol ho hissa(ank, -2);        // [19, 3]          leave out the end to go to the end; negatives count back
+bol ho khoj(ank, 19), kul(ank);   // 2 71
+bol ho ba(ank, 7), ba("namaste", "mas");   // sach sach
+```
+
+`chhaant`, `ulta` and `hissa` return new lists and leave the original alone. `chhaant` sorts numbers by
+size and strings by character code, so capital letters come before lowercase ones.
+
 Giving a built-in the wrong kind of value is an error, not a silent wrong answer: `sankhya("abc")`
 stops the program and says `"abc"` isn't a number.
 
 Built-in names are ordinary variables, so you can reuse the names for your own variables.
+
+### Input
+
+`poochh` asks a question, waits for an answer and returns it as text:
+
+```
+maan la naam = poochh("Tohar naam ka ba? ");
+bol ho "Pranam,", naam;
+
+maan la umar = sankhya(poochh("Umar? "));    // turn the answer into a number
+bol ho "Agila saal:", umar + 1;
+```
+
+- The question is optional: `poochh()` just waits for an answer.
+- The answer is always text. Use `sankhya(...)` for numbers.
+- When there's nothing left to read, `poochh` returns `khaali`. That happens at the end of piped input,
+  after Ctrl+D in a terminal, or on Cancel in the playground. Check with `jadi (jawab == khaali)`.
+- In a terminal, it reads a line of what you type, and piped input works too:
+  `printf '50\n25\n' | bhojpuri examples/andaaz.bhoj`.
+- In the playground, it opens the browser's question box. The box also shows what was printed since the
+  last question, and the question and answer are added to the output.
+
+### Catching errors
+
+`koshish kara` ("try doing") runs a block. If something goes wrong inside it, even deep inside a function
+it calls, the `galti pe` ("on error") block runs instead of the program stopping:
+
+```
+koshish kara {
+  maan la umar = sankhya(poochh("Umar? "));
+  bol ho "Agila saal:", umar + 1;
+} galti pe (g) {
+  bol ho "Galti bhail:", g;     // g is the error message
+}
+```
+
+`phenk da` ("throw it") raises your own error. It can be any value, and `galti pe (g)` gets it unchanged:
+
+```
+kaam bhugtaan(paisa) {
+  jadi (paisa < 100) {
+    phenk da { "kod": 402, "sandesh": "Paisa kam ba" };
+  }
+  lauta da "ho gail";
+}
+
+koshish kara {
+  bhugtaan(50);
+} galti pe (g) {
+  bol ho g["sandesh"];          // Paisa kam ba
+}
+```
+
+- The `(g)` is optional: `} galti pe {` is fine when you don't need the error.
+- A `phenk da` that nobody catches stops the program and shows the value as the error message.
+- Runtime errors can be caught, including runaway recursion and the playground's loop guard. Syntax errors
+  can't, because they're found before the program starts.
+- `bas kara`, `aage badha` and `lauta da` work inside both blocks.
+- Write `galti pe` on the same line as the `}` that closes `koshish kara`, as with `na ta`. This matters
+  most at the interactive prompt.
+- On their own, `koshish`, `galti` and `phenk` are still ordinary names. Only the two-word forms are
+  keywords.
 
 ### Operators
 
@@ -283,11 +403,29 @@ import { run, formatError, BhojpuriError } from "@aayazk/bhojpuri-lang";
 
 const lines = [];
 try {
-  run(source, { print: (line) => lines.push(line), maxLoopIterations: 100_000 });
+  run(source, {
+    print: (line) => lines.push(line),     // where bol ho goes (default: console.log)
+    input: (question) => "Ramu",           // answers poochh; return null for "no more input"
+    maxLoopIterations: 100_000,            // stop runaway loops
+  });
 } catch (err) {
   if (err instanceof BhojpuriError) console.error(formatError(err, source));
 }
 ```
+
+To build your own prompt, use `Session`. It keeps variables between inputs, and `run` returns the value to show:
+
+```js
+import { Session } from "@aayazk/bhojpuri-lang";
+
+const session = new Session({ print: console.log });
+session.run(`maan la x = 20`);
+session.run(`x + 1`);          // { exit: false, result: "21" }
+session.isComplete(`kaam f() {`); // false: still waiting for the closing }
+```
+
+Without an `input` option, `poochh` stops with a Bhojpuri error, because there's no one to answer it.
+There's also a `random` option that replaces `Math.random` for `sanyog`, which is handy in tests.
 
 ## Project layout
 

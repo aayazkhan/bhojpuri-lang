@@ -1,5 +1,5 @@
 import { KEYWORDS, LOOP_WORDS, BUILTINS } from "./keywords.js";
-import { runtimeError } from "./errors.js";
+import { BhojpuriError, runtimeError } from "./errors.js";
 import { MSG } from "./messages.js";
 
 // Signals returned (not thrown) by statements to unwind to the nearest loop or function.
@@ -16,10 +16,12 @@ class Scope {
   constructor(parent = null) {
     this.parent = parent;
     this.vars = new Map();
+    // At the interactive prompt, `maan la x = ...` may be typed again to start over.
+    this.allowRedeclare = false;
   }
 
   declare(name, value, node) {
-    if (this.vars.has(name)) throw runtimeError(MSG.alreadyDeclared(name), node);
+    if (this.vars.has(name) && !this.allowRedeclare) throw runtimeError(MSG.alreadyDeclared(name), node);
     this.vars.set(name, value);
   }
 
@@ -50,9 +52,11 @@ class UserFunction {
 }
 
 class NativeFunction {
-  constructor(name, arity, impl) {
+  /** `arity` is how many arguments it takes; `minArity` is lower when the last ones are optional. */
+  constructor(name, arity, impl, minArity = arity) {
     this.name = name;
     this.arity = arity;
+    this.minArity = minArity;
     this.impl = impl;
   }
 }
@@ -156,7 +160,7 @@ function getEntry(dict, key, node) {
   return dict.get(key);
 }
 
-function createGlobals(random) {
+function createGlobals({ random, input }) {
   const globals = new Scope();
   const expectList = (name, value, node) => {
     if (!Array.isArray(value)) throw runtimeError(MSG.builtinArgType(name, "list", typeName(value)), node);
@@ -169,6 +173,11 @@ function createGlobals(random) {
   };
   const expectDict = (name, value, node) => {
     if (!isDict(value)) throw runtimeError(MSG.builtinArgType(name, "kosh", typeName(value)), node);
+  };
+  const expectListOrString = (name, value, node) => {
+    if (!Array.isArray(value) && typeof value !== "string") {
+      throw runtimeError(MSG.builtinArgType(name, "list ya string", typeName(value)), node);
+    }
   };
   const expectString = (name, value, node) => {
     if (typeof value !== "string") throw runtimeError(MSG.builtinArgType(name, "string", typeName(value)), node);
@@ -230,13 +239,63 @@ function createGlobals(random) {
       expectString(BUILTINS.JOIN, separator, node);
       return list.map((item) => display(item)).join(separator);
     }),
+    // A new sorted list; the original is left as it was.
+    new NativeFunction(BUILTINS.SORT, 1, ([list], node) => {
+      expectList(BUILTINS.SORT, list, node);
+      const kind = typeof list[0];
+      for (const item of list) {
+        if ((typeof item !== "number" && typeof item !== "string") || typeof item !== kind) {
+          throw runtimeError(MSG.cantSort(BUILTINS.SORT, typeName(list[0]), typeName(item)), node);
+        }
+      }
+      return [...list].sort(kind === "number" ? (a, b) => a - b : (a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    }),
+    new NativeFunction(BUILTINS.REVERSE, 1, ([value], node) => {
+      expectListOrString(BUILTINS.REVERSE, value, node);
+      return Array.isArray(value) ? [...value].reverse() : value.split("").reverse().join("");
+    }),
+    // Like JS slice: `end` is left out (optional), negative numbers count from the end,
+    // and numbers past either end are clamped.
+    new NativeFunction(BUILTINS.SLICE, 3, ([value, start, end], node) => {
+      expectListOrString(BUILTINS.SLICE, value, node);
+      expectInteger(BUILTINS.SLICE, start, node);
+      if (end !== undefined) expectInteger(BUILTINS.SLICE, end, node);
+      return value.slice(start, end);
+    }, 2),
+    new NativeFunction(BUILTINS.FIND, 2, ([container, item], node) => {
+      expectListOrString(BUILTINS.FIND, container, node);
+      if (typeof container === "string") expectString(BUILTINS.FIND, item, node);
+      return container.indexOf(item);
+    }),
+    new NativeFunction(BUILTINS.SUM, 1, ([list], node) => {
+      expectList(BUILTINS.SUM, list, node);
+      let total = 0;
+      for (const item of list) {
+        if (typeof item !== "number") throw runtimeError(MSG.builtinArgType(BUILTINS.SUM, "sankhya ke list", `${typeName(item)} bhi`), node);
+        total += item;
+      }
+      return total;
+    }),
+    // The question is optional. The answer is always text, or khaali when there is
+    // nothing more to read (end of input, or Cancel in the playground).
+    new NativeFunction(BUILTINS.INPUT, 1, ([question], node) => {
+      if (!input) throw runtimeError(MSG.noInput(BUILTINS.INPUT), node);
+      const answer = input(question === undefined ? "" : display(question));
+      return answer === null || answer === undefined ? null : String(answer);
+    }, 0),
     new NativeFunction(BUILTINS.KEYS, 1, ([dict], node) => {
       expectDict(BUILTINS.KEYS, dict, node);
       return [...dict.keys()];
     }),
-    new NativeFunction(BUILTINS.HAS, 2, ([dict, key], node) => {
-      expectDict(BUILTINS.HAS, dict, node);
-      return dict.has(checkKey(key, node));
+    // A kosh has the key, a list has the item, or a string has the piece of text.
+    new NativeFunction(BUILTINS.HAS, 2, ([container, item], node) => {
+      if (isDict(container)) return container.has(checkKey(item, node));
+      if (Array.isArray(container)) return container.includes(item);
+      if (typeof container === "string") {
+        expectString(BUILTINS.HAS, item, node);
+        return container.includes(item);
+      }
+      throw runtimeError(MSG.builtinArgType(BUILTINS.HAS, "kosh, list ya string", typeName(container)), node);
     }),
     new NativeFunction(BUILTINS.REMOVE, 2, ([dict, key], node) => {
       expectDict(BUILTINS.REMOVE, dict, node);
@@ -250,22 +309,60 @@ function createGlobals(random) {
   return globals;
 }
 
+/**
+ * @typedef {{
+ *   print?: (line: string) => void,
+ *   maxLoopIterations?: number,
+ *   random?: () => number,
+ *   input?: (question: string) => string | null,
+ * }} InterpreterOptions
+ *   print: where `bol ho` output goes (defaults to console.log).
+ *   maxLoopIterations: guard against infinite loops, e.g. in the browser playground.
+ *   random: source of numbers in [0, 1) for `sanyog` (defaults to Math.random; handy for tests).
+ *   input: answers `poochh`. It gets the question ("" if none) and returns the answer, or null
+ *     when there is nothing more to read. Without it, `poochh` is a runtime error.
+ */
+
 export class Interpreter {
-  /**
-   * @param {{ print?: (line: string) => void, maxLoopIterations?: number, random?: () => number }} [options]
-   *   print: where `bol ho` output goes (defaults to console.log).
-   *   maxLoopIterations: guard against infinite loops, e.g. in the browser playground.
-   *   random: source of numbers in [0, 1) for `sanyog` (defaults to Math.random; handy for tests).
-   */
-  constructor({ print = console.log, maxLoopIterations = Infinity, random = Math.random } = {}) {
+  /** @param {InterpreterOptions} [options] */
+  constructor({ print = console.log, maxLoopIterations = Infinity, random = Math.random, input = null } = {}) {
     this.print = print;
     this.maxLoopIterations = maxLoopIterations;
     this.random = random;
+    this.input = input;
   }
 
   run(program) {
     // The program gets its own scope so it can shadow built-in names.
-    this.execAll(program.body, new Scope(createGlobals(this.random)));
+    this.execAll(program.body, this.programScope());
+  }
+
+  programScope() {
+    return new Scope(createGlobals({ random: this.random, input: this.input }));
+  }
+
+  /** A scope for the interactive prompt: it lasts between inputs, and names can be declared again. */
+  sessionScope() {
+    const scope = this.programScope();
+    scope.allowRedeclare = true;
+    return scope;
+  }
+
+  /**
+   * Run statements from the prompt in `scope`. Returns the value of the last statement when it
+   * is an expression other than an assignment (like `2 + 3` or `naam`), and undefined otherwise.
+   */
+  runInteractive(statements, scope) {
+    let result;
+    for (const statement of statements) {
+      result = undefined;
+      if (statement.type === "ExpressionStatement" && statement.expression.type !== "Assignment") {
+        result = this.evaluate(statement.expression, scope);
+      } else {
+        this.exec(statement, scope);
+      }
+    }
+    return result;
   }
 
   execAll(statements, scope) {
@@ -314,6 +411,26 @@ export class Interpreter {
 
       case "Return":
         return new ReturnSignal(node.argument ? this.evaluate(node.argument, scope) : null);
+
+      case "Try":
+        try {
+          return this.exec(node.body, scope);
+        } catch (err) {
+          // Only runtime errors can be caught; anything else is a bug in the interpreter.
+          if (!(err instanceof BhojpuriError) || err.kind !== "RuntimeError") throw err;
+          const handlerScope = new Scope(scope);
+          if (node.param) {
+            handlerScope.declare(node.param, Object.hasOwn(err, "value") ? err.value : err.message, node);
+          }
+          return this.exec(node.handler, handlerScope);
+        }
+
+      case "Throw": {
+        const value = this.evaluate(node.argument, scope);
+        const err = runtimeError(MSG.thrown(display(value)), node);
+        err.value = value; // what `galti pe (g)` receives, unchanged
+        throw err;
+      }
 
       case "Break": return BREAK;
       case "Continue": return CONTINUE;
@@ -461,7 +578,10 @@ export class Interpreter {
 
   call(callee, args, node) {
     if (callee instanceof NativeFunction) {
-      if (args.length !== callee.arity) throw runtimeError(MSG.wrongArgCount(callee.name, callee.arity, args.length), node);
+      if (args.length < callee.minArity || args.length > callee.arity) {
+        const expected = callee.minArity === callee.arity ? callee.arity : `${callee.minArity} ya ${callee.arity}`;
+        throw runtimeError(MSG.wrongArgCount(callee.name, expected, args.length), node);
+      }
       return callee.impl(args, node);
     }
 

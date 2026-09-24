@@ -6,6 +6,50 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-24
+
+### Added
+
+- `poochh(question)` asks a question and returns the typed answer as text, or `khaali` when there is
+  nothing more to read. The question is optional. In the CLI it reads a line from stdin (piped input
+  works too); in the playground it opens the browser's question box and shows what was printed since the
+  last question.
+- An `input` option for `run()` / `new Interpreter()` that answers `poochh`. Without it, `poochh` is a
+  runtime error.
+- Example `andaaz.bhoj`, a number-guessing game.
+- CLI tests that run `bin/bhojpuri.js` with piped input.
+- Interactive prompt: `bhojpuri` without a file opens a `bhojpuri>` prompt. Each line runs straight away,
+  without `ka ho bhaiya`, and the last `;` is optional. Values are shown (strings in quotes), and variables
+  and functions carry over between lines (`maan la` can be run again for the same name). Unclosed brackets
+  continue on a `...` prompt. Errors don't end the session. The arrow keys recall earlier lines, Ctrl+C
+  clears the line, and `chalat bani bhaiya` or Ctrl+D leaves. Piped lines run the same way, without
+  prompts.
+- `Session` in the library API (`run`, `isComplete`) for building your own prompt.
+- List helpers: `chhaant` (a new sorted list), `ulta` (reverse a list or string), `hissa` (part of a list or
+  string, with an optional end and negative indexes), `khoj` (index of an item or piece of text, or `-1`)
+  and `kul` (sum of a list of numbers). `chhaant`, `ulta` and `hissa` don't change the original.
+- Catching errors: `koshish kara { ... } galti pe (g) { ... }` runs the second block when a runtime error
+  happens in the first, even inside a function it calls. `g` (optional) is the error message. `phenk da
+  value;` throws your own error with any value, and `galti pe (g)` receives the value unchanged. An uncaught
+  `phenk da` stops the program and shows the value. Syntax errors can't be caught.
+- `ba` also works on lists (does it contain the item?) and strings (does it contain the text?).
+- Built-in functions can take optional arguments. The error for a wrong number of arguments then says
+  "2 ya 3".
+
+### Changed
+
+- The CLI writes output with `fs.writeSync` instead of `console.log`, so questions and answers stay in
+  order. If the program reading its output stops early (e.g. `bhojpuri x.bhoj | head`), it exits quietly
+  instead of crashing with a broken-pipe error.
+- CI runs the examples with empty stdin, so examples that ask questions don't wait for input.
+- `koshish kara`, `galti pe` and `phenk da` are keywords. The single words `koshish`, `galti` and `phenk`
+  can still be used as names.
+- `andaaz.bhoj` catches an answer that isn't a number instead of stopping.
+- Examples: `chhatai.bhoj` compares its bubble sort with `chhaant`, and `bazaar.bhoj` uses `kul`, `khoj`,
+  `chhaant` and `ulta`.
+- `bhojpuri` with no arguments opens the interactive prompt, instead of printing help and exiting with
+  code 1. Use `bhojpuri --help` for help. Errors from the CLI now go to stderr with `fs.writeSync`.
+
 ## [0.3.1] - 2026-09-24
 
 ### Changed
@@ -88,7 +132,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Browser playground (`npm run playground`).
 - Example programs and a `node:test` test suite.
 
-[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.1.0...v0.2.0

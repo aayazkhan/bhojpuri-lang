@@ -1,7 +1,10 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
-import { run, tokenize, BhojpuriError, formatError } from "../src/index.js";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { spawnSync } from "node:child_process";
+import { run, tokenize, Session, BhojpuriError, formatError } from "../src/index.js";
 
 const program = (body) => `ka ho bhaiya\n${body}\nchalat bani bhaiya`;
 
@@ -395,6 +398,45 @@ describe("kosh (dictionaries)", () => {
   });
 });
 
+describe("poochh (input)", () => {
+  // Answers the questions in order, then khaali; remembers what was asked.
+  function answering(...answers) {
+    const asked = [];
+    const input = (question) => {
+      asked.push(question);
+      return answers.length ? answers.shift() : null;
+    };
+    return { asked, input };
+  }
+
+  test("returns the typed answer as text", () => {
+    const { asked, input } = answering("Ramu", "24");
+    const lines = output(program(`maan la naam = poochh("Naam? ");\nmaan la umar = poochh("Umar? ");\nbol ho naam, kism(umar), sankhya(umar) + 1;`), { input });
+    assert.deepEqual(lines, ["Ramu shabd 25"]);
+    assert.deepEqual(asked, ["Naam? ", "Umar? "]);
+  });
+
+  test("the question is optional, and any value is shown as text", () => {
+    const { asked, input } = answering("a", "b");
+    assert.deepEqual(output(program(`bol ho poochh(), poochh(42);`), { input }), ["a b"]);
+    assert.deepEqual(asked, ["", "42"]);
+  });
+
+  test("gives khaali when there is nothing more to read", () => {
+    const { input } = answering("ek");
+    assert.deepEqual(output(program(`bol ho poochh("1? "), poochh("2? "), poochh("2? ") == khaali;`), { input }), ["ek khaali sach"]);
+  });
+
+  test("answers that aren't strings are turned into text", () => {
+    assert.deepEqual(output(program(`bol ho kism(poochh()), poochh();`), { input: () => 7 }), ["shabd 7"]);
+  });
+
+  test("errors: no input available, too many arguments", () => {
+    assertError(program(`poochh("Naam? ");`), { kind: "RuntimeError", line: 2, match: /"poochh" ke jawab dewe wala koi na ba/ });
+    assertError(program(`poochh("a", "b");`), { kind: "RuntimeError", match: /"poochh" 0 ya 1 cheez maange la, lekin 2/ });
+  });
+});
+
 describe("standard library", () => {
   const withRandom = (random, body) => output(program(body), { random });
 
@@ -455,6 +497,46 @@ describe("standard library", () => {
     );
     assertError(program(`bol ho tod("a,b", 1);`), { kind: "RuntimeError", match: /"tod" ke string chahi/ });
     assertError(program(`bol ho jod("ab", ",");`), { kind: "RuntimeError", match: /"jod" ke list chahi/ });
+  });
+
+  test("chhaant returns a new sorted list", () => {
+    assert.deepEqual(
+      out(`maan la l = [42, 7, 19, 3, 88, 1];\nbol ho chhaant(l), l;\nbol ho chhaant(["kela", "aam", "Zebra"]), chhaant([]), chhaant([2.5, -1, 2]);`),
+      ["[1, 3, 7, 19, 42, 88] [42, 7, 19, 3, 88, 1]", '["Zebra", "aam", "kela"] [] [-1, 2, 2.5]'],
+    );
+    assertError(program(`bol ho chhaant([1, "a"]);`), { kind: "RuntimeError", match: /"chhaant" khali sab sankhya ya sab string .* number aur string/ });
+    assertError(program(`bol ho chhaant([[1], [2]]);`), { kind: "RuntimeError", match: /"chhaant"/ });
+    assertError(program(`bol ho chhaant("cba");`), { kind: "RuntimeError", match: /"chhaant" ke list chahi/ });
+  });
+
+  test("ulta reverses a list or string without changing the original", () => {
+    assert.deepEqual(out(`maan la l = [1, 2, 3];\nbol ho ulta(l), l, ulta("ghar"), ulta([]);`), ["[3, 2, 1] [1, 2, 3] rahg []"]);
+    assertError(program(`bol ho ulta(5);`), { kind: "RuntimeError", match: /"ulta" ke list ya string chahi/ });
+  });
+
+  test("hissa takes part of a list or string", () => {
+    assert.deepEqual(
+      out(`maan la l = [10, 20, 30, 40];\nbol ho hissa(l, 1, 3), hissa(l, 2), hissa(l, -1), hissa(l, 0, -1), hissa(l, 5), hissa(l, -10, 100), hissa("namaste", 0, 4);`),
+      ['[20, 30] [30, 40] [40] [10, 20, 30] [] [10, 20, 30, 40] nama'],
+    );
+    assertError(program(`bol ho hissa([1], 0.5);`), { kind: "RuntimeError", match: /"hissa" ke pura sankhya chahi/ });
+    assertError(program(`bol ho hissa([1]);`), { kind: "RuntimeError", match: /"hissa" 2 ya 3 cheez maange la, lekin 1/ });
+  });
+
+  test("khoj finds where an item or text first appears", () => {
+    assert.deepEqual(out(`bol ho khoj([5, 7, 7], 7), khoj([5], 1), khoj([1, "1"], "1"), khoj("namaste", "ste"), khoj("abc", "z");`), ["1 -1 1 4 -1"]);
+    assertError(program(`bol ho khoj("abc", 1);`), { kind: "RuntimeError", match: /"khoj" ke string chahi/ });
+  });
+
+  test("kul adds up a list of numbers", () => {
+    assert.deepEqual(out(`bol ho kul([30, 40, 120]), kul([]), kul([-1.5, 1]);`), ["190 0 -0.5"]);
+    assertError(program(`bol ho kul([1, "2"]);`), { kind: "RuntimeError", match: /"kul" ke sankhya ke list chahi, lekin string bhi/ });
+  });
+
+  test("ba also checks lists and strings", () => {
+    assert.deepEqual(out(`bol ho ba([1, 2], 2), ba([1, 2], "2"), ba("namaste", "mas"), ba("namaste", "x"), ba({ "a": 1 }, "a");`), ["sach jhooth sach jhooth sach"]);
+    assertError(program(`bol ho ba(5, 1);`), { kind: "RuntimeError", match: /"ba" ke kosh, list ya string chahi/ });
+    assertError(program(`bol ho ba("abc", 1);`), { kind: "RuntimeError", match: /"ba" ke string chahi/ });
   });
 
   test("new built-in names can be shadowed", () => {
@@ -536,7 +618,8 @@ describe("examples", () => {
   const dir = new URL("../examples/", import.meta.url);
   for (const file of readdirSync(dir).filter((f) => f.endsWith(".bhoj"))) {
     test(`${file} runs`, () => {
-      const lines = output(readFileSync(new URL(file, dir), "utf8"));
+      // Examples that ask questions get no answers, like a run with empty input.
+      const lines = output(readFileSync(new URL(file, dir), "utf8"), { input: () => null });
       assert.ok(lines.length > 0);
     });
   }
@@ -544,5 +627,251 @@ describe("examples", () => {
   test("fizzbuzz output", () => {
     const lines = output(readFileSync(new URL("fizzbuzz.bhoj", dir), "utf8"));
     assert.deepEqual(lines, ["1", "2", "Fizz", "4", "Buzz", "Fizz", "7", "8", "Fizz", "Buzz", "11", "Fizz", "13", "14", "FizzBuzz"]);
+  });
+});
+
+describe("koshish kara / galti pe / phenk da", () => {
+  test("catches a runtime error and gives its message", () => {
+    assert.deepEqual(
+      out(`koshish kara {\n  bol ho "pahile";\n  bol ho sankhya("das");\n  bol ho "ee na chhapi";\n} galti pe (g) {\n  bol ho "Pakdail:", g;\n}\nbol ho "aage";`),
+      ["pahile", 'Pakdail: "das" sankhya na ha, ekra ke sankhya na banawal ja sakela.', "aage"],
+    );
+  });
+
+  test("the block runs normally when nothing goes wrong", () => {
+    assert.deepEqual(out(`koshish kara { bol ho 1; } galti pe (g) { bol ho "galti"; }`), ["1"]);
+  });
+
+  test("the name after galti pe is optional", () => {
+    assert.deepEqual(out(`koshish kara { bol ho [][0]; } galti pe { bol ho "pakdail"; }`), ["pakdail"]);
+  });
+
+  test("phenk da throws any value, and galti pe gets it unchanged", () => {
+    assert.deepEqual(
+      out(`kaam bhugtaan(paisa) {\n  jadi (paisa < 100) { phenk da { "kod": 402, "sandesh": "Paisa kam ba" }; }\n  lauta da "ho gail";\n}\nkoshish kara {\n  bol ho bhugtaan(500);\n  bol ho bhugtaan(50);\n} galti pe (g) {\n  bol ho kism(g), g["kod"], g["sandesh"];\n}`),
+      ["ho gail", "kosh 402 Paisa kam ba"],
+    );
+    assert.deepEqual(out(`koshish kara { phenk da 42; } galti pe (g) { bol ho g + 1; }`), ["43"]);
+  });
+
+  test("an uncaught phenk da stops the program with the value as the message", () => {
+    assertError(program(`bol ho 1;\nphenk da "Kuchh gadbad ba";`), { kind: "RuntimeError", line: 3, match: /^Kuchh gadbad ba$/ });
+    assertError(program(`phenk da [1, "a"];`), { kind: "RuntimeError", match: /^\[1, "a"\]$/ });
+  });
+
+  test("errors in the handler, or thrown again, go to the next koshish out", () => {
+    assert.deepEqual(
+      out(`koshish kara {\n  koshish kara { phenk da "andar"; } galti pe (g) { phenk da g + " → bahar"; }\n} galti pe (g) {\n  bol ho g;\n}`),
+      ["andar → bahar"],
+    );
+    assertError(program(`koshish kara { phenk da 1; } galti pe (g) { bol ho anjaan; }`), { kind: "RuntimeError", match: /"anjaan"/ });
+  });
+
+  test("loops, functions and returns work through koshish and galti pe", () => {
+    assert.deepEqual(
+      out(`har i = 1 se 4 tak {\n  koshish kara {\n    jadi (i == 2) { phenk da i; }\n    jadi (i == 4) { bas kara; }\n    bol ho "i", i;\n  } galti pe (g) {\n    bol ho "chhod", g;\n    aage badha;\n  }\n}`),
+      ["i 1", "chhod 2", "i 3"],
+    );
+    assert.deepEqual(out(`kaam f() { koshish kara { lauta da "andar"; } galti pe { lauta da "galti"; } }\nbol ho f();`), ["andar"]);
+  });
+
+  test("the error variable and variables inside the blocks stay inside", () => {
+    assertError(program(`koshish kara { phenk da 1; } galti pe (g) {}\nbol ho g;`), { kind: "RuntimeError", line: 3, match: /"g" naam ke koi variable/ });
+  });
+
+  test("catches runaway recursion and the loop guard", () => {
+    assert.deepEqual(out(`kaam anant(n) { lauta da anant(n + 1); }\nkoshish kara { anant(0); } galti pe { bol ho "pakdail"; }`), ["pakdail"]);
+    assert.deepEqual(
+      output(program(`koshish kara { jab le (sach) {} } galti pe (g) { bol ho "ruk gail"; }`), { maxLoopIterations: 100 }),
+      ["ruk gail"],
+    );
+  });
+
+  test("koshish, galti and phenk on their own are still ordinary names", () => {
+    assert.deepEqual(out(`maan la koshish = 1, galti = 2, phenk = [3];\nbol ho koshish + galti + phenk[0];`), ["6"]);
+  });
+
+  test("syntax errors: missing galti pe, galti pe without koshish, missing block", () => {
+    assertError(program(`koshish kara { bol ho 1; }\nbol ho 2;`), { kind: "SyntaxError", line: 3, match: /"galti pe" chahi/ });
+    assertError(program(`galti pe { bol ho 1; }`), { kind: "SyntaxError", match: /"galti pe" se pahile "koshish kara"/ });
+    assertError(program(`koshish kara bol ho 1;`), { kind: "SyntaxError", match: /"\{" chahi/ });
+    assertError(program(`koshish kara {} galti pe (5) {}`), { kind: "SyntaxError", match: /variable ke naam/ });
+    assertError(program(`phenk da;`), { kind: "SyntaxError", match: /koi value/ });
+  });
+});
+
+describe("interactive prompt (Session)", () => {
+  function session(options) {
+    const printed = [];
+    const s = new Session({ print: (line) => printed.push(line), ...options });
+    return { s, printed, result: (source) => s.run(source).result };
+  }
+
+  test("shows the value of an expression, with strings in quotes", () => {
+    const { result } = session();
+    assert.equal(result("2 + 3 * 4"), "14");
+    assert.equal(result(`"Ram" + "u"`), '"Ramu"');
+    assert.equal(result(`[1, "a"]`), '[1, "a"]');
+    assert.equal(result(`({ "a": 1 })`), '{"a": 1}');
+    assert.equal(result("1 < 2"), "sach");
+  });
+
+  test("shows nothing for statements, assignments and khaali", () => {
+    const { result, printed } = session();
+    assert.equal(result(`maan la x = 1`), null);
+    assert.equal(result(`x = 5`), null);
+    assert.equal(result(`khaali`), null);
+    assert.equal(result(`bol ho "namaste", x`), null);
+    assert.deepEqual(printed, ["namaste 5"]);
+  });
+
+  test("the ; after the last statement is optional, and several statements can share a line", () => {
+    const { result } = session();
+    assert.equal(result(`maan la a = 2; maan la b = 3; a * b`), "6");
+    assert.equal(result(`a;`), "2");
+    assert.throws(() => result(`maan la c = 1 bol ho c`), /";" chahi/);
+  });
+
+  test("variables and functions carry over, and names can be declared again", () => {
+    const { result } = session();
+    result(`kaam dugna(x) {\n  lauta da x * 2;\n}`);
+    result(`maan la n = 21`);
+    assert.equal(result(`dugna(n)`), "42");
+    result(`maan la n = "naya"`);
+    assert.equal(result(`n`), '"naya"');
+    result(`maan la lambai = 3`);
+    assert.equal(result(`lambai`), "3");
+  });
+
+  test("an error doesn't end the session", () => {
+    const { s, result } = session();
+    assert.throws(() => result(`naam`), (err) => err instanceof BhojpuriError && /"naam" naam ke koi variable/.test(err.message));
+    assert.throws(() => result(`bol ho (`), (err) => err.kind === "SyntaxError");
+    result(`maan la naam = "Ramu"`);
+    assert.equal(s.run(`naam`).exit, false);
+    assert.equal(result(`naam`), '"Ramu"');
+  });
+
+  test("chalat bani bhaiya ends the session", () => {
+    const { s } = session();
+    assert.deepEqual(s.run(`chalat bani bhaiya`), { exit: true, result: null });
+    assert.deepEqual(s.run(`  chalat   bani bhaiya  `), { exit: true, result: null });
+    assert.throws(() => s.run(`chalat bani bhaiya 1`));
+  });
+
+  test("isComplete waits for open brackets and comments", () => {
+    const { s } = session();
+    assert.equal(s.isComplete(`kaam f() {`), false);
+    assert.equal(s.isComplete(`kaam f() {\n  lauta da 1;`), false);
+    assert.equal(s.isComplete(`kaam f() {\n  lauta da 1;\n}`), true);
+    assert.equal(s.isComplete(`maan la l = [1,`), false);
+    assert.equal(s.isComplete(`/* abhi likhat bani`), false);
+    assert.equal(s.isComplete(`"band na bhail`), true); // run reports the unterminated string
+    assert.equal(s.isComplete(`}`), true);
+  });
+
+  test("poochh and sanyog work at the prompt", () => {
+    const { result } = session({ input: () => "24", random: () => 0 });
+    assert.equal(result(`sankhya(poochh("Umar? ")) + 1`), "25");
+    assert.equal(result(`sanyog(1, 6)`), "1");
+  });
+});
+
+describe("cli", () => {
+  const cli = new URL("../bin/bhojpuri.js", import.meta.url).pathname;
+  const example = (file) => new URL(`../examples/${file}`, import.meta.url).pathname;
+  const bhojpuri = (args, input = "") => spawnSync(process.execPath, [cli, ...args], { input, encoding: "utf8" });
+
+  test("runs a file", () => {
+    const result = bhojpuri([example("hello.bhoj")]);
+    assert.equal(result.status, 0);
+    assert.match(result.stdout, /Pranam duniya/);
+  });
+
+  test("poochh reads lines from stdin, and gives khaali at the end", () => {
+    const result = bhojpuri([example("andaaz.bhoj")], "0\n101\r\n");
+    assert.equal(result.status, 0);
+    assert.match(result.stdout, /Koshish 1: 0 chhota ba/);
+    assert.match(result.stdout, /Koshish 2: 101 bada ba/);
+    assert.match(result.stdout, /Koshish 3: \nThik ba, phir kabhi/);
+  });
+
+  test("reads UTF-8 answers and a last line without a newline", () => {
+    const dir = mkdtempSync(join(tmpdir(), "bhojpuri-"));
+    const file = join(dir, "sawal.bhoj");
+    writeFileSync(file, `ka ho bhaiya\nbol ho poochh() + "|" + poochh() + "|" + poochh();\nchalat bani bhaiya`);
+    try {
+      const result = bhojpuri([file], "राम\nश्याम");
+      assert.equal(result.status, 0);
+      assert.equal(result.stdout, "राम|श्याम|khaali\n");
+    } finally {
+      rmSync(dir, { recursive: true });
+    }
+  });
+
+  test("stops quietly when the reader of its output goes away", () => {
+    const dir = mkdtempSync(join(tmpdir(), "bhojpuri-"));
+    const file = join(dir, "bahut.bhoj");
+    writeFileSync(file, `ka ho bhaiya\nhar i = 1 se 200000 tak { bol ho i; }\nchalat bani bhaiya`);
+    try {
+      const result = spawnSync("sh", ["-c", `"${process.execPath}" "${cli}" "${file}" | head -2`], { encoding: "utf8" });
+      assert.equal(result.stdout, "1\n2\n");
+      assert.equal(result.stderr, "");
+    } finally {
+      rmSync(dir, { recursive: true });
+    }
+  });
+
+  test("errors go to stderr with exit code 1", () => {
+    const dir = mkdtempSync(join(tmpdir(), "bhojpuri-"));
+    const file = join(dir, "galti.bhoj");
+    writeFileSync(file, `ka ho bhaiya\nbol ho "pahile";\nbol ho sankhya(poochh());\nchalat bani bhaiya`);
+    try {
+      const result = bhojpuri([file], "das\n");
+      assert.equal(result.status, 1);
+      assert.equal(result.stdout, "pahile\n");
+      assert.match(result.stderr, /line 3.*"das" sankhya na ha/);
+    } finally {
+      rmSync(dir, { recursive: true });
+    }
+  });
+
+  test("the guessing game survives an answer that isn't a number", () => {
+    const result = bhojpuri([example("andaaz.bhoj")], "das\n");
+    assert.equal(result.status, 0);
+    assert.match(result.stdout, /"das" sankhya na ha — ee koshish bekaar gail/);
+  });
+
+  test("with no file, runs piped lines as an interactive session", () => {
+    const lines = [
+      "2 + 3 * 4",
+      `maan la naam = "Ramu"`,
+      "naam",
+      "kaam dugna(x) {",
+      "  lauta da x * 2;",
+      "}",
+      "dugna(21)",
+      "naam[10]",
+      `maan la umar = sankhya(poochh("Umar? "))`,
+      "24",
+      "umar + 1",
+      "chalat bani bhaiya",
+      `bol ho "ee na chali"`,
+    ];
+    const result = bhojpuri([], lines.join("\n") + "\n");
+    assert.equal(result.status, 0);
+    assert.equal(result.stdout, `14\n"Ramu"\n42\nUmar? 25\n`);
+    assert.match(result.stderr, /Index 10 bahar ba/);
+  });
+
+  test("the session reports code left unfinished at the end of input", () => {
+    const result = bhojpuri([], "kaam f() {\n");
+    assert.equal(result.status, 0);
+    assert.match(result.stderr, /"\}" chahi/);
+  });
+
+  test("--version and --help", () => {
+    assert.equal(bhojpuri(["--version"]).stdout.trim(), JSON.parse(readFileSync(new URL("../package.json", import.meta.url))).version);
+    assert.match(bhojpuri(["--help"]).stdout, /poochh\(…\)/);
   });
 });

@@ -7,13 +7,14 @@ import { Interpreter } from "./interpreter.js";
  * Throws a BhojpuriError (with line/col) on syntax or runtime errors.
  *
  * @param {string} source
- * @param {{ print?: (line: string) => void, maxLoopIterations?: number, random?: () => number }} [options]
+ * @param {import("./interpreter.js").InterpreterOptions} [options]
  */
 export function run(source, options) {
   new Interpreter(options).run(parse(tokenize(source)));
 }
 
 export { tokenize, parse, Interpreter };
+export { Session } from "./session.js";
 export { display } from "./interpreter.js";
 export { BhojpuriError, formatError } from "./errors.js";
 export { KEYWORDS, KEYWORD_MEANINGS, LOOP_WORDS, BUILTINS, BUILTIN_MEANINGS } from "./keywords.js";

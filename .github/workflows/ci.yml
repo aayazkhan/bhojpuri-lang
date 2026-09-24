@@ -18,7 +18,8 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm test
       - name: Run every example
-        run: for f in examples/*.bhoj; do echo "== $f"; node bin/bhojpuri.js "$f"; done
+        # Empty stdin, so examples that ask questions with poochh get khaali instead of waiting.
+        run: for f in examples/*.bhoj; do echo "== $f"; node bin/bhojpuri.js "$f" < /dev/null; done
 
   # Enforces the Git Flow rules from CONTRIBUTING.md on pull requests.
   policy:

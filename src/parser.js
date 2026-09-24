@@ -1,12 +1,12 @@
 import { syntaxError } from "./errors.js";
 import { MSG } from "./messages.js";
-import { LOOP_WORDS } from "./keywords.js";
+import { KEYWORDS, LOOP_WORDS } from "./keywords.js";
 
 /*
  * Grammar (recursive descent):
  *
  *   program    := PROGRAM_START statement* PROGRAM_END
- *   statement  := let | print | if | while | for | function | return
+ *   statement  := let | print | if | while | for | function | return | try | throw
  *               | BREAK ";" | CONTINUE ";" | block | ";" | expr ";"
  *   let        := LET IDENT ("=" expr)? ("," IDENT ("=" expr)?)* ";"
  *   print      := PRINT expr ("," expr)* ";"
@@ -17,6 +17,8 @@ import { LOOP_WORDS } from "./keywords.js";
  *                  (FROM, TO, STEP and IN are LOOP_WORDS: plain names that are only special here)
  *   function   := FUNCTION IDENT "(" (IDENT ("," IDENT)*)? ")" block
  *   return     := RETURN expr? ";"
+ *   try        := TRY block CATCH ("(" IDENT ")")? block
+ *   throw      := THROW expr ";"
  *   block      := "{" statement* "}"
  *
  *   expr       := target ("=" | "+=" | "-=" | "*=" | "/=" | "%=") expr | or
@@ -52,9 +54,19 @@ export function parse(tokens) {
   return new Parser(tokens).parseProgram();
 }
 
+/**
+ * Parse one input of the interactive prompt: statements without `ka ho bhaiya` /
+ * `chalat bani bhaiya`, where the last statement doesn't need its `;`.
+ * @param {import("./tokenizer.js").Token[]} tokens
+ */
+export function parseInteractive(tokens) {
+  return new Parser(tokens, { interactive: true }).parseStatements();
+}
+
 class Parser {
-  constructor(tokens) {
+  constructor(tokens, { interactive = false } = {}) {
     this.tokens = tokens;
+    this.interactive = interactive;
     this.i = 0;
     this.loopDepth = 0;
     this.functionDepth = 0;
@@ -121,6 +133,18 @@ class Parser {
     return { type: "Program", body, ...pos(first) };
   }
 
+  parseStatements() {
+    const body = [];
+    while (this.peek().type !== "eof") body.push(this.parseStatement());
+    return body;
+  }
+
+  /** The `;` after a statement. At the prompt, the end of the input will do as well. */
+  endStatement() {
+    if (this.interactive && this.peek().type === "eof") return;
+    this.expectPunct(";");
+  }
+
   parseStatement() {
     const t = this.peek();
 
@@ -133,6 +157,9 @@ class Parser {
         case "FOR": return this.parseFor();
         case "FUNCTION": return this.parseFunction();
         case "RETURN": return this.parseReturn();
+        case "TRY": return this.parseTry();
+        case "THROW": return this.parseThrow();
+        case "CATCH": throw syntaxError(MSG.danglingCatch(t.text), t);
         case "BREAK":
         case "CONTINUE": return this.parseJump();
         case "ELSE":
@@ -148,7 +175,7 @@ class Parser {
     }
 
     const expression = this.parseExpression();
-    this.expectPunct(";");
+    this.endStatement();
     return { type: "ExpressionStatement", expression, ...pos(t) };
   }
 
@@ -166,14 +193,14 @@ class Parser {
       }
       declarations.push({ name: id.value, init, ...pos(id) });
     } while (this.isPunct(",") && this.next());
-    this.expectPunct(";");
+    this.endStatement();
     return { type: "Let", declarations, ...pos(start) };
   }
 
   parsePrint() {
     const start = this.next();
     const args = this.parseList();
-    this.expectPunct(";");
+    this.endStatement();
     return { type: "Print", args, ...pos(start) };
   }
 
@@ -267,18 +294,43 @@ class Parser {
     }
   }
 
+  parseTry() {
+    const start = this.next();
+    const body = this.parseBlock();
+    if (!this.isKeyword("CATCH")) throw this.unexpected(MSG.quote(KEYWORDS.CATCH));
+    this.next();
+    let param = null;
+    if (this.isPunct("(")) {
+      this.next();
+      const name = this.peek();
+      if (name.type !== "identifier") throw this.unexpected(MSG.things.variableName);
+      this.next();
+      param = name.value;
+      this.expectPunct(")");
+    }
+    const handler = this.parseBlock();
+    return { type: "Try", body, param, handler, ...pos(start) };
+  }
+
+  parseThrow() {
+    const start = this.next();
+    const argument = this.parseExpression();
+    this.endStatement();
+    return { type: "Throw", argument, ...pos(start) };
+  }
+
   parseReturn() {
     const t = this.next();
     if (this.functionDepth === 0) throw syntaxError(MSG.returnOutsideFunction(t.text), t);
     const argument = this.isPunct(";") ? null : this.parseExpression();
-    this.expectPunct(";");
+    this.endStatement();
     return { type: "Return", argument, ...pos(t) };
   }
 
   parseJump() {
     const t = this.next();
     if (this.loopDepth === 0) throw syntaxError(MSG.jumpOutsideLoop(t.text), t);
-    this.expectPunct(";");
+    this.endStatement();
     return { type: t.value === "BREAK" ? "Break" : "Continue", ...pos(t) };
   }
 
