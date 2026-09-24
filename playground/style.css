@@ -10,6 +10,14 @@
   --error: #fca5a5;
   --code-bg: #1f1b18;
   --code-text: #f5efe6;
+  /* Code colours. The editor is dark in both themes, so these don't change with it. */
+  --tok-keyword: #fb923c;
+  --tok-literal: #fcd34d;
+  --tok-string: #86efac;
+  --tok-number: #93c5fd;
+  --tok-builtin: #f0abfc;
+  --tok-comment: #9c8f82;
+  --tok-punct: #fdba74;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   color-scheme: light;
 }
@@ -85,9 +93,10 @@ h2 {
 
 .toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px 12px;
   min-height: 36px;
   margin-bottom: 10px;
 }
@@ -112,7 +121,21 @@ select, button {
   min-width: 0;
 }
 
-button { cursor: pointer; }
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+button {
+  cursor: pointer;
+  white-space: nowrap;
+}
 button:hover { border-color: var(--muted); }
 
 button.primary {
@@ -141,6 +164,52 @@ textarea {
 }
 textarea:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
 
+/* The coloured copy of the code sits exactly under the textarea, whose own text is
+   transparent. Both use the same font, padding and no line wrapping, so they line up. */
+.editor {
+  position: relative;
+  flex: 1;
+  display: flex;
+  min-height: 380px;
+}
+
+.editor pre,
+.editor textarea {
+  font: 14px/1.6 var(--mono);
+  padding: 12px;
+  white-space: pre;
+  overflow-wrap: normal;
+  word-break: normal;
+  tab-size: 2;
+}
+
+.editor pre {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.editor textarea {
+  position: relative;
+  flex: 1;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--code-text);
+  overflow: auto;
+}
+
+.editor textarea::selection { background: rgba(251, 146, 60, 0.35); color: transparent; }
+
+.tok-keyword { color: var(--tok-keyword); font-weight: 600; }
+.tok-literal { color: var(--tok-literal); }
+.tok-string { color: var(--tok-string); }
+.tok-number { color: var(--tok-number); }
+.tok-builtin { color: var(--tok-builtin); }
+.tok-comment { color: var(--tok-comment); font-style: italic; }
+.tok-punct { color: var(--tok-punct); }
+
 pre {
   overflow: auto;
   white-space: pre-wrap;
@@ -163,6 +232,61 @@ kbd {
   border-radius: 4px;
   background: var(--surface-2);
 }
+
+/* Console: the interactive prompt in the page. Dark like the editor. */
+.console {
+  margin-top: 16px;
+  background: var(--code-bg);
+  border-color: var(--code-bg);
+}
+.console h2 { color: var(--code-text); }
+
+.console-log {
+  max-height: 320px;
+  overflow: auto;
+  font: 14px/1.6 var(--mono);
+  color: var(--code-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.console-in, .console-out, .console-result, .console-error, .console-note { min-height: 1.6em; }
+.console-result { color: var(--tok-number); }
+.console-error { color: var(--error); }
+.console-note { color: var(--tok-comment); font-style: italic; }
+
+.console-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  border-top: 1px solid #3a332d;
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.console-entry pre,
+.console-entry textarea {
+  flex: none;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  font: 14px/1.6 var(--mono);
+  background: transparent;
+  color: var(--code-text);
+  white-space: pre;
+}
+
+.console-prompt { color: var(--tok-keyword); padding-right: 1ch; user-select: none; }
+.console-entry .console-prompt { width: 11ch; color: var(--tok-keyword); }
+
+.console-entry textarea {
+  flex: 1;
+  resize: none;
+  overflow: hidden;
+  caret-color: var(--tok-keyword);
+}
+.console-entry textarea:focus-visible { box-shadow: none; }
+.console:focus-within { box-shadow: 0 0 0 2px var(--accent); }
 
 .cheatsheet {
   margin: 24px 0 48px;
@@ -204,5 +328,5 @@ td code {
 
 @media (max-width: 760px) {
   .workspace { grid-template-columns: 1fr; }
-  textarea, pre { min-height: 260px; }
+  textarea, pre, .editor { min-height: 260px; }
 }

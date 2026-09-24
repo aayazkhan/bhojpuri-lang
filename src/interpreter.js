@@ -500,6 +500,9 @@ export class Interpreter {
       case "Identifier": return scope.get(node.name, node);
       case "ListLiteral": return node.elements.map((element) => this.evaluate(element, scope));
 
+      case "Template":
+        return node.parts.map((part) => (typeof part === "string" ? part : display(this.evaluate(part, scope)))).join("");
+
       case "DictLiteral": {
         const dict = new Map();
         for (const entry of node.entries) {

@@ -1,6 +1,9 @@
 import {
   run, formatError, BhojpuriError, KEYWORDS, KEYWORD_MEANINGS, BUILTINS, BUILTIN_MEANINGS,
 } from "../src/index.js";
+import { encodeCode, decodeHash } from "./share.js";
+import { highlight } from "./highlight.js";
+import { setUpConsole } from "./console.js";
 
 const EXAMPLES = [
   { file: "hello.bhoj", title: "Pranam duniya" },
@@ -20,6 +23,24 @@ const STORAGE_KEY = "bhojpuri-lang:code";
 const MAX_LOOP_ITERATIONS = 100_000;
 
 const editor = document.getElementById("editor");
+const highlighted = document.getElementById("highlight");
+
+// Redraw the coloured copy under the textarea. The extra newline keeps the last line
+// visible when the code ends with one.
+function paint() {
+  highlighted.innerHTML = highlight(editor.value) + "\n";
+  syncScroll();
+}
+
+function syncScroll() {
+  highlighted.scrollTop = editor.scrollTop;
+  highlighted.scrollLeft = editor.scrollLeft;
+}
+
+function setCode(code) {
+  editor.value = code;
+  paint();
+}
 const output = document.getElementById("output");
 const examples = document.getElementById("examples");
 
@@ -55,7 +76,7 @@ function runCode() {
 
 async function loadExample(file) {
   const res = await fetch(`../examples/${file}`);
-  editor.value = await res.text();
+  setCode(await res.text());
   save();
 }
 
@@ -71,6 +92,40 @@ function restore() {
   } catch {
     return null;
   }
+}
+
+// ---- share links ----
+
+const shareStatus = document.getElementById("share-status");
+let statusTimer;
+
+function showStatus(text) {
+  shareStatus.textContent = text;
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => (shareStatus.textContent = ""), 4000);
+}
+
+async function share() {
+  const url = `${location.origin}${location.pathname}#${await encodeCode(editor.value)}`;
+  try {
+    await navigator.clipboard.writeText(url);
+    showStatus("Link copy ho gail!");
+  } catch {
+    window.prompt("Ee link copy kar:", url); // e.g. clipboard blocked by the browser
+  }
+}
+
+/** Load code from a share link in the address. Returns true if there was one. */
+async function openSharedLink() {
+  const code = await decodeHash(location.hash);
+  if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+  if (code === null) return false;
+  setCode(code);
+  examples.selectedIndex = -1; // it isn't one of the examples
+  save();
+  output.replaceChildren();
+  showStatus("Baantal code khulal.");
+  return true;
 }
 
 // ---- wire up ----
@@ -98,10 +153,23 @@ document.getElementById("builtins").append(
   ...Object.entries(BUILTINS).map(([id, name]) => cheatRow(`${name}(…)`, BUILTIN_MEANINGS[id])),
 );
 
+setUpConsole({
+  log: document.getElementById("console-log"),
+  input: document.getElementById("console-input"),
+  prompt: document.getElementById("console-prompt"),
+  reset: document.getElementById("console-reset"),
+});
+
 examples.addEventListener("change", () => loadExample(examples.value));
+document.getElementById("share").addEventListener("click", share);
+window.addEventListener("hashchange", openSharedLink);
 document.getElementById("run").addEventListener("click", runCode);
 document.getElementById("clear").addEventListener("click", () => output.replaceChildren());
-editor.addEventListener("input", save);
+editor.addEventListener("input", () => {
+  paint();
+  save();
+});
+editor.addEventListener("scroll", syncScroll);
 
 editor.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
@@ -110,10 +178,14 @@ editor.addEventListener("keydown", (e) => {
   } else if (e.key === "Tab" && !e.shiftKey) {
     e.preventDefault();
     editor.setRangeText("  ", editor.selectionStart, editor.selectionEnd, "end");
+    paint();
     save();
   }
 });
 
-const saved = restore();
-if (saved) editor.value = saved;
-else await loadExample(EXAMPLES[0].file);
+// A share link wins; then the code from last time; then the first example.
+if (!(await openSharedLink())) {
+  const saved = restore();
+  if (saved) setCode(saved);
+  else await loadExample(EXAMPLES[0].file);
+}

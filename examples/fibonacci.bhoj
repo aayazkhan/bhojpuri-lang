@@ -8,6 +8,6 @@ ka ho bhaiya
   }
 
   har i = 0 se 9 tak {
-    bol ho "fib(" + i + ") =", fib(i);
+    bol ho `fib({i}) = {fib(i)}`;
   }
 chalat bani bhaiya

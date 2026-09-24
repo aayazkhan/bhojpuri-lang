@@ -6,6 +6,39 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-24
+
+### Added
+
+- Text in strings: a string written with backticks can contain `{expression}`, and each expression's value
+  is written into the text, e.g. `` `Pranam {naam}, agila saal {umar + 1}` ``. Values look the way `bol ho`
+  shows them. `\{` is a literal brace. Errors inside `{ }` point at the exact line and column. `"..."` and
+  `'...'` strings are unchanged.
+- Playground share links: the **Baantaw 🔗** button copies a link with the code compressed into the part of
+  the address after `#`, which never reaches a server. Opening the link loads that code into the editor.
+  Damaged links are ignored.
+- Coloured code in the playground editor: keywords, `sach`/`jhooth`/`khaali`, strings, numbers, comments and
+  built-in calls each get a colour as you type. The `{…}` parts of backtick strings are coloured as code, and
+  `se`/`tak`/`kadam`/`me` only inside a `har` header. Half-typed code is coloured too.
+- Playground console: a panel under the editor that runs one line at a time, like `bhojpuri` with no file.
+  Results, printed output and errors show in the log, and variables and functions carry over. Unclosed
+  `{` `(` `[` continue on a `...` line (Shift+Enter always adds a line). ↑/↓ recall earlier lines, `poochh`
+  uses the question box, and **Naya shuru** starts a fresh session.
+- VS Code extension in `editors/vscode/` for `.bhoj` files:
+  - colours for keywords, literals, strings, numbers, comments, built-in calls and function names, including
+    the `{…}` in backtick strings and `se`/`tak`/`kadam`/`me` only in a `har` header;
+  - comment toggling, bracket and quote closing, and indentation.
+  Its grammar is generated from `src/keywords.js` by `scripts/build-vscode-grammar.js`, and a test checks it's
+  up to date. Install by copying the folder into `~/.vscode/extensions/`.
+
+### Changed
+
+- The playground toolbar wraps on narrow screens instead of squeezing its buttons.
+- `fibonacci.bhoj` and `andaaz.bhoj` use backtick strings instead of joining text with `+`.
+- The tests are split by topic into `test/*.test.js` (language, loops, functions, collections, built-ins,
+  catching errors, prompt, CLI, examples), with shared helpers in `test/helpers.js`. `npm test` runs
+  `node --test test/*.test.js`.
+
 ## [0.4.1] - 2026-09-24
 
 ### Fixed
@@ -140,7 +173,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Browser playground (`npm run playground`).
 - Example programs and a `node:test` test suite.
 
-[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.3.0...v0.3.1

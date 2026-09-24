@@ -39,7 +39,10 @@ merge after CI passes.
    git pull
    git switch -c feature/short-description
    ```
-2. **Write the code and tests.** Every feature or fix needs tests in `test/`. Run `npm test`.
+2. **Write the code and tests.** Every feature or fix needs tests in `test/`, in the `*.test.js` file for
+   that topic (shared helpers such as `out()` and `assertError()` are in `test/helpers.js`). Run `npm test`.
+   If you change a keyword or built-in name in `src/keywords.js`, also run
+   `node scripts/build-vscode-grammar.js` to update the VS Code grammar.
 3. **Document it** (CI checks the changelog):
    - Add an entry under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md), in the right group
      (`Added`, `Changed`, `Fixed`, `Removed`).

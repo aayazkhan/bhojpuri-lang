@@ -3,7 +3,10 @@
 A toy programming language with Bhojpuri keywords, inspired by [Bhailang](https://bhailang.js.org/).
 Written in plain JavaScript with zero dependencies. It runs in Node.js and in the browser.
 
-**[Try it in the playground →](https://aayazkhan.github.io/bhojpuri-lang/)**
+**[Try it in the playground →](https://aayazkhan.github.io/bhojpuri-lang/)** Write code (with colours as you
+type), run it, and press
+**Baantaw 🔗** to copy a link that opens your code for anyone you send it to. The **Console** below the
+editor runs one line at a time, like the [interactive prompt](#interactive-prompt).
 
 ```
 ka ho bhaiya
@@ -48,7 +51,7 @@ Run `bhojpuri` without a file to try things out one line at a time:
 
 ```
 $ bhojpuri
-Bhojpuri Lang 0.4.1 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
+Bhojpuri Lang 0.5.0 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
 bhojpuri> 2 + 3 * 4
 14
 bhojpuri> maan la naam = "Ramu"
@@ -118,6 +121,21 @@ Variables are block-scoped. Names can be written in Devanagari too (`maan la न
 ```
 bol ho "jawab:", a * 2;     // several values are joined with a space
 ```
+
+### Text in strings
+
+Write a string with backticks to put values straight into the text. Whatever is inside `{ }` is worked out
+and written in, the same way `bol ho` would show it:
+
+```
+maan la naam = "Ramu", umar = 24;
+bol ho `Pranam {naam}, agila saal {umar + 1} ke ho jaiba`;   // Pranam Ramu, agila saal 25 ke ho jaiba
+bol ho `Saaman: {jod(saaman, ", ")}`;
+```
+
+- Any expression works inside `{ }`: maths, function calls, indexes, even another string.
+- Write `\{` for a literal brace. `"..."` and `'...'` strings don't change: braces in them are just text.
+- Like other strings, a backtick string has to end on the same line.
 
 ### Conditions
 
@@ -365,7 +383,8 @@ koshish kara {
 
 ### Operators
 
-`+ - * / %`, `== != < > <= >=`, `&& || !`. `+` joins strings, for example `"umar: " + 20`.
+`+ - * / %`, `== != < > <= >=`, `&& || !`. `+` joins strings, for example `"umar: " + 20`
+(a backtick string like `` `umar: {20}` `` is often easier to read).
 The falsy values are `jhooth`, `khaali`, `0` and `""`. Everything else counts as true.
 
 Comments use `// ...` and `/* ... */`.
@@ -384,7 +403,22 @@ Chalat samay galti (line 3, col 14): "b" naam ke koi variable na ba. Pahile "maa
 
 All keywords and built-in function names live in [`src/keywords.js`](src/keywords.js), and all error text lives in
 [`src/messages.js`](src/messages.js). Edit a value there and the tokenizer, CLI, playground and error
-messages pick it up. After renaming keywords, update the `.bhoj` examples and the tests.
+messages pick it up, and so do the playground's colours. After renaming keywords:
+
+- regenerate the VS Code grammar with `node scripts/build-vscode-grammar.js` (the tests fail if it's out of date);
+- update the `.bhoj` examples and the tests.
+
+## Editor support
+
+[`editors/vscode/`](editors/vscode/) is a VS Code extension for `.bhoj` files. It colours keywords, strings,
+numbers, comments, built-in calls and function names, including the `{…}` in backtick strings. It also
+handles comment toggling, bracket and quote closing, and indentation. To install it from this repository:
+
+```bash
+cp -r editors/vscode ~/.vscode/extensions/aayazk.bhojpuri-lang-0.1.0
+```
+
+Then restart VS Code. See [its README](editors/vscode/README.md) for details.
 
 ## How it works
 
@@ -436,8 +470,10 @@ bin/bhojpuri.js      CLI
 src/                 tokenizer, parser, interpreter, keywords, messages
 examples/*.bhoj      sample programs
 playground/          browser playground (uses src/ directly as ES modules)
+editors/vscode/      VS Code extension (colours, comments, brackets)
 scripts/serve.js     zero-dependency static server for the playground
-test/                node:test suite
+scripts/build-vscode-grammar.js   generates the VS Code grammar from src/keywords.js
+test/                node:test suite, one *.test.js file per topic
 ```
 
 ## Contributing
