@@ -1,4 +1,5 @@
 import { syntaxError } from "./errors.js";
+import { tokenize } from "./tokenizer.js";
 import { MSG } from "./messages.js";
 import { KEYWORDS, LOOP_WORDS } from "./keywords.js";
 
@@ -32,11 +33,12 @@ import { KEYWORDS, LOOP_WORDS } from "./keywords.js";
  *   unary      := ("!" | "-" | "+") unary | postfix
  *   postfix    := primary ("(" args? ")" | "[" expr "]")*
  *   args       := expr ("," expr)*
- *   primary    := NUMBER | STRING | TRUE | FALSE | NULL | IDENT | "(" expr ")"
+ *   primary    := NUMBER | STRING | TEMPLATE | TRUE | FALSE | NULL | IDENT | "(" expr ")"
  *               | "[" (expr ("," expr)* ","?)? "]"
  *               | "{" (expr ":" expr ("," expr ":" expr)* ","?)? "}"
  *
  * A "{" that starts a statement is a block; a kosh literal only appears where a value is expected.
+ * TEMPLATE is a `backtick string` whose {…} parts are each parsed as an expr.
  */
 
 const ASSIGNMENT_OPS = new Set(["=", "+=", "-=", "*=", "/=", "%="]);
@@ -61,6 +63,16 @@ export function parse(tokens) {
  */
 export function parseInteractive(tokens) {
   return new Parser(tokens, { interactive: true }).parseStatements();
+}
+
+/** Parse the expression inside a template string's {…}. */
+function parseEmbedded({ source, line, col }) {
+  const tokens = tokenize(source, { line, col });
+  if (tokens[0].type === "eof") throw syntaxError(MSG.emptyTemplateExpression(), { line, col: col - 1 });
+  const parser = new Parser(tokens);
+  const expression = parser.parseExpression();
+  if (parser.peek().type !== "eof") throw parser.unexpected(MSG.quote("}"));
+  return expression;
 }
 
 class Parser {
@@ -427,6 +439,12 @@ class Parser {
     if (t.type === "number" || t.type === "string") {
       this.next();
       return { type: "Literal", value: t.value, ...pos(t) };
+    }
+
+    if (t.type === "template") {
+      this.next();
+      const parts = t.value.map((part) => (typeof part === "string" ? part : parseEmbedded(part)));
+      return { type: "Template", parts, ...pos(t) };
     }
 
     if (t.type === "keyword" && t.value in LITERAL_KEYWORDS) {

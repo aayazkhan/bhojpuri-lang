@@ -7,7 +7,7 @@ ka ho bhaiya
   bol ho "Hum 1 se 100 ke beech ek sankhya soch lihni. 7 koshish me batav!";
 
   har koshish = 1 se 7 tak {
-    maan la jawab = poochh("Koshish " + koshish + ": ");
+    maan la jawab = poochh(`Koshish {koshish}: `);
     jadi (jawab == khaali) {
       bol ho "Thik ba, phir kabhi khelal jaai.";
       bas kara;
@@ -18,7 +18,7 @@ ka ho bhaiya
     koshish kara {
       andaaz = sankhya(jawab);
     } galti pe {
-      bol ho "\"" + jawab + "\" sankhya na ha — ee koshish bekaar gail.";
+      bol ho `"{jawab}" sankhya na ha — ee koshish bekaar gail.`;
       aage badha;
     }
 

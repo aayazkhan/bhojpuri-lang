@@ -4,8 +4,9 @@ import { MSG } from "./messages.js";
 
 /**
  * @typedef {{
- *   type: "keyword" | "number" | "string" | "identifier" | "punct" | "eof",
- *   value: any,     // keyword id (e.g. "IF"), number, decoded string, name or operator
+ *   type: "keyword" | "number" | "string" | "template" | "identifier" | "punct" | "eof",
+ *   value: any,     // keyword id (e.g. "IF"), number, decoded string, name or operator;
+ *                   // for a template, its parts: strings and { source, line, col } for each {…}
  *   text: string,   // the exact source text
  *   line: number,
  *   col: number,
@@ -37,6 +38,30 @@ const PUNCTUATION = [
 
 const ESCAPES = { n: "\n", t: "\t", r: "\r", "0": "\0" };
 
+const QUOTES = new Set(['"', "'", "`"]);
+
+/**
+ * Find the `}` that closes a `{` in a template string, starting just after the `{`.
+ * Skips over quoted strings and nested braces. Returns -1 if it isn't closed on this line.
+ */
+function closingBrace(source, from) {
+  let depth = 1;
+  for (let i = from; i < source.length && source[i] !== "\n"; i++) {
+    const c = source[i];
+    if (QUOTES.has(c)) {
+      for (i++; source[i] !== c; i++) {
+        if (source[i] === undefined || source[i] === "\n") return -1;
+        if (source[i] === "\\") i++;
+      }
+    } else if (c === "{") {
+      depth++;
+    } else if (c === "}" && --depth === 0) {
+      return i;
+    }
+  }
+  return -1;
+}
+
 function matchAt(regex, source, pos) {
   regex.lastIndex = pos;
   return regex.exec(source)?.[0] ?? null;
@@ -44,13 +69,15 @@ function matchAt(regex, source, pos) {
 
 /**
  * @param {string} source
+ * @param {{ line?: number, col?: number }} [start] where `source` begins, for code inside a
+ *   template string's {…}, so errors point at the right place in the whole program.
  * @returns {Token[]}
  */
-export function tokenize(source) {
+export function tokenize(source, { line: startLine = 1, col: startCol = 1 } = {}) {
   const tokens = [];
   let pos = 0;
-  let line = 1;
-  let lineStart = 0;
+  let line = startLine;
+  let lineStart = 1 - startCol;
 
   const here = () => ({ line, col: pos - lineStart + 1 });
   const advance = (n) => {
@@ -120,6 +147,35 @@ export function tokenize(source) {
         }
       }
       push("string", value, source.slice(pos, i + 1), start);
+      continue;
+    }
+
+    // `Pranam {naam}`: text with expressions in braces. The expressions are parsed later.
+    if (ch === "`") {
+      const parts = [];
+      let text = "";
+      let i = pos + 1;
+      for (;;) {
+        const c = source[i];
+        if (c === undefined || c === "\n") throw syntaxError(MSG.unterminatedString(), start);
+        if (c === "`") break;
+        if (c === "\\" && i + 1 < source.length) {
+          const next = source[i + 1];
+          text += ESCAPES[next] ?? next;
+          i += 2;
+        } else if (c === "{") {
+          const end = closingBrace(source, i + 1);
+          if (end === -1) throw syntaxError(MSG.unterminatedTemplateBrace(), { line, col: i - lineStart + 1 });
+          parts.push(text, { source: source.slice(i + 1, end), line, col: i + 1 - lineStart + 1 });
+          text = "";
+          i = end + 1;
+        } else {
+          text += c;
+          i++;
+        }
+      }
+      parts.push(text);
+      push("template", parts, source.slice(pos, i + 1), start);
       continue;
     }
 

@@ -119,6 +119,21 @@ Variables are block-scoped. Names can be written in Devanagari too (`maan la न
 bol ho "jawab:", a * 2;     // several values are joined with a space
 ```
 
+### Text in strings
+
+Write a string with backticks to put values straight into the text. Whatever is inside `{ }` is worked out
+and written in, the same way `bol ho` would show it:
+
+```
+maan la naam = "Ramu", umar = 24;
+bol ho `Pranam {naam}, agila saal {umar + 1} ke ho jaiba`;   // Pranam Ramu, agila saal 25 ke ho jaiba
+bol ho `Saaman: {jod(saaman, ", ")}`;
+```
+
+- Any expression works inside `{ }`: maths, function calls, indexes, even another string.
+- Write `\{` for a literal brace. `"..."` and `'...'` strings don't change: braces in them are just text.
+- Like other strings, a backtick string has to end on the same line.
+
 ### Conditions
 
 ```
@@ -365,7 +380,8 @@ koshish kara {
 
 ### Operators
 
-`+ - * / %`, `== != < > <= >=`, `&& || !`. `+` joins strings, for example `"umar: " + 20`.
+`+ - * / %`, `== != < > <= >=`, `&& || !`. `+` joins strings, for example `"umar: " + 20`
+(a backtick string like `` `umar: {20}` `` is often easier to read).
 The falsy values are `jhooth`, `khaali`, `0` and `""`. Everything else counts as true.
 
 Comments use `// ...` and `/* ... */`.
