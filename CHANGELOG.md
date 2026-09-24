@@ -6,6 +6,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-09-24
+
+### Changed
+
+- The npm package is now `@aayazk/bhojpuri-lang`. npm doesn't accept `bhojpuri-lang` because it is too
+  close to an existing package, `bhojpurilang`. The command it installs is still `bhojpuri`. Install
+  with `npm install -g @aayazk/bhojpuri-lang`, or run a file with `npx @aayazk/bhojpuri-lang file.bhoj`.
+- `publishConfig.access` is set to `public` so `npm publish` publishes the scoped package publicly.
+- README: new Install section, and the library example imports from `@aayazk/bhojpuri-lang`.
+
 ## [0.3.0] - 2026-09-24
 
 ### Added
@@ -78,7 +88,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Browser playground (`npm run playground`).
 - Example programs and a `node:test` test suite.
 
-[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/aayazkhan/bhojpuri-lang/releases/tag/v0.1.0

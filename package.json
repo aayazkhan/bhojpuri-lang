@@ -1,6 +1,6 @@
 {
-  "name": "bhojpuri-lang",
-  "version": "0.3.0",
+  "name": "@aayazk/bhojpuri-lang",
+  "version": "0.3.1",
   "description": "A toy programming language with Bhojpuri keywords",
   "author": "Ayyaz Khan <khan.shan803@gmail.com>",
   "license": "MIT",
@@ -34,6 +34,9 @@
     "toy-language",
     "esolang"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=18"
   }
