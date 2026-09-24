@@ -48,7 +48,7 @@ Run `bhojpuri` without a file to try things out one line at a time:
 
 ```
 $ bhojpuri
-Bhojpuri Lang 0.4.0 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
+Bhojpuri Lang 0.4.1 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
 bhojpuri> 2 + 3 * 4
 14
 bhojpuri> maan la naam = "Ramu"
@@ -62,7 +62,9 @@ bhojpuri> dugna(21)
 bhojpuri> chalat bani bhaiya
 ```
 
-- **No markers needed:** there's no `ka ho bhaiya`, and the `;` at the end of a line is optional.
+- **No markers needed:** there's no `ka ho bhaiya`. The `;` can be left out at the end of the line and just
+  before a `}`, as in `jadi (x > 0) { bol ho "haan" }`. Two statements on one line still need a `;` between
+  them, and `.bhoj` files still need every `;`.
 - **Values are shown:** typing a value shows it, with strings in quotes. Statements, assignments and `khaali`
   show nothing.
 - **Everything is remembered:** variables and functions carry over between lines. You can run

@@ -6,6 +6,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-09-24
+
+### Fixed
+
+- At the interactive prompt, the `;` can now also be left out just before a `}`, so one-line blocks like
+  `koshish kara { phenk da "oops" } galti pe (g) { bol ho g }` or `jadi (x > 0) { bol ho "haan" }` work.
+  Before, only the `;` at the very end of the line was optional. `.bhoj` files still need every `;`.
+
 ## [0.4.0] - 2026-09-24
 
 ### Added
@@ -132,7 +140,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Browser playground (`npm run playground`).
 - Example programs and a `node:test` test suite.
 
-[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.2.0...v0.3.0

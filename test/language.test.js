@@ -732,6 +732,21 @@ describe("interactive prompt (Session)", () => {
     assert.throws(() => result(`maan la c = 1 bol ho c`), /";" chahi/);
   });
 
+  test("the ; can also be left out just before a }", () => {
+    const { result, printed } = session();
+    assert.equal(result(`koshish kara { phenk da "oops" } galti pe (g) { bol ho "pakdail:", g }`), null);
+    result(`jadi (1 < 2) { bol ho "haan" } na ta { bol ho "na" }`);
+    result(`kaam dugna(x) { lauta da x * 2 }`);
+    assert.equal(result(`dugna(4)`), "8");
+    result(`har i = 1 se 3 tak { jadi (i == 2) { aage badha } bol ho i }`);
+    assert.deepEqual(printed, ["pakdail: oops", "haan", "1", "3"]);
+    assert.throws(() => result(`{ maan la a = 1 bol ho a }`), /";" chahi/);
+  });
+
+  test("files still need every ;", () => {
+    assertError(program(`jadi (sach) { bol ho 1 }`), { kind: "SyntaxError", line: 2, match: /";" chahi rahe, lekin "\}"/ });
+  });
+
   test("variables and functions carry over, and names can be declared again", () => {
     const { result } = session();
     result(`kaam dugna(x) {\n  lauta da x * 2;\n}`);
