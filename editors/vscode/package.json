@@ -1,0 +1,37 @@
+{
+  "name": "bhojpuri-lang",
+  "displayName": "Bhojpuri Lang",
+  "description": "Colours and editing support for Bhojpuri Lang (.bhoj) programs",
+  "version": "0.1.0",
+  "publisher": "aayazk",
+  "author": "Ayyaz Khan <khan.shan803@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aayazkhan/bhojpuri-lang.git",
+    "directory": "editors/vscode"
+  },
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "bhojpuri",
+        "aliases": ["Bhojpuri Lang", "bhojpuri"],
+        "extensions": [".bhoj"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "bhojpuri",
+        "scopeName": "source.bhojpuri",
+        "path": "./syntaxes/bhojpuri.tmLanguage.json"
+      }
+    ]
+  }
+}

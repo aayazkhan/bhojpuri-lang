@@ -403,7 +403,22 @@ Chalat samay galti (line 3, col 14): "b" naam ke koi variable na ba. Pahile "maa
 
 All keywords and built-in function names live in [`src/keywords.js`](src/keywords.js), and all error text lives in
 [`src/messages.js`](src/messages.js). Edit a value there and the tokenizer, CLI, playground and error
-messages pick it up. After renaming keywords, update the `.bhoj` examples and the tests.
+messages pick it up, and so do the playground's colours. After renaming keywords:
+
+- regenerate the VS Code grammar with `node scripts/build-vscode-grammar.js` (the tests fail if it's out of date);
+- update the `.bhoj` examples and the tests.
+
+## Editor support
+
+[`editors/vscode/`](editors/vscode/) is a VS Code extension for `.bhoj` files. It colours keywords, strings,
+numbers, comments, built-in calls and function names, including the `{…}` in backtick strings. It also
+handles comment toggling, bracket and quote closing, and indentation. To install it from this repository:
+
+```bash
+cp -r editors/vscode ~/.vscode/extensions/aayazk.bhojpuri-lang-0.1.0
+```
+
+Then restart VS Code. See [its README](editors/vscode/README.md) for details.
 
 ## How it works
 
@@ -455,7 +470,9 @@ bin/bhojpuri.js      CLI
 src/                 tokenizer, parser, interpreter, keywords, messages
 examples/*.bhoj      sample programs
 playground/          browser playground (uses src/ directly as ES modules)
+editors/vscode/      VS Code extension (colours, comments, brackets)
 scripts/serve.js     zero-dependency static server for the playground
+scripts/build-vscode-grammar.js   generates the VS Code grammar from src/keywords.js
 test/                node:test suite, one *.test.js file per topic
 ```
 
