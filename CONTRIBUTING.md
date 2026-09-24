@@ -46,7 +46,8 @@ short program that shows the problem. In the playground, **Baantaw 🔗** copies
    ```
 2. **Write the code and tests.** Every feature or fix needs tests in `test/`, in the `*.test.js` file for
    that topic (shared helpers such as `out()` and `assertError()` are in `test/helpers.js`). Run `npm test`.
-   If you change a keyword or built-in name in `src/keywords.js`, also run
+   A new built-in gets its name and meaning in `src/keywords.js`, and its code in `src/builtins.js`, in the
+   section for its topic. If you change a keyword or built-in name in `src/keywords.js`, also run
    `node scripts/build-vscode-grammar.js` to update the VS Code grammar.
 3. **Document it** (CI checks the changelog):
    - Add an entry under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md), in the right group
@@ -57,6 +58,10 @@ short program that shows the problem. In the playground, **Baantaw 🔗** copies
 5. **Merge** once CI is green. Use **"Create a merge commit"** so stacked PRs keep a clean history.
 
 ## Releasing
+
+Before a release, check the changes against [STABILITY.md](STABILITY.md). From 1.0, anything it covers
+may only change in a new major version. New built-ins are fine in any release, but a new keyword needs a
+major version.
 
 1. `git switch -c release/x.y.z develop`
 2. Bump `version` in `package.json` and move the `[Unreleased]` entries in `CHANGELOG.md` into a new

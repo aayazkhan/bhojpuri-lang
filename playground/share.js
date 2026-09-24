@@ -1,9 +1,13 @@
+import { MAIN } from "./files.js";
+
 // Share links keep the code after the "#" in the address, so it never reaches a server:
-//   #z=<base64url of the deflate-compressed UTF-8 code>   (what the playground makes)
-//   #code=<base64url of the UTF-8 code>                    (no compression, for old browsers)
+//   #z=<base64url of the deflate-compressed UTF-8 code>   (one file: what the playground makes)
+//   #code=<base64url of the UTF-8 code>                    (one file, no compression, for old browsers)
+//   #f=<base64url of the deflate-compressed JSON [{ name, code }, ...]>   (several files)
 
 const COMPRESSED = "z=";
 const PLAIN = "code=";
+const FILES = "f=";
 
 function toBase64Url(bytes) {
   let binary = "";
@@ -32,6 +36,41 @@ export async function encodeCode(code) {
   const bytes = new TextEncoder().encode(code);
   if (typeof CompressionStream === "undefined") return PLAIN + toBase64Url(bytes);
   return COMPRESSED + toBase64Url(await pipe(bytes, new CompressionStream("deflate")));
+}
+
+/**
+ * The part of a share link after "#", for all the playground's files. A lone main.bhoj uses the
+ * one-file form, so its links look the same as before files existed.
+ * @param {{ name: string, code: string }[]} files main.bhoj first
+ */
+export async function encodeFiles(files) {
+  if (files.length === 1 && files[0].name === MAIN) return encodeCode(files[0].code);
+  const bytes = new TextEncoder().encode(JSON.stringify(files.map(({ name, code }) => ({ name, code }))));
+  if (typeof CompressionStream === "undefined") return null; // too long to share uncompressed
+  return FILES + toBase64Url(await pipe(bytes, new CompressionStream("deflate")));
+}
+
+/**
+ * The files in a share link's "#..." part (main.bhoj first), or null if there are none or
+ * it's damaged. One-file links give just main.bhoj.
+ * @param {string} hash e.g. location.hash
+ */
+export async function decodeFiles(hash) {
+  const value = hash.replace(/^#/, "");
+  if (!value.startsWith(FILES)) {
+    const code = await decodeHash(hash);
+    return code === null ? null : [{ name: MAIN, code }];
+  }
+  if (typeof DecompressionStream === "undefined") return null;
+  try {
+    const bytes = await pipe(fromBase64Url(value.slice(FILES.length)), new DecompressionStream("deflate"));
+    const files = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+    const valid = Array.isArray(files) && files.length > 0 && files[0].name === MAIN &&
+      files.every((f) => typeof f?.name === "string" && typeof f?.code === "string");
+    return valid ? files.map(({ name, code }) => ({ name, code })) : null;
+  } catch {
+    return null;
+  }
 }
 
 /**

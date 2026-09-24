@@ -70,10 +70,10 @@ describe("har loops", () => {
   });
 
   test("errors: bad bounds, zero step, not a list, loop guard", () => {
-    assertError(program(`har i = "1" se 5 tak {}`), { kind: "RuntimeError", match: /"se" ke baad sankhya chahi, lekin string/ });
+    assertError(program(`har i = "1" se 5 tak {}`), { kind: "RuntimeError", match: /"se" ke baad sankhya chahi, lekin shabd/ });
     assertError(program(`har i = 1 se khaali tak {}`), { kind: "RuntimeError", match: /"tak" ke baad/ });
     assertError(program(`har i = 1 se 5 tak kadam 0 {}`), { kind: "RuntimeError", line: 2, match: /"kadam" 0 na ho sakela/ });
-    assertError(program(`har x 5 me {}`), { kind: "RuntimeError", match: /list, string ya kosh pe chal sakela, number pe na/ });
+    assertError(program(`har x 5 me {}`), { kind: "RuntimeError", match: /list, shabd ya kosh pe chal sakela, sankhya pe na/ });
     assert.throws(() => output(program(`har i = 1 se 1000 tak {}`), { maxLoopIterations: 10 }), /10 baar/);
   });
 

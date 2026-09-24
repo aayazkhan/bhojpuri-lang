@@ -35,7 +35,7 @@ describe("functions without names", () => {
   });
 
   test("lauta da inside, bas kara not", () => {
-    assertError(program(`jab le (sach) { maan la f = kaam() { bas kara } }`), { kind: "SyntaxError", match: /"bas kara" khali/ });
+    assertError(program(`jab le (sach) { maan la f = kaam() { bas kara } }`), { kind: "SyntaxError", match: /"bas kara" sirf/ });
     assertError(program(`maan la f = kaam(x, x) {};`), { kind: "SyntaxError", match: /"x" naam duu baar/ });
   });
 });
@@ -64,7 +64,7 @@ describe("badal (map) and chhaan (filter)", () => {
 
   test("errors inside the kaam, and wrong arguments", () => {
     assertError(program(`badal([1, 0], kaam(x) { lauta da 1 / x });`), { kind: "RuntimeError", match: /Zero se bhaag/ });
-    assertError(program(`badal([1], 5);`), { kind: "RuntimeError", match: /"badal" ke kaam chahi, lekin number/ });
+    assertError(program(`badal([1], 5);`), { kind: "RuntimeError", match: /"badal" ke kaam chahi, lekin sankhya/ });
     assertError(program(`chhaan("abc", bada);`), { kind: "RuntimeError", match: /"chhaan" ke list chahi/ });
     assertError(program(`badal([1], kaam(x, y) { lauta da x });`), { kind: "RuntimeError", match: /"kaam" 2 cheez maange la, lekin 1/ });
   });

@@ -45,10 +45,10 @@ describe("lists", () => {
   });
 
   test("errors: out of range, bad index, not indexable, strings are read-only", () => {
-    assertError(program(`maan la l = [1];\nbol ho l[1];`), { kind: "RuntimeError", line: 3, match: /lambai khali 1/ });
+    assertError(program(`maan la l = [1];\nbol ho l[1];`), { kind: "RuntimeError", line: 3, match: /lambai sirf 1/ });
     assertError(program(`bol ho [1][-1];`), { kind: "RuntimeError" });
     assertError(program(`bol ho [1][0.5];`), { kind: "RuntimeError", match: /pura sankhya/ });
-    assertError(program(`bol ho 5[0];`), { kind: "RuntimeError", match: /number/ });
+    assertError(program(`bol ho 5[0];`), { kind: "RuntimeError", match: /^sankhya me \[ \] se index/ });
     assertError(program(`maan la s = "ab";\ns[0] = "x";`), { kind: "RuntimeError", match: /String/ });
     assertError(program(`daal(5, 1);`), { kind: "RuntimeError", match: /"daal"/ });
     assertError(program(`jodo(1) = 2;`), { kind: "SyntaxError" });
@@ -119,9 +119,9 @@ describe("kosh (dictionaries)", () => {
     assertError(program(`maan la d = {};\nbol ho d["phone"];`), { kind: "RuntimeError", line: 3, match: /Kosh me "phone" chaabi na ba/ });
     assertError(program(`maan la d = {};\nd["n"] += 1;`), { kind: "RuntimeError", match: /"n" chaabi na ba/ });
     assertError(program(`bol ho {}[1];`), { kind: "RuntimeError", match: /Kosh me 1 chaabi na ba/ });
-    assertError(program(`maan la d = { [1]: 2 };`), { kind: "RuntimeError", match: /chaabi string ya sankhya hoe ke chahi, lekin list/ });
+    assertError(program(`maan la d = { [1]: 2 };`), { kind: "RuntimeError", match: /chaabi shabd ya sankhya hoe ke chahi, lekin list/ });
     assertError(program(`maan la d = {};\nd[khaali] = 1;`), { kind: "RuntimeError", match: /lekin khaali/ });
-    assertError(program(`bol ho ba({}, sach);`), { kind: "RuntimeError", match: /chaabi string ya sankhya/ });
+    assertError(program(`bol ho ba({}, sach);`), { kind: "RuntimeError", match: /chaabi shabd ya sankhya/ });
     assertError(program(`bol ho chaabi([1]);`), { kind: "RuntimeError", match: /"chaabi" ke kosh chahi, lekin list/ });
     assertError(program(`bol ho hataw("a", "a");`), { kind: "RuntimeError", match: /"hataw" ke kosh chahi/ });
     assertError(program(`bol ho { "a" 1 };`), { kind: "SyntaxError", match: /":" chahi/ });

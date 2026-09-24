@@ -7,7 +7,8 @@ Written in plain JavaScript with zero dependencies. It runs in Node.js and in th
 **📘 Sikh** there for 12 short lessons in Bhojpuri (or English), each with an example and a small exercise
 that checks your answer.
 Write code (with colours as you type), run it, and press
-**Baantaw 🔗** to copy a link that opens your code for anyone you send it to. The **Console** below the
+**Baantaw 🔗** to copy a link that opens your code for anyone you send it to. **+ Naya file** adds more files
+for [`le aaw`](#using-other-files-le-aaw). The **Console** below the
 editor runs one line at a time, like the [interactive prompt](#interactive-prompt).
 
 ```
@@ -36,6 +37,18 @@ Or run a file without installing anything:
 npx @aayazk/bhojpuri-lang program.bhoj
 ```
 
+| Command | What it does |
+| --- | --- |
+| `bhojpuri program.bhoj` | runs the program. `poochh` reads answers from what you type (or from piped input) |
+| `bhojpuri` | opens the [interactive prompt](#interactive-prompt); piped lines run without prompts |
+| `bhojpuri --help` | lists every keyword and built-in |
+| `bhojpuri --version` | prints the version |
+
+The command exits with code `0` when the program finishes, and `1` for a syntax or runtime error (printed
+to stderr) or a file that can't be read.
+
+From 1.0, [STABILITY.md](STABILITY.md) says what stays the same between versions.
+
 ## Quick start (from a clone of this repo)
 
 ```bash
@@ -58,7 +71,7 @@ Run `bhojpuri` without a file to try things out one line at a time:
 
 ```
 $ bhojpuri
-Bhojpuri Lang 0.6.0 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
+Bhojpuri Lang 0.7.0 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
 bhojpuri> 2 + 3 * 4
 14
 bhojpuri> maan la naam = "Ramu"
@@ -129,6 +142,17 @@ Variables are block-scoped. Names can be written in Devanagari too (`maan la न
 ```
 bol ho "jawab:", a * 2;     // several values are joined with a space
 ```
+
+### Strings
+
+Strings use double or single quotes: `"Pranam"` or `'Pranam'`. They end on the same line, and `+` joins
+them. A backslash starts an escape:
+
+| Escape | Gives |
+| --- | --- |
+| `\n` `\t` `\r` `\0` | new line, tab, carriage return, the zero character |
+| `\"` `\'` `\\` | the quote or backslash itself |
+| `\` + anything else | that character, e.g. `\{` in a backtick string |
 
 ### Text in strings
 
@@ -448,8 +472,10 @@ chalat bani bhaiya
   in the file doing the bringing.
 - **Errors name the file they come from,** with its own line:
   `Chalat samay galti (lib/ganit.bhoj, line 4, col 23): ...`.
-- **Where it works:** in the `bhojpuri` command and the interactive prompt. The browser playground has no
-  files, so there `le aaw` says it can't be used. See [examples/hisaab.bhoj](examples/hisaab.bhoj).
+- **Where it works:** everywhere. In the `bhojpuri` command and the interactive prompt it reads files from
+  disk. In the playground, **+ Naya file** adds a file tab, and `le aaw` finds the other tabs; the program
+  always starts from `main.bhoj`, and share links carry every file. See
+  [examples/hisaab.bhoj](examples/hisaab.bhoj), which is also in the playground's example list.
 
 ### Operators
 
@@ -511,6 +537,9 @@ source code ──► tokenizer ──► tokens ──► parser ──► AST 
 - **Tokenizer** splits the source into keywords, numbers, strings, names and operators. Multi-word keywords are matched longest-first.
 - **Parser** is a recursive-descent parser that builds an abstract syntax tree (AST). The full grammar is at the top of `src/parser.js`.
 - **Interpreter** walks the AST with a chain of scopes. `bas kara`, `aage badha` and `lauta da` are returned as signals up to the enclosing loop or function. Functions keep a reference to the scope they were defined in, which is what makes closures work.
+  - `src/values.js`: the kinds of value and how they're shown.
+  - `src/scope.js`: variables.
+  - `src/builtins.js`: the built-in functions, grouped by topic.
 
 ## Using it as a library
 
@@ -548,11 +577,32 @@ in error messages, and `from` is the `id` of the file that asks.
 Without an `input` option, `poochh` stops with a Bhojpuri error, because there's no one to answer it.
 There's also a `random` option that replaces `Math.random` for `sanyog`, which is handy in tests.
 
+Everything the package exports:
+
+| Export | What it is |
+| --- | --- |
+| `run(source, options)` | tokenizes, parses and runs a program. Options: `print`, `input`, `maxLoopIterations`, `random`, `loadFile`, `file` (all described above) |
+| `Session` | the interactive prompt: `new Session(options)`, then `run(source)` → `{ exit, result }` and `isComplete(source)` |
+| `BhojpuriError` | what `run` throws for a mistake in the program |
+| `formatError(err, source)` | the error as text, with the line and a `^` under the column |
+| `tokenize(source)`, `parse(tokens)`, `Interpreter` | the three steps `run` uses, for tools that need them separately |
+| `display(value)` | a value as `bol ho` would print it |
+| `KEYWORDS`, `KEYWORD_MEANINGS`, `LOOP_WORDS`, `BUILTINS`, `BUILTIN_MEANINGS` | the names of everything, and what each means in English |
+
+A `BhojpuriError` has these fields:
+- `kind`: `"SyntaxError"` or `"RuntimeError"`.
+- `message`: the Bhojpuri message. Its wording may improve between versions.
+- `line`, `col`: where the mistake is.
+- `file`, `source`: the name and code of the file it's in, when that's a file brought in with `le aaw`
+  rather than the main program.
+- `value`: the value given to `phenk da`, for an uncaught `phenk da`.
+
 ## Project layout
 
 ```
 bin/bhojpuri.js      CLI
-src/                 tokenizer, parser, interpreter, keywords, messages
+src/                 tokenizer, parser, interpreter, values, scope, builtins, keywords, messages,
+                     suggest (did-you-mean hints), session (interactive prompt)
 examples/*.bhoj      sample programs (examples/lib/ holds a file that hisaab.bhoj brings in)
 playground/          browser playground (uses src/ directly as ES modules)
 editors/vscode/      VS Code extension (colours, comments, brackets)

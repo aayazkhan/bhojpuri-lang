@@ -6,6 +6,37 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-09-24
+
+### Added
+
+- `STABILITY.md`: what stays the same from 1.0 on (keywords, built-ins, output, which situations are errors,
+  the CLI, the library API, share links), what doesn't (message wording, the playground, the VS Code
+  colours, internals), and how changes happen. In particular, new keywords only come in a major version.
+- README: string escapes, the `bhojpuri` command and its exit codes, and every library export with the
+  fields of `BhojpuriError`.
+- `le aaw` in the playground: file tabs above the editor (`main.bhoj` plus any files added with
+  **+ Naya file**, including folders like `lib/ganit.bhoj` and Devanagari names).
+  - `le aaw` finds the other tabs using the same path rules as the CLI, and errors name the tab they
+    come from.
+  - **Chalaw** always runs `main.bhoj`, and the console can use `le aaw` too.
+  - Share links carry every file. A single `main.bhoj` still makes the old kind of link, and old links
+    still open.
+  - Examples bring their extra files along, so `hisaab.bhoj` is now in the example list.
+  - Code saved before this version becomes `main.bhoj`.
+
+### Changed
+
+- Error messages name types the way `kism` does: `sankhya`, `shabd`, `list`, `kosh`, `sach/jhooth`,
+  `khaali` and `kaam`, instead of JavaScript's `number`, `string` and so on. For example:
+  `"bada" ke shabd chahi, lekin sankhya mil gail.`
+- In error messages, "only" is now `sirf` instead of `khali`, so it can't be mistaken for the keyword
+  `khaali`. The message for an invalid assignment also mentions kosh keys (`d["k"]`).
+- The lessons call `!` "nahi" (not), instead of "ulta", which is the name of the reverse built-in.
+- Internal: the interpreter is split into smaller files. `src/values.js` holds the kinds of value and how
+  they're shown, `src/scope.js` the variables, and `src/builtins.js` the built-in functions, grouped by topic.
+  `src/interpreter.js` only runs statements and expressions. Behaviour is unchanged, and the tests are unchanged.
+
 ## [0.6.0] - 2026-09-24
 
 ### Added
@@ -214,7 +245,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Browser playground (`npm run playground`).
 - Example programs and a `node:test` test suite.
 
-[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.4.0...v0.4.1

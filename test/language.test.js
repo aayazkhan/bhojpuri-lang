@@ -192,3 +192,22 @@ describe("tokenizer", () => {
     assert.deepEqual(types, ["ELSE_IF", "ELSE", null]);
   });
 });
+
+describe("one vocabulary for types", () => {
+  test("errors name types the way kism does", () => {
+    const kinds = ["5", '"a"', "sach", "khaali", "[1]", '{ "k": 1 }', "lambai"];
+    const names = out(`bol ho ${kinds.map((k) => `kism(${k})`).join(", ")};`)[0].split(" ");
+    assert.deepEqual(names, ["sankhya", "shabd", "sach/jhooth", "khaali", "list", "kosh", "kaam"]);
+    // Subtracting anything from a string is an error that names both types.
+    kinds.forEach((kind, i) => {
+      assert.throws(() => out(`bol ho "x" - (${kind});`), (err) => err.message === `"-" shabd aur ${names[i]} pe na chal sakela.`, kind);
+    });
+  });
+
+  test("no English JS type names in error messages", () => {
+    const programs = [`bol ho 5[0];`, `bol ho bada(5);`, `bol ho "a" - 1;`, `har x 5 me {}`, `bol ho chhaant([1, "a"]);`, `maan la d = {}; d[[1]] = 1;`];
+    for (const body of programs) {
+      assert.throws(() => out(body), (err) => !/\b(number|string|boolean|object)\b/.test(err.message), body);
+    }
+  });
+});
