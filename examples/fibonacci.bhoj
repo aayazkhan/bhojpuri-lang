@@ -1,0 +1,15 @@
+// Fibonacci: "kaam" se function banaw, "lauta da" se jawab lautaw
+ka ho bhaiya
+  kaam fib(n) {
+    jadi (n < 2) {
+      lauta da n;
+    }
+    lauta da fib(n - 1) + fib(n - 2);
+  }
+
+  maan la i = 0;
+  jab le (i < 10) {
+    bol ho "fib(" + i + ") =", fib(i);
+    i += 1;
+  }
+chalat bani bhaiya

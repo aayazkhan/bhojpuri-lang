@@ -1,0 +1,24 @@
+// Chhatai (bubble sort): list ke chhota se bada kram me lagaw
+ka ho bhaiya
+  kaam chhaant(list) {
+    maan la n = lambai(list);
+    maan la i = 0;
+    jab le (i < n) {
+      maan la j = 0;
+      jab le (j < n - i - 1) {
+        jadi (list[j] > list[j + 1]) {
+          maan la rakhal = list[j];
+          list[j] = list[j + 1];
+          list[j + 1] = rakhal;
+        }
+        j += 1;
+      }
+      i += 1;
+    }
+    lauta da list;
+  }
+
+  maan la ank = [42, 7, 19, 3, 88, 1];
+  bol ho "Pahile:", ank;
+  bol ho "Baad me:", chhaant(ank);
+chalat bani bhaiya

@@ -42,6 +42,8 @@ Statements end with `;`, and blocks use `{ }`.
 | `jab le`             | `while`            |
 | `bas kara`           | `break`            |
 | `aage badha`         | `continue`         |
+| `kaam`               | define a function  |
+| `lauta da`           | `return`           |
 | `sach` / `jhooth`    | `true` / `false`   |
 | `khaali`             | `null`             |
 
@@ -85,6 +87,58 @@ jab le (i < 10) {
 }
 ```
 
+### Functions
+
+```
+kaam jodo(a, b) {
+  lauta da a + b;
+}
+bol ho jodo(2, 3);          // 5
+```
+
+- `lauta da;` with no value, or reaching the end of the function, returns `khaali`.
+- Functions can call themselves (recursion). They're values too: you can pass them to other functions or return them.
+- Functions remember the variables around them (closures):
+
+```
+kaam counter() {
+  maan la n = 0;
+  kaam badhaw() { n += 1; lauta da n; }
+  lauta da badhaw;
+}
+maan la ginti = counter();
+ginti(); ginti();
+bol ho ginti();             // 3
+```
+
+Recursion can go about 1,000 calls deep (roughly Python's default). Deeper recursion gives an error
+instead of crashing.
+
+### Lists
+
+```
+maan la saaman = ["aalu", "pyaaz"];
+daal(saaman, "sattu");      // add to the end
+bol ho saaman[0];           // aalu
+saaman[1] = "tamatar";
+bol ho lambai(saaman);      // 3
+bol ho nikaal(saaman);      // sattu (removes the last item)
+bol ho saaman;              // ["aalu", "tamatar"]
+```
+
+Indexes start at 0. Strings can be indexed too (`"ghar"[0]` is `g`), but they can't be changed.
+Lists are shared by reference, so a function that changes a list changes it for the caller too.
+
+### Built-in functions
+
+| Name                 | Meaning                                  |
+| -------------------- | ---------------------------------------- |
+| `lambai(x)`          | length of a list or string               |
+| `daal(list, value)`  | add `value` to the end of `list`         |
+| `nikaal(list)`       | remove and return the last item (`khaali` if empty) |
+
+Built-in names are ordinary variables, so you can reuse the names for your own variables.
+
 ### Operators
 
 `+ - * / %`, `== != < > <= >=`, `&& || !`. `+` joins strings, for example `"umar: " + 20`.
@@ -104,7 +158,7 @@ Chalat samay galti (line 3, col 14): "b" naam ke koi variable na ba. Pahile "maa
 
 ## Changing the keywords
 
-All keywords live in [`src/keywords.js`](src/keywords.js), and all error text lives in
+All keywords and built-in function names live in [`src/keywords.js`](src/keywords.js), and all error text lives in
 [`src/messages.js`](src/messages.js). Edit a value there and the tokenizer, CLI, playground and error
 messages pick it up. After renaming keywords, update the `.bhoj` examples and the tests.
 
@@ -117,7 +171,7 @@ source code ──► tokenizer ──► tokens ──► parser ──► AST 
 
 - **Tokenizer** splits the source into keywords, numbers, strings, names and operators. Multi-word keywords are matched longest-first.
 - **Parser** is a recursive-descent parser that builds an abstract syntax tree (AST). The full grammar is at the top of `src/parser.js`.
-- **Interpreter** walks the AST with a chain of scopes. `bas kara` and `aage badha` are returned as signals up to the enclosing loop.
+- **Interpreter** walks the AST with a chain of scopes. `bas kara`, `aage badha` and `lauta da` are returned as signals up to the enclosing loop or function. Functions keep a reference to the scope they were defined in, which is what makes closures work.
 
 ## Using it as a library
 

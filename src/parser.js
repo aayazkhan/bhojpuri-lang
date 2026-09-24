@@ -5,22 +5,29 @@ import { MSG } from "./messages.js";
  * Grammar (recursive descent):
  *
  *   program    := PROGRAM_START statement* PROGRAM_END
- *   statement  := let | print | if | while | BREAK ";" | CONTINUE ";" | block | ";" | expr ";"
+ *   statement  := let | print | if | while | function | return
+ *               | BREAK ";" | CONTINUE ";" | block | ";" | expr ";"
  *   let        := LET IDENT ("=" expr)? ("," IDENT ("=" expr)?)* ";"
  *   print      := PRINT expr ("," expr)* ";"
  *   if         := IF "(" expr ")" block (ELSE_IF "(" expr ")" block)* (ELSE block)?
  *   while      := WHILE "(" expr ")" block
+ *   function   := FUNCTION IDENT "(" (IDENT ("," IDENT)*)? ")" block
+ *   return     := RETURN expr? ";"
  *   block      := "{" statement* "}"
  *
- *   expr       := IDENT ("=" | "+=" | "-=" | "*=" | "/=" | "%=") expr | or
+ *   expr       := target ("=" | "+=" | "-=" | "*=" | "/=" | "%=") expr | or
+ *   target     := IDENT | postfix "[" expr "]"
  *   or         := and ("||" and)*
  *   and        := equality ("&&" equality)*
  *   equality   := comparison (("==" | "!=") comparison)*
  *   comparison := additive (("<" | ">" | "<=" | ">=") additive)*
  *   additive   := term (("+" | "-") term)*
  *   term       := unary (("*" | "/" | "%") unary)*
- *   unary      := ("!" | "-" | "+") unary | primary
+ *   unary      := ("!" | "-" | "+") unary | postfix
+ *   postfix    := primary ("(" args? ")" | "[" expr "]")*
+ *   args       := expr ("," expr)*
  *   primary    := NUMBER | STRING | TRUE | FALSE | NULL | IDENT | "(" expr ")"
+ *               | "[" (expr ("," expr)* ","?)? "]"
  */
 
 const ASSIGNMENT_OPS = new Set(["=", "+=", "-=", "*=", "/=", "%="]);
@@ -43,6 +50,7 @@ class Parser {
     this.tokens = tokens;
     this.i = 0;
     this.loopDepth = 0;
+    this.functionDepth = 0;
   }
 
   // ---- token helpers ----
@@ -104,6 +112,8 @@ class Parser {
         case "PRINT": return this.parsePrint();
         case "IF": return this.parseIf();
         case "WHILE": return this.parseWhile();
+        case "FUNCTION": return this.parseFunction();
+        case "RETURN": return this.parseReturn();
         case "BREAK":
         case "CONTINUE": return this.parseJump();
         case "ELSE":
@@ -143,11 +153,7 @@ class Parser {
 
   parsePrint() {
     const start = this.next();
-    const args = [this.parseExpression()];
-    while (this.isPunct(",")) {
-      this.next();
-      args.push(this.parseExpression());
-    }
+    const args = this.parseList();
     this.expectPunct(";");
     return { type: "Print", args, ...pos(start) };
   }
@@ -177,6 +183,46 @@ class Parser {
     } finally {
       this.loopDepth--;
     }
+  }
+
+  parseFunction() {
+    const start = this.next();
+    const name = this.peek();
+    if (name.type !== "identifier") throw this.unexpected(MSG.things.functionName);
+    this.next();
+
+    this.expectPunct("(");
+    const params = [];
+    if (!this.isPunct(")")) {
+      do {
+        const param = this.peek();
+        if (param.type !== "identifier") throw this.unexpected(MSG.things.variableName);
+        if (params.includes(param.value)) throw syntaxError(MSG.duplicateParam(param.value), param);
+        this.next();
+        params.push(param.value);
+      } while (this.isPunct(",") && this.next());
+    }
+    this.expectPunct(")");
+
+    // A loop outside the function doesn't make `bas kara` valid inside it.
+    const outerLoopDepth = this.loopDepth;
+    this.loopDepth = 0;
+    this.functionDepth++;
+    try {
+      const body = this.parseBlock();
+      return { type: "Function", name: name.value, params, body, ...pos(start) };
+    } finally {
+      this.loopDepth = outerLoopDepth;
+      this.functionDepth--;
+    }
+  }
+
+  parseReturn() {
+    const t = this.next();
+    if (this.functionDepth === 0) throw syntaxError(MSG.returnOutsideFunction(t.text), t);
+    const argument = this.isPunct(";") ? null : this.parseExpression();
+    this.expectPunct(";");
+    return { type: "Return", argument, ...pos(t) };
   }
 
   parseJump() {
@@ -210,10 +256,10 @@ class Parser {
     const left = this.parseBinary(0);
     const t = this.peek();
     if (t.type === "punct" && ASSIGNMENT_OPS.has(t.value)) {
-      if (left.type !== "Identifier") throw syntaxError(MSG.invalidAssignTarget(), t);
+      if (left.type !== "Identifier" && left.type !== "Index") throw syntaxError(MSG.invalidAssignTarget(), t);
       this.next();
       const value = this.parseExpression();
-      return { type: "Assignment", operator: t.value, name: left.name, value, ...pos(left) };
+      return { type: "Assignment", operator: t.value, target: left, value, ...pos(left) };
     }
     return left;
   }
@@ -237,7 +283,37 @@ class Parser {
       this.next();
       return { type: "Unary", operator: t.value, argument: this.parseUnary(), ...pos(t) };
     }
-    return this.parsePrimary();
+    return this.parsePostfix();
+  }
+
+  parsePostfix() {
+    let expr = this.parsePrimary();
+    for (;;) {
+      const t = this.peek();
+      if (this.isPunct("(")) {
+        this.next();
+        const args = this.isPunct(")") ? [] : this.parseList();
+        this.expectPunct(")");
+        expr = { type: "Call", callee: expr, args, ...pos(t) };
+      } else if (this.isPunct("[")) {
+        this.next();
+        const index = this.parseExpression();
+        this.expectPunct("]");
+        expr = { type: "Index", object: expr, index, ...pos(t) };
+      } else {
+        return expr;
+      }
+    }
+  }
+
+  /** One or more comma-separated expressions. */
+  parseList() {
+    const items = [this.parseExpression()];
+    while (this.isPunct(",")) {
+      this.next();
+      items.push(this.parseExpression());
+    }
+    return items;
   }
 
   parsePrimary() {
@@ -263,6 +339,18 @@ class Parser {
       const expression = this.parseExpression();
       this.expectPunct(")");
       return expression;
+    }
+
+    if (this.isPunct("[")) {
+      this.next();
+      const elements = [];
+      while (!this.isPunct("]")) {
+        elements.push(this.parseExpression());
+        if (!this.isPunct(",")) break;
+        this.next(); // a trailing comma is fine
+      }
+      this.expectPunct("]");
+      return { type: "ListLiteral", elements, ...pos(t) };
     }
 
     throw this.unexpected(MSG.things.value);

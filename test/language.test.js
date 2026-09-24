@@ -126,6 +126,117 @@ describe("control flow", () => {
   });
 });
 
+describe("functions", () => {
+  test("define, call and return", () => {
+    assert.deepEqual(out(`kaam jodo(a, b) { lauta da a + b; }\nbol ho jodo(2, 3);`), ["5"]);
+  });
+
+  test("no return value gives khaali", () => {
+    assert.deepEqual(out(`kaam kuchh() { bol ho "andar"; }\nbol ho kuchh();`), ["andar", "khaali"]);
+    assert.deepEqual(out(`kaam jaldi() { lauta da; bol ho "kabhi na"; }\nbol ho jaldi();`), ["khaali"]);
+  });
+
+  test("recursion", () => {
+    assert.deepEqual(
+      out(`kaam fib(n) { jadi (n < 2) { lauta da n; } lauta da fib(n - 1) + fib(n - 2); }\nbol ho fib(15);`),
+      ["610"],
+    );
+  });
+
+  test("return from inside a loop", () => {
+    assert.deepEqual(
+      out(`kaam khoj(list, x) {\n  maan la i = 0;\n  jab le (i < lambai(list)) { jadi (list[i] == x) { lauta da i; } i += 1; }\n  lauta da -1;\n}\nbol ho khoj([5, 7, 9], 9), khoj([5], 1);`),
+      ["2 -1"],
+    );
+  });
+
+  test("closures keep their own state", () => {
+    assert.deepEqual(
+      out(`kaam counter() {\n  maan la n = 0;\n  kaam badhaw() { n += 1; lauta da n; }\n  lauta da badhaw;\n}\nmaan la a = counter(), b = counter();\na(); a();\nbol ho a(), b();`),
+      ["3 1"],
+    );
+  });
+
+  test("functions are values", () => {
+    assert.deepEqual(
+      out(`kaam dugna(x) { lauta da x * 2; }\nkaam lagaw(f, x) { lauta da f(x); }\nbol ho lagaw(dugna, 21), dugna;`),
+      ["42 <kaam dugna>"],
+    );
+  });
+
+  test("parameters are local", () => {
+    assertError(program(`kaam f(x) { lauta da x; }\nf(1);\nbol ho x;`), { kind: "RuntimeError", match: /"x"/ });
+  });
+
+  test("errors: wrong arg count, not a function, return outside function", () => {
+    assertError(program(`kaam f(a, b) {}\nf(1);`), { kind: "RuntimeError", line: 3, match: /2 cheez.*1 dihal/ });
+    assertError(program(`maan la x = 5;\nx();`), { kind: "RuntimeError", match: /kaam na ha/ });
+    assertError(program(`lauta da 1;`), { kind: "SyntaxError", match: /kaam/ });
+    assertError(program(`kaam f(a, a) {}`), { kind: "SyntaxError", match: /"a"/ });
+  });
+
+  test("bas kara inside a function does not reach a loop outside it", () => {
+    assertError(program(`jab le (sach) { kaam f() { bas kara; } }`), { kind: "SyntaxError" });
+  });
+
+  test("runaway recursion becomes a Bhojpuri error", () => {
+    assertError(program(`kaam f(n) { lauta da f(n + 1); }\nf(0);`), { kind: "RuntimeError", line: 2, match: /recursion/ });
+  });
+});
+
+describe("lists", () => {
+  test("literals, indexing and printing", () => {
+    assert.deepEqual(
+      out(`maan la l = [1, "do", sach, khaali, [3]];\nbol ho l, l[1], l[4][0], [];`),
+      ['[1, "do", sach, khaali, [3]] do 3 []'],
+    );
+  });
+
+  test("trailing comma and multi-line literals", () => {
+    assert.deepEqual(out(`maan la l = [\n  1,\n  2,\n];\nbol ho lambai(l);`), ["2"]);
+  });
+
+  test("index assignment and compound assignment", () => {
+    assert.deepEqual(out(`maan la l = [1, 2, 3];\nl[0] = 10; l[2] += 5;\nbol ho l;`), ["[10, 2, 8]"]);
+  });
+
+  test("lists are shared by reference", () => {
+    assert.deepEqual(
+      out(`kaam badal(l) { l[0] = 99; }\nmaan la a = [1];\nbadal(a);\nbol ho a, a == a, [1] == [1];`),
+      ["[99] sach jhooth"],
+    );
+  });
+
+  test("built-ins: lambai, daal, nikaal", () => {
+    assert.deepEqual(
+      out(`maan la l = [];\ndaal(l, 1); daal(l, 2);\nbol ho l, lambai(l), lambai("namaste");\nbol ho nikaal(l), l, nikaal([]);`),
+      ["[1, 2] 2 7", "2 [1] khaali"],
+    );
+  });
+
+  test("string indexing", () => {
+    assert.deepEqual(out(`maan la s = "ghar";\nbol ho s[0], s[3];`), ["g r"]);
+  });
+
+  test("built-in names can be shadowed", () => {
+    assert.deepEqual(out(`maan la lambai = 5;\nbol ho lambai;`), ["5"]);
+  });
+
+  test("a list containing itself prints safely", () => {
+    assert.deepEqual(out(`maan la l = [1];\ndaal(l, l);\nbol ho l;`), ["[1, [...]]"]);
+  });
+
+  test("errors: out of range, bad index, not indexable, strings are read-only", () => {
+    assertError(program(`maan la l = [1];\nbol ho l[1];`), { kind: "RuntimeError", line: 3, match: /lambai khali 1/ });
+    assertError(program(`bol ho [1][-1];`), { kind: "RuntimeError" });
+    assertError(program(`bol ho [1][0.5];`), { kind: "RuntimeError", match: /pura sankhya/ });
+    assertError(program(`bol ho 5[0];`), { kind: "RuntimeError", match: /number/ });
+    assertError(program(`maan la s = "ab";\ns[0] = "x";`), { kind: "RuntimeError", match: /String/ });
+    assertError(program(`daal(5, 1);`), { kind: "RuntimeError", match: /"daal"/ });
+    assertError(program(`jodo(1) = 2;`), { kind: "SyntaxError" });
+  });
+});
+
 describe("errors", () => {
   test("missing start / end / code after end", () => {
     assertError(`bol ho 1;`, { kind: "SyntaxError", match: /ka ho bhaiya/ });
