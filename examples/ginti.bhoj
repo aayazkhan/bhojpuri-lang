@@ -1,0 +1,28 @@
+// Shabd ginti: kosh (dictionary) me har sabad kei baar aail, gin ke rakh
+ka ho bhaiya
+  maan la geet = "chal chal re gadi chal re gadi dheere dheere chal";
+  maan la ginti = {};
+
+  har sabad tod(geet, " ") me {
+    jadi (ba(ginti, sabad)) {
+      ginti[sabad] += 1;
+    } na ta {
+      ginti[sabad] = 1;
+    }
+  }
+
+  bol ho "Kul alag shabd:", lambai(ginti);
+  har sabad ginti me {
+    bol ho sabad, "—", ginti[sabad], "baar";
+  }
+
+  // Sab se jyada kaun aail?
+  maan la sabse = "";
+  har sabad chaabi(ginti) me {
+    jadi (sabse == "" || ginti[sabad] > ginti[sabse]) { sabse = sabad; }
+  }
+  bol ho "Sab se jyada:", sabse;
+
+  hataw(ginti, "re");
+  bol ho "\"re\" hata ke:", ginti;
+chalat bani bhaiya
