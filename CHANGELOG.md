@@ -6,6 +6,47 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-09-24
+
+### Added
+
+- Functions without names: `kaam(x) { ... }` makes a function wherever a value is expected, e.g.
+  `maan la dugna = kaam(x) { lauta da x * 2 };`. It can be passed, returned, stored and called straight away,
+  and it keeps its surrounding variables like any function. `kaam naam(...)` still defines a named function.
+- `le aaw "file.bhoj";` runs another file and makes its top-level functions and variables available.
+  - Paths are relative to the file that asks, and `.bhoj` is optional.
+  - Each file runs once; files that bring each other in, and name clashes, are errors.
+  - Errors from another file's code name that file and show its line, even when one of its functions
+    fails later.
+  - It works in the CLI and the interactive prompt. Library users pass `loadFile` (and `file`) to `run()`.
+  - Example: `examples/hisaab.bhoj` with `examples/lib/ganit.bhoj`.
+- Did-you-mean hints: when a variable, function or built-in name isn't found but a similar one exists, the
+  error suggests it, e.g. `"naam" naam ke koi variable na ba. Kahin "naamm" ta na?`. Missing kosh keys get
+  the same hint. Short names (one or two letters) only get a hint for a difference in capitals.
+- "Sikh" (learn) lessons in the playground: the **📘 Sikh** button opens 12 short lessons, from `bol ho` to
+  `koshish kara`. Each has an explanation, an example that opens in the editor, and an exercise. **Jaanch
+  kar** checks your output against the expected one (showing both when they differ), and **Jawab dekhaw**
+  loads a solution. The panel opens for first-time visitors and remembers the current lesson.
+- The Sikh lessons are written in Bhojpuri (Roman letters) as well as English. Bhojpuri is shown by
+  default, and a button switches language (remembered). A test checks that both ask for the same code.
+  The README starts with a short introduction in Bhojpuri.
+- String helpers: `saaf` (trim spaces, tabs and newlines from both ends), `jagah(text, purana, naya)`
+  (replace every match; an empty search text is an error), `shuru_me` and `ant_me` (starts / ends with).
+- `badal(list, kaam)` (map: a new list with the `kaam` applied to every item) and `chhaan(list, kaam)`
+  (filter: a new list of the items the `kaam` says `sach` to). Any function works, including built-ins.
+- Issue templates: a bug report form (program, what happened, what you expected, where it ran, version)
+  and an idea form, plus links to the playground and the language guide.
+
+### Changed
+
+- The `;` can be left out just before a `}` in files too (before, only at the interactive prompt), so short
+  blocks like `jadi (x > 0) { bol ho "haan" }` and `kaam(x) { lauta da x * 2 }` work anywhere. Only more
+  programs are accepted; two statements on one line still need a `;`.
+- `bazaar.bhoj` uses `chhaan` and `badal`.
+- Decimals are shown to 15 significant digits everywhere a number becomes text (`bol ho`, backtick strings,
+  `shabd`, `jod`, `+` with a string, lists, kosh and the prompt), so `0.1 + 0.2` shows as `0.3`. Only the
+  display is rounded: values and `==` are unchanged.
+
 ## [0.5.0] - 2026-09-24
 
 ### Added
@@ -173,7 +214,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Browser playground (`npm run playground`).
 - Example programs and a `node:test` test suite.
 
-[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.3.1...v0.4.0

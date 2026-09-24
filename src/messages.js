@@ -23,8 +23,11 @@ export const MSG = {
   returnOutsideFunction: (kw) => `${q(kw)} khali ${q(K.FUNCTION)} ke bhitar chal sakela.`,
   duplicateParam: (name) => `${q(name)} naam duu baar likhal gail ba.`,
 
-  notDeclared: (name) =>
-    `${q(name)} naam ke koi variable na ba. Pahile ${q(`${K.LET} ${name}`)} likh ke banaw.`,
+  // `hint` is a similar name that does exist, when the name looks like a typo.
+  notDeclared: (name, hint) =>
+    hint
+      ? `${q(name)} naam ke koi variable na ba. Kahin ${q(hint)} ta na?`
+      : `${q(name)} naam ke koi variable na ba. Pahile ${q(`${K.LET} ${name}`)} likh ke banaw.`,
   alreadyDeclared: (name) =>
     `${q(name)} pahile se banal ba. Nai value dewe khatir ${q(`${name} = ...`)} likh.`,
   divideByZero: () => `Zero se bhaag na dihal ja sakela.`,
@@ -41,13 +44,21 @@ export const MSG = {
   cantSort: (name, a, b) => `${q(name)} khali sab sankhya ya sab string wala list chhaant sakela, lekin ${a} aur ${b} mil gail.`,
   // An error thrown with `phenk da` that nobody caught: show the value itself.
   thrown: (text) => text,
+  emptySearch: (name) => `${q(name)} ke khoje wala text khaali ("") na ho sakela.`,
+  noFiles: (kw) => `Ihaan ${q(kw)} na chal sakela: dusra file padhe ke koi intazaam na ba. Terminal me ${q("bhojpuri")} se chalaw.`,
+  fileNotFound: (path) => `${q(path)} file na mil paail.`,
+  circularImport: (path) => `${q(path)} ghuma-phira ke khud ke le aawat ba. Duno file ek dusra ke na le aa sakela.`,
+  importClash: (name, path) => `${q(name)} pahile se banal ba, aur ${q(path)} bhi ek ${q(name)} deta. Ek ke naam badal.`,
   notANumber: (text) => `${q(text)} sankhya na ha, ekra ke sankhya na banawal ja sakela.`,
   badRange: (name, a, b) => `${q(name)} ke pahila sankhya dusra se chhota ya barabar hoe ke chahi, lekin ${a} aur ${b} mil gail.`,
   loopBoundNotNumber: (word, got) => `${q(K.FOR)} loop me ${q(word)} ke baad sankhya chahi, lekin ${got} mil gail.`,
   zeroStep: () => `${q(W.STEP)} 0 na ho sakela, na ta loop kabhi aage na badhi.`,
   notIterable: (type) => `${q(K.FOR)} loop list, string ya kosh pe chal sakela, ${type} pe na.`,
   badKey: (type) => `Kosh ke chaabi string ya sankhya hoe ke chahi, lekin ${type} mil gail.`,
-  missingKey: (key) => `Kosh me ${key} chaabi na ba. Pahile ${q("ba(kosh, chaabi)")} se jaanch l.`,
+  missingKey: (key, hint) =>
+    hint
+      ? `Kosh me ${key} chaabi na ba. Kahin ${q(hint)} ta na?`
+      : `Kosh me ${key} chaabi na ba. Pahile ${q("ba(kosh, chaabi)")} se jaanch l.`,
   notIndexable: (type) => `${type} me [ ] se index na lagawal ja sakela.`,
   badIndex: (got) => `Index pura sankhya (0, 1, 2 ...) hoe ke chahi, lekin ${got} mil gail.`,
   indexOutOfRange: (index, length) => `Index ${index} bahar ba — lambai khali ${length} ba.`,
@@ -56,6 +67,7 @@ export const MSG = {
   things: {
     variableName: "variable ke naam",
     functionName: "kaam ke naam",
+    fileName: `file ke naam (jaise ${q("ganit.bhoj")})`,
     value: "koi value",
     endOfFile: "file ke ant",
   },

@@ -1,0 +1,14 @@
+// Ganit (maths) ke kaam: "hisaab.bhoj" ise "le aaw" se le aawela.
+// I file akele bhi chal sakela, lekin kuchhu print na kare.
+ka ho bhaiya
+  maan la PI = 3.14159;
+
+  kaam varg(n) { lauta da n * n }
+
+  kaam gol_ke_chhetrafal(r) { lauta da PI * varg(r) }
+
+  kaam ausat(list) {
+    jadi (lambai(list) == 0) { phenk da "Khaali list ke ausat na nikal sakela"; }
+    lauta da kul(list) / lambai(list);
+  }
+chalat bani bhaiya

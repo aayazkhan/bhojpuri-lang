@@ -1,6 +1,12 @@
 import { KEYWORDS, LOOP_WORDS, BUILTINS } from "./keywords.js";
 import { BhojpuriError, runtimeError } from "./errors.js";
 import { MSG } from "./messages.js";
+import { closestName } from "./suggest.js";
+import { tokenize } from "./tokenizer.js";
+import { parse } from "./parser.js";
+
+// Marks a file that is still running, to catch files that bring each other in.
+const LOADING = Symbol("loading");
 
 // Signals returned (not thrown) by statements to unwind to the nearest loop or function.
 const BREAK = Symbol("break");
@@ -29,7 +35,12 @@ class Scope {
     for (let scope = this; scope; scope = scope.parent) {
       if (scope.vars.has(name)) return scope;
     }
-    throw runtimeError(MSG.notDeclared(name), node);
+    throw runtimeError(MSG.notDeclared(name, closestName(name, this.visibleNames())), node);
+  }
+
+  /** Every name that can be used from here, nearest scope first. */
+  *visibleNames() {
+    for (let scope = this; scope; scope = scope.parent) yield* scope.vars.keys();
   }
 
   get(name, node) {
@@ -75,7 +86,7 @@ export function display(value, seen = new Set()) {
   if (value === null) return KEYWORDS.NULL;
   if (value === true) return KEYWORDS.TRUE;
   if (value === false) return KEYWORDS.FALSE;
-  if (isFunction(value)) return `<${KEYWORDS.FUNCTION} ${value.name}>`;
+  if (isFunction(value)) return value.name ? `<${KEYWORDS.FUNCTION} ${value.name}>` : `<${KEYWORDS.FUNCTION}>`;
   if (Array.isArray(value) || isDict(value)) {
     if (seen.has(value)) return Array.isArray(value) ? "[...]" : "{...}";
     seen.add(value);
@@ -87,6 +98,9 @@ export function display(value, seen = new Set()) {
     seen.delete(value);
     return text;
   }
+  // Numbers are shown to 15 significant digits, so 0.1 + 0.2 shows as 0.3 rather than
+  // 0.30000000000000004. Only the display is rounded; the value itself is unchanged.
+  if (typeof value === "number" && !Number.isInteger(value)) return String(Number(value.toPrecision(15)));
   return String(value);
 }
 
@@ -155,12 +169,13 @@ function checkKey(key, node) {
 /** Read `dict[key]`, which must already exist. */
 function getEntry(dict, key, node) {
   if (!dict.has(checkKey(key, node))) {
-    throw runtimeError(MSG.missingKey(typeof key === "string" ? JSON.stringify(key) : String(key)), node);
+    const hint = typeof key === "string" ? closestName(key, [...dict.keys()].filter((k) => typeof k === "string")) : null;
+    throw runtimeError(MSG.missingKey(typeof key === "string" ? JSON.stringify(key) : String(key), hint), node);
   }
   return dict.get(key);
 }
 
-function createGlobals({ random, input }) {
+function createGlobals({ random, input, call }) {
   const globals = new Scope();
   const expectList = (name, value, node) => {
     if (!Array.isArray(value)) throw runtimeError(MSG.builtinArgType(name, "list", typeName(value)), node);
@@ -173,6 +188,9 @@ function createGlobals({ random, input }) {
   };
   const expectDict = (name, value, node) => {
     if (!isDict(value)) throw runtimeError(MSG.builtinArgType(name, "kosh", typeName(value)), node);
+  };
+  const expectFunction = (name, value, node) => {
+    if (!isFunction(value)) throw runtimeError(MSG.builtinArgType(name, "kaam", typeName(value)), node);
   };
   const expectListOrString = (name, value, node) => {
     if (!Array.isArray(value) && typeof value !== "string") {
@@ -238,6 +256,38 @@ function createGlobals({ random, input }) {
       expectList(BUILTINS.JOIN, list, node);
       expectString(BUILTINS.JOIN, separator, node);
       return list.map((item) => display(item)).join(separator);
+    }),
+    new NativeFunction(BUILTINS.TRIM, 1, ([text], node) => {
+      expectString(BUILTINS.TRIM, text, node);
+      return text.trim();
+    }),
+    // Every `old` becomes `replacement`.
+    new NativeFunction(BUILTINS.REPLACE, 3, ([text, old, replacement], node) => {
+      for (const value of [text, old, replacement]) expectString(BUILTINS.REPLACE, value, node);
+      if (old === "") throw runtimeError(MSG.emptySearch(BUILTINS.REPLACE), node);
+      return text.split(old).join(replacement);
+    }),
+    new NativeFunction(BUILTINS.STARTS_WITH, 2, ([text, start], node) => {
+      expectString(BUILTINS.STARTS_WITH, text, node);
+      expectString(BUILTINS.STARTS_WITH, start, node);
+      return text.startsWith(start);
+    }),
+    new NativeFunction(BUILTINS.ENDS_WITH, 2, ([text, end], node) => {
+      expectString(BUILTINS.ENDS_WITH, text, node);
+      expectString(BUILTINS.ENDS_WITH, end, node);
+      return text.endsWith(end);
+    }),
+    // Call a function on each item: a new list of the results (map).
+    new NativeFunction(BUILTINS.MAP, 2, ([list, fn], node) => {
+      expectList(BUILTINS.MAP, list, node);
+      expectFunction(BUILTINS.MAP, fn, node);
+      return [...list].map((item) => call(fn, [item], node));
+    }),
+    // A new list of the items the function says sach to (filter).
+    new NativeFunction(BUILTINS.FILTER, 2, ([list, fn], node) => {
+      expectList(BUILTINS.FILTER, list, node);
+      expectFunction(BUILTINS.FILTER, fn, node);
+      return [...list].filter((item) => truthy(call(fn, [item], node)));
     }),
     // A new sorted list; the original is left as it was.
     new NativeFunction(BUILTINS.SORT, 1, ([list], node) => {
@@ -315,30 +365,78 @@ function createGlobals({ random, input }) {
  *   maxLoopIterations?: number,
  *   random?: () => number,
  *   input?: (question: string) => string | null,
+ *   loadFile?: (path: string, from: string | null) => { id: string, name: string, source: string } | null,
+ *   file?: string,
  * }} InterpreterOptions
  *   print: where `bol ho` output goes (defaults to console.log).
  *   maxLoopIterations: guard against infinite loops, e.g. in the browser playground.
  *   random: source of numbers in [0, 1) for `sanyog` (defaults to Math.random; handy for tests).
  *   input: answers `poochh`. It gets the question ("" if none) and returns the answer, or null
  *     when there is nothing more to read. Without it, `poochh` is a runtime error.
+ *   loadFile: finds a file for `le aaw`. It gets the path as written and the `id` of the file that
+ *     asks for it (`file` for the main program), and returns the file's `id` (e.g. its full path,
+ *     used to run each file once), a `name` for error messages and its `source`, or null if there's
+ *     no such file. Without it, `le aaw` is a runtime error.
+ *   file: the `id` of the main program, so `le aaw` paths can be relative to it.
  */
 
 export class Interpreter {
   /** @param {InterpreterOptions} [options] */
-  constructor({ print = console.log, maxLoopIterations = Infinity, random = Math.random, input = null } = {}) {
+  constructor({
+    print = console.log, maxLoopIterations = Infinity, random = Math.random, input = null, loadFile = null, file = null,
+  } = {}) {
     this.print = print;
     this.maxLoopIterations = maxLoopIterations;
     this.random = random;
     this.input = input;
+    this.loadFile = loadFile;
+    this.currentFile = file;
+    this.files = new Map(); // id -> the names a file defines, or LOADING while it runs
   }
 
   run(program) {
+    // The main program counts as running, so a file that brings it back in is a loop.
+    if (this.currentFile) this.files.set(this.currentFile, LOADING);
     // The program gets its own scope so it can shadow built-in names.
     this.execAll(program.body, this.programScope());
   }
 
   programScope() {
-    return new Scope(createGlobals({ random: this.random, input: this.input }));
+    const call = (fn, args, node) => this.call(fn, args, node);
+    return new Scope(createGlobals({ random: this.random, input: this.input, call }));
+  }
+
+  /**
+   * Run the file named by `le aaw` (once, however often it's brought in) and return the names
+   * it defines at its top level.
+   */
+  importFile(node) {
+    if (!this.loadFile) throw runtimeError(MSG.noFiles(KEYWORDS.IMPORT), node);
+    const file = this.loadFile(node.path, this.currentFile);
+    if (!file) throw runtimeError(MSG.fileNotFound(node.path), node);
+
+    const known = this.files.get(file.id);
+    if (known === LOADING) throw runtimeError(MSG.circularImport(node.path), node);
+    if (known) return known;
+
+    this.files.set(file.id, LOADING);
+    const outerFile = this.currentFile;
+    this.currentFile = file.id;
+    try {
+      // Tokens from this file remember it, so errors from its code name it, even when one of its
+      // functions fails much later.
+      const tokens = tokenize(file.source, { file: { name: file.name, source: file.source } });
+      const scope = this.programScope();
+      this.execAll(parse(tokens).body, scope);
+      const names = new Map(scope.vars);
+      this.files.set(file.id, names);
+      return names;
+    } catch (err) {
+      this.files.delete(file.id);
+      throw err;
+    } finally {
+      this.currentFile = outerFile;
+    }
   }
 
   /** A scope for the interactive prompt: it lasts between inputs, and names can be declared again. */
@@ -432,6 +530,15 @@ export class Interpreter {
         throw err;
       }
 
+      case "Import":
+        for (const [name, value] of this.importFile(node)) {
+          if (scope.vars.has(name) && scope.vars.get(name) !== value && !scope.allowRedeclare) {
+            throw runtimeError(MSG.importClash(name, node.path), node);
+          }
+          scope.vars.set(name, value);
+        }
+        return;
+
       case "Break": return BREAK;
       case "Continue": return CONTINUE;
       case "Block": return this.execAll(node.body, new Scope(scope));
@@ -499,6 +606,8 @@ export class Interpreter {
       case "Literal": return node.value;
       case "Identifier": return scope.get(node.name, node);
       case "ListLiteral": return node.elements.map((element) => this.evaluate(element, scope));
+
+      case "FunctionExpression": return new UserFunction(node, scope);
 
       case "Template":
         return node.parts.map((part) => (typeof part === "string" ? part : display(this.evaluate(part, scope)))).join("");
@@ -590,7 +699,7 @@ export class Interpreter {
 
     if (!(callee instanceof UserFunction)) throw runtimeError(MSG.notAFunction(typeName(callee)), node);
     if (args.length !== callee.params.length) {
-      throw runtimeError(MSG.wrongArgCount(callee.name, callee.params.length, args.length), node);
+      throw runtimeError(MSG.wrongArgCount(callee.name ?? KEYWORDS.FUNCTION, callee.params.length, args.length), node);
     }
 
     const scope = new Scope(callee.closure);

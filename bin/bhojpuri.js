@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readFileSync, readSync, writeSync } from "node:fs";
 import { createInterface } from "node:readline";
+import { dirname, extname, relative, resolve } from "node:path";
 import {
   run, Session, formatError, BhojpuriError, KEYWORDS, KEYWORD_MEANINGS, BUILTINS, BUILTIN_MEANINGS,
 } from "../src/index.js";
@@ -62,6 +63,21 @@ function input(question) {
   return answer;
 }
 
+/**
+ * Find a file for `le aaw`: relative to the file that asks for it (or the current folder at the
+ * prompt), with ".bhoj" added when the name has no extension.
+ */
+function loadFile(path, from) {
+  const full = resolve(from ? dirname(from) : process.cwd(), extname(path) ? path : `${path}.bhoj`);
+  let source;
+  try {
+    source = readFileSync(full, "utf8");
+  } catch {
+    return null;
+  }
+  return { id: full, name: relative(process.cwd(), full) || full, source };
+}
+
 function showHelp() {
   const rows = [
     ...Object.entries(KEYWORDS).map(([id, text]) => [text, KEYWORD_MEANINGS[id]]),
@@ -90,7 +106,7 @@ function runFile(file) {
     process.exit(1);
   }
   try {
-    run(source, { print, input });
+    run(source, { print, input, loadFile, file: resolve(file) });
   } catch (err) {
     if (!(err instanceof BhojpuriError)) throw err;
     printError(err, source);
@@ -185,7 +201,7 @@ if (args[0] === "-v" || args[0] === "--version") {
 } else if (args.length > 0) {
   runFile(args[0]);
 } else {
-  const session = new Session({ print, input });
+  const session = new Session({ print, input, loadFile });
   if (process.stdin.isTTY) replInTerminal(session);
   else replFromPipe(session);
 }

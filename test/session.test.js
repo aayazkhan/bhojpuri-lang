@@ -1,7 +1,7 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import { Session, BhojpuriError } from "../src/index.js";
-import { program, assertError } from "./helpers.js";
+import { program, output, assertError } from "./helpers.js";
 
 describe("interactive prompt (Session)", () => {
   function session(options) {
@@ -17,6 +17,7 @@ describe("interactive prompt (Session)", () => {
     assert.equal(result(`[1, "a"]`), '[1, "a"]');
     assert.equal(result(`({ "a": 1 })`), '{"a": 1}');
     assert.equal(result("1 < 2"), "sach");
+    assert.equal(result("0.1 + 0.2"), "0.3");
   });
 
   test("shows nothing for statements, assignments and khaali", () => {
@@ -46,8 +47,10 @@ describe("interactive prompt (Session)", () => {
     assert.throws(() => result(`{ maan la a = 1 bol ho a }`), /";" chahi/);
   });
 
-  test("files still need every ;", () => {
-    assertError(program(`jadi (sach) { bol ho 1 }`), { kind: "SyntaxError", line: 2, match: /";" chahi rahe, lekin "\}"/ });
+  test("in files, only the ; just before a } can be left out", () => {
+    assert.deepEqual(output(program(`jadi (sach) { bol ho 1 }\nkaam f() { lauta da 2 }\nbol ho f();`)), ["1", "2"]);
+    assertError(program(`bol ho 1`), { kind: "SyntaxError", match: /";" chahi/ });
+    assertError(program(`{ bol ho 1 bol ho 2 }`), { kind: "SyntaxError", match: /";" chahi rahe, lekin "bol ho"/ });
   });
 
   test("variables and functions carry over, and names can be declared again", () => {

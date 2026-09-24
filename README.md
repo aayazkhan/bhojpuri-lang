@@ -3,8 +3,10 @@
 A toy programming language with Bhojpuri keywords, inspired by [Bhailang](https://bhailang.js.org/).
 Written in plain JavaScript with zero dependencies. It runs in Node.js and in the browser.
 
-**[Try it in the playground →](https://aayazkhan.github.io/bhojpuri-lang/)** Write code (with colours as you
-type), run it, and press
+**[Try it in the playground →](https://aayazkhan.github.io/bhojpuri-lang/)** New to programming? Press
+**📘 Sikh** there for 12 short lessons in Bhojpuri (or English), each with an example and a small exercise
+that checks your answer.
+Write code (with colours as you type), run it, and press
 **Baantaw 🔗** to copy a link that opens your code for anyone you send it to. The **Console** below the
 editor runs one line at a time, like the [interactive prompt](#interactive-prompt).
 
@@ -14,6 +16,11 @@ ka ho bhaiya
   bol ho "Pranam", naam;
 chalat bani bhaiya
 ```
+
+> **Bhojpuri me:** Bhojpuri Lang ek khilauna programming language ha, jekar keyword Bhojpuri me ba. Browser me
+> [playground](https://aayazkhan.github.io/bhojpuri-lang/) khol ke turant code likh aur chalaw. **📘 Sikh**
+> dabawe pe 12 go chhot-chhot paath milela, har paath ke saath ek abhyas bhi. Apna computer pe chalawe
+> khatir `npx @aayazk/bhojpuri-lang` likh. Neeche ke puri jaankari angrezi me ba.
 
 ## Install
 
@@ -51,7 +58,7 @@ Run `bhojpuri` without a file to try things out one line at a time:
 
 ```
 $ bhojpuri
-Bhojpuri Lang 0.5.0 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
+Bhojpuri Lang 0.6.0 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
 bhojpuri> 2 + 3 * 4
 14
 bhojpuri> maan la naam = "Ramu"
@@ -65,9 +72,8 @@ bhojpuri> dugna(21)
 bhojpuri> chalat bani bhaiya
 ```
 
-- **No markers needed:** there's no `ka ho bhaiya`. The `;` can be left out at the end of the line and just
-  before a `}`, as in `jadi (x > 0) { bol ho "haan" }`. Two statements on one line still need a `;` between
-  them, and `.bhoj` files still need every `;`.
+- **No markers needed:** there's no `ka ho bhaiya`, and the `;` at the end of the line is optional (as it is
+  before a `}` everywhere). Two statements on one line still need a `;` between them.
 - **Values are shown:** typing a value shows it, with strings in quotes. Statements, assignments and `khaali`
   show nothing.
 - **Everything is remembered:** variables and functions carry over between lines. You can run
@@ -83,7 +89,8 @@ bhojpuri> chalat bani bhaiya
 ## The language
 
 Every program starts with `ka ho bhaiya` and ends with `chalat bani bhaiya`.
-Statements end with `;`, and blocks use `{ }`.
+Statements end with `;`, and blocks use `{ }`. The `;` can be left out just before a `}`, so short blocks
+like `jadi (x > 0) { bol ho "haan" }` read cleanly.
 
 | Bhojpuri             | Meaning            |
 | -------------------- | ------------------ |
@@ -103,6 +110,7 @@ Statements end with `;`, and blocks use `{ }`.
 | `lauta da`           | `return`           |
 | `koshish kara` … `galti pe` | `try` … `catch` |
 | `phenk da`           | `throw`            |
+| `le aaw`             | use another file (`import`) |
 | `sach` / `jhooth`    | `true` / `false`   |
 | `khaali`             | `null`             |
 
@@ -220,6 +228,25 @@ bol ho ginti();             // 3
 Recursion can go about 1,000 calls deep (roughly Python's default). Deeper recursion gives an error
 instead of crashing.
 
+#### Functions without names
+
+`kaam(x) { ... }` without a name makes a function right where a value is expected. That's handy for
+passing a small function to another one:
+
+```
+maan la dugna = kaam(x) { lauta da x * 2 };
+bol ho dugna(21);                                           // 42
+
+maan la ank = [1, 2, 3, 4, 5, 6];
+bol ho badal(ank, kaam(x) { lauta da x * 10 });             // [10, 20, 30, 40, 50, 60]
+bol ho chhaan(ank, kaam(x) { lauta da x % 2 == 0 });        // [2, 4, 6]
+bol ho badal(["aam", "kela"], bada);                        // ["AAM", "KELA"]
+```
+
+`badal` ("change") calls the function on every item and gives a new list of the results. `chhaan`
+("sift") gives a new list of the items the function says `sach` to. Both leave the original list alone, and
+any function works: one without a name, one made with `kaam naam(...)`, or a built-in like `bada`.
+
 ### Lists
 
 ```
@@ -291,6 +318,12 @@ har k ramu me {                 // loop over the keys
 | `hissa(x, start, end)` | part of a list or string (see below)   |
 | `khoj(x, item)`      | where `item` first appears in a list (or text in a string), or `-1` |
 | `kul(list)`          | the total of a list of numbers           |
+| `saaf(text)`         | text without the spaces, tabs and newlines at the start and end |
+| `jagah(text, purana, naya)` | text with every `purana` replaced by `naya` |
+| `shuru_me(text, x)`  | `sach` if the text starts with `x`       |
+| `ant_me(text, x)`    | `sach` if the text ends with `x`         |
+| `badal(list, kaam)`  | a new list: the `kaam` applied to every item (see [Functions without names](#functions-without-names)) |
+| `chhaan(list, kaam)` | a new list of the items the `kaam` says `sach` to |
 
 ```
 maan la umar = sankhya("24");
@@ -309,6 +342,14 @@ bol ho hissa(ank, 1, 3);      // [7, 19]          from index 1 up to (not includ
 bol ho hissa(ank, -2);        // [19, 3]          leave out the end to go to the end; negatives count back
 bol ho khoj(ank, 19), kul(ank);   // 2 71
 bol ho ba(ank, 7), ba("namaste", "mas");   // sach sach
+```
+
+Working with text:
+
+```
+maan la naam = saaf("  Ramu  ");                    // "Ramu"
+bol ho jagah("aam aam kela", "aam", "seb");          // seb seb kela
+bol ho shuru_me(naam, "Ra"), ant_me("x.bhoj", ".bhoj");   // sach sach
 ```
 
 `chhaant`, `ulta` and `hissa` return new lists and leave the original alone. `chhaant` sorts numbers by
@@ -381,11 +422,44 @@ koshish kara {
 - On their own, `koshish`, `galti` and `phenk` are still ordinary names. Only the two-word forms are
   keywords.
 
+### Using other files: le aaw
+
+`le aaw` ("bring it") runs another `.bhoj` file and makes its top-level functions and variables available:
+
+```
+// lib/ganit.bhoj
+ka ho bhaiya
+  maan la PI = 3.14159;
+  kaam varg(n) { lauta da n * n }
+chalat bani bhaiya
+```
+
+```
+// hisaab.bhoj
+ka ho bhaiya
+  le aaw "lib/ganit.bhoj";
+  bol ho varg(7), PI;          // 49 3.14159
+chalat bani bhaiya
+```
+
+- **Paths:** they're relative to the file that says `le aaw`, and `.bhoj` can be left off (`le aaw "lib/ganit"`).
+- **Each file runs once,** however many files bring it in.
+- **Loops and clashes:** files that bring each other in are an error, and so is a name that already exists
+  in the file doing the bringing.
+- **Errors name the file they come from,** with its own line:
+  `Chalat samay galti (lib/ganit.bhoj, line 4, col 23): ...`.
+- **Where it works:** in the `bhojpuri` command and the interactive prompt. The browser playground has no
+  files, so there `le aaw` says it can't be used. See [examples/hisaab.bhoj](examples/hisaab.bhoj).
+
 ### Operators
 
 `+ - * / %`, `== != < > <= >=`, `&& || !`. `+` joins strings, for example `"umar: " + 20`
 (a backtick string like `` `umar: {20}` `` is often easier to read).
 The falsy values are `jhooth`, `khaali`, `0` and `""`. Everything else counts as true.
+
+Decimals are shown to 15 significant digits, so `bol ho 0.1 + 0.2` prints `0.3` instead of
+`0.30000000000000004`. Only the display is rounded, not the value. Like most languages, `0.1 + 0.2 == 0.3`
+is still `jhooth`, so compare decimals with `gol` (for example `gol(x * 100) == 30`) rather than `==`.
 
 Comments use `// ...` and `/* ... */`.
 
@@ -397,6 +471,13 @@ Errors point to the exact line and column:
 Chalat samay galti (line 3, col 14): "b" naam ke koi variable na ba. Pahile "maan la b" likh ke banaw.
   3 |   bol ho a + b;
     |              ^
+```
+
+When a name looks like a typo of one that exists, the error suggests it. This works for variables,
+functions, built-ins and kosh keys:
+
+```
+Chalat samay galti (line 3, col 10): "naam" naam ke koi variable na ba. Kahin "naamm" ta na?
 ```
 
 ## Changing the keywords
@@ -460,6 +541,10 @@ session.run(`x + 1`);          // { exit: false, result: "21" }
 session.isComplete(`kaam f() {`); // false: still waiting for the closing }
 ```
 
+For `le aaw`, pass `loadFile(path, from)`, which returns `{ id, name, source }` for the file (or `null`),
+and `file`, the main program's `id`. `id` is how a file is recognised (e.g. its full path), `name` is shown
+in error messages, and `from` is the `id` of the file that asks.
+
 Without an `input` option, `poochh` stops with a Bhojpuri error, because there's no one to answer it.
 There's also a `random` option that replaces `Math.random` for `sanyog`, which is handy in tests.
 
@@ -468,7 +553,7 @@ There's also a `random` option that replaces `Math.random` for `sanyog`, which i
 ```
 bin/bhojpuri.js      CLI
 src/                 tokenizer, parser, interpreter, keywords, messages
-examples/*.bhoj      sample programs
+examples/*.bhoj      sample programs (examples/lib/ holds a file that hisaab.bhoj brings in)
 playground/          browser playground (uses src/ directly as ES modules)
 editors/vscode/      VS Code extension (colours, comments, brackets)
 scripts/serve.js     zero-dependency static server for the playground
