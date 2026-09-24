@@ -32,6 +32,9 @@ import { LOOP_WORDS } from "./keywords.js";
  *   args       := expr ("," expr)*
  *   primary    := NUMBER | STRING | TRUE | FALSE | NULL | IDENT | "(" expr ")"
  *               | "[" (expr ("," expr)* ","?)? "]"
+ *               | "{" (expr ":" expr ("," expr ":" expr)* ","?)? "}"
+ *
+ * A "{" that starts a statement is a block; a kosh literal only appears where a value is expected.
  */
 
 const ASSIGNMENT_OPS = new Set(["=", "+=", "-=", "*=", "/=", "%="]);
@@ -398,6 +401,20 @@ class Parser {
       }
       this.expectPunct("]");
       return { type: "ListLiteral", elements, ...pos(t) };
+    }
+
+    if (this.isPunct("{")) {
+      this.next();
+      const entries = [];
+      while (!this.isPunct("}")) {
+        const key = this.parseExpression();
+        this.expectPunct(":");
+        entries.push({ key, value: this.parseExpression() });
+        if (!this.isPunct(",")) break;
+        this.next(); // a trailing comma is fine
+      }
+      this.expectPunct("}");
+      return { type: "DictLiteral", entries, ...pos(t) };
     }
 
     throw this.unexpected(MSG.things.value);

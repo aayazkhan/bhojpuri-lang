@@ -23,6 +23,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - `se`, `tak`, `kadam` and `me` are only special inside a `har` header, so they can still be used as names.
   They are listed in `LOOP_WORDS` in `src/keywords.js`, which `src/index.js` also exports.
 
+- Dictionaries (`kosh`): `{ "naam": "Ramu", "umar": 24 }` literals (a trailing comma is allowed), reading
+  with `d["naam"]`, and adding or changing keys with `d["gaon"] = "Ballia"` / `d["umar"] += 1`. Keys can be
+  strings or numbers and keep the order they were added in. Reading a missing key is an error.
+  `lambai` counts the keys, `kism` returns `kosh`, and `har k d me { }` loops over the keys.
+- Built-ins for dictionaries: `chaabi` (list of keys), `ba` (does a key exist?) and `hataw` (remove a key).
+- Example `ginti.bhoj`, which counts words with a kosh.
+
 ### Changed
 
 - `har` is now a keyword, so it can no longer be used as a variable name.

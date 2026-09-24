@@ -66,15 +66,18 @@ export const BUILTINS = Object.freeze({
   LOWER: "chhota",
   SPLIT: "tod",
   JOIN: "jod",
+  KEYS: "chaabi",
+  HAS: "ba",
+  REMOVE: "hataw",
 });
 
 export const BUILTIN_MEANINGS = Object.freeze({
-  LENGTH: "length of a list or string",
+  LENGTH: "length of a list or string, or number of keys in a kosh",
   PUSH: "add an item to the end of a list",
   POP: "remove and return the last item of a list",
   TO_NUMBER: "turn text into a number",
   TO_STRING: "turn any value into text",
-  TYPE: "the type of a value (sankhya, shabd, list, ...)",
+  TYPE: "the type of a value (sankhya, shabd, list, kosh, ...)",
   ROUND: "round to the nearest whole number",
   FLOOR: "round down to a whole number",
   RANDOM: "random whole number from a to b (inclusive)",
@@ -82,4 +85,7 @@ export const BUILTIN_MEANINGS = Object.freeze({
   LOWER: "text in lower case",
   SPLIT: "split text into a list at each separator",
   JOIN: "join a list into text with a separator",
+  KEYS: "list of a kosh's keys, in the order they were added",
+  HAS: "sach if a kosh has the key",
+  REMOVE: "remove a key from a kosh and return its value (khaali if missing)",
 });

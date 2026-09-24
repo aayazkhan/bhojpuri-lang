@@ -43,7 +43,7 @@ Statements end with `;`, and blocks use `{ }`.
 | `na ta`              | `else`             |
 | `jab le`             | `while`            |
 | `har` … `se` … `tak` | counting `for` loop |
-| `har` … `me`         | `for each` item of a list or string |
+| `har` … `me`         | `for each` item of a list or string, or key of a kosh |
 | `bas kara`           | `break`            |
 | `aage badha`         | `continue`         |
 | `kaam`               | define a function  |
@@ -93,7 +93,7 @@ har i = 10 se 0 tak kadam -2 {
 }
 ```
 
-`har … me` visits each item of a list, or each letter of a string:
+`har … me` visits each item of a list, each letter of a string, or each key of a kosh:
 
 ```
 har phal ["aam", "kela"] me {
@@ -165,16 +165,46 @@ bol ho saaman;              // ["aalu", "tamatar"]
 Indexes start at 0. Strings can be indexed too (`"ghar"[0]` is `g`), but they can't be changed.
 Lists are shared by reference, so a function that changes a list changes it for the caller too.
 
+### Dictionaries (kosh)
+
+A `kosh` stores values under keys:
+
+```
+maan la ramu = { "naam": "Ramu", "umar": 24 };
+bol ho ramu["naam"];            // Ramu
+ramu["gaon"] = "Ballia";        // add a key, or change one that exists
+ramu["umar"] += 1;
+bol ho lambai(ramu);            // 3
+bol ho ramu;                    // {"naam": "Ramu", "umar": 25, "gaon": "Ballia"}
+
+jadi (ba(ramu, "phone")) {      // does the key exist?
+  bol ho ramu["phone"];
+}
+hataw(ramu, "gaon");            // remove a key; returns its value
+
+har k ramu me {                 // loop over the keys
+  bol ho k, "=", ramu[k];
+}
+```
+
+- Keys can be strings or numbers, and `1` and `"1"` are different keys.
+- Keys stay in the order they were added. `chaabi(d)` gives them as a list.
+- Reading a key that doesn't exist is an error, so a typo in a key name gets caught. Check first with
+  `ba(d, key)`. `hataw` on a missing key just returns `khaali`.
+- Like lists, a kosh is shared by reference, and `==` is only `sach` for the very same kosh.
+- A `{` at the start of a statement is still a block. A kosh literal is only read where a value is
+  expected, such as after `=`, in `bol ho` or as a function argument.
+
 ### Built-in functions
 
 | Name                 | Meaning                                  |
 | -------------------- | ---------------------------------------- |
-| `lambai(x)`          | length of a list or string               |
+| `lambai(x)`          | length of a list or string, or the number of keys in a kosh |
 | `daal(list, value)`  | add `value` to the end of `list`         |
 | `nikaal(list)`       | remove and return the last item (`khaali` if empty) |
 | `sankhya(text)`      | turn text into a number: `sankhya("42")` is `42` |
 | `shabd(x)`           | turn any value into text: `shabd(42)` is `"42"` |
-| `kism(x)`            | the type of a value: `sankhya`, `shabd`, `list`, `sach/jhooth`, `khaali` or `kaam` |
+| `kism(x)`            | the type of a value: `sankhya`, `shabd`, `list`, `kosh`, `sach/jhooth`, `khaali` or `kaam` |
 | `gol(n)`             | round to the nearest whole number: `gol(2.6)` is `3` |
 | `neeche(n)`          | round down: `neeche(7 / 2)` is `3`       |
 | `sanyog(a, b)`       | random whole number from `a` to `b`, both included |
@@ -182,6 +212,9 @@ Lists are shared by reference, so a function that changes a list changes it for 
 | `chhota(text)`       | text in lower case                       |
 | `tod(text, sep)`     | split text into a list: `tod("a,b", ",")` is `["a", "b"]` |
 | `jod(list, sep)`     | join a list into text: `jod(["a", "b"], "-")` is `"a-b"` |
+| `chaabi(kosh)`       | list of the keys, in the order they were added |
+| `ba(kosh, key)`      | `sach` if the key exists                 |
+| `hataw(kosh, key)`   | remove a key and return its value (`khaali` if it wasn't there) |
 
 ```
 maan la umar = sankhya("24");

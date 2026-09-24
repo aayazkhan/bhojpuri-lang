@@ -62,18 +62,26 @@ const isStackOverflow = (err) => err instanceof RangeError || err?.name === "Int
 
 const isFunction = (value) => value instanceof UserFunction || value instanceof NativeFunction;
 
+// A dictionary (`kosh`) is a JS Map: it keeps keys in the order they were added,
+// and 1 and "1" stay different keys.
+const isDict = (value) => value instanceof Map;
+
 /** How a value looks when printed or joined into a string. */
 export function display(value, seen = new Set()) {
   if (value === null) return KEYWORDS.NULL;
   if (value === true) return KEYWORDS.TRUE;
   if (value === false) return KEYWORDS.FALSE;
   if (isFunction(value)) return `<${KEYWORDS.FUNCTION} ${value.name}>`;
-  if (Array.isArray(value)) {
-    if (seen.has(value)) return "[...]";
+  if (Array.isArray(value) || isDict(value)) {
+    if (seen.has(value)) return Array.isArray(value) ? "[...]" : "{...}";
     seen.add(value);
-    const items = value.map((item) => (typeof item === "string" ? JSON.stringify(item) : display(item, seen)));
+    // Inside a list or kosh, strings keep their quotes so ["1"] and [1] look different.
+    const inner = (item) => (typeof item === "string" ? JSON.stringify(item) : display(item, seen));
+    const text = Array.isArray(value)
+      ? `[${value.map(inner).join(", ")}]`
+      : `{${[...value].map(([key, item]) => `${inner(key)}: ${inner(item)}`).join(", ")}}`;
     seen.delete(value);
-    return `[${items.join(", ")}]`;
+    return text;
   }
   return String(value);
 }
@@ -82,6 +90,7 @@ function typeName(value) {
   if (value === null) return KEYWORDS.NULL;
   if (typeof value === "boolean") return `${KEYWORDS.TRUE}/${KEYWORDS.FALSE}`;
   if (Array.isArray(value)) return "list";
+  if (isDict(value)) return "kosh";
   if (isFunction(value)) return KEYWORDS.FUNCTION;
   return typeof value;
 }
@@ -133,6 +142,20 @@ function kindName(value) {
   return typeName(value);
 }
 
+/** Validate a kosh key: only strings and numbers can be keys. */
+function checkKey(key, node) {
+  if (typeof key !== "string" && typeof key !== "number") throw runtimeError(MSG.badKey(typeName(key)), node);
+  return key;
+}
+
+/** Read `dict[key]`, which must already exist. */
+function getEntry(dict, key, node) {
+  if (!dict.has(checkKey(key, node))) {
+    throw runtimeError(MSG.missingKey(typeof key === "string" ? JSON.stringify(key) : String(key)), node);
+  }
+  return dict.get(key);
+}
+
 function createGlobals(random) {
   const globals = new Scope();
   const expectList = (name, value, node) => {
@@ -144,6 +167,9 @@ function createGlobals(random) {
   const expectInteger = (name, value, node) => {
     if (!Number.isInteger(value)) throw runtimeError(MSG.builtinArgType(name, "pura sankhya", display(value)), node);
   };
+  const expectDict = (name, value, node) => {
+    if (!isDict(value)) throw runtimeError(MSG.builtinArgType(name, "kosh", typeName(value)), node);
+  };
   const expectString = (name, value, node) => {
     if (typeof value !== "string") throw runtimeError(MSG.builtinArgType(name, "string", typeName(value)), node);
   };
@@ -151,7 +177,8 @@ function createGlobals(random) {
   const builtins = [
     new NativeFunction(BUILTINS.LENGTH, 1, ([value], node) => {
       if (Array.isArray(value) || typeof value === "string") return value.length;
-      throw runtimeError(MSG.builtinArgType(BUILTINS.LENGTH, "list ya string", typeName(value)), node);
+      if (isDict(value)) return value.size;
+      throw runtimeError(MSG.builtinArgType(BUILTINS.LENGTH, "list, string ya kosh", typeName(value)), node);
     }),
     new NativeFunction(BUILTINS.PUSH, 2, ([list, value], node) => {
       expectList(BUILTINS.PUSH, list, node);
@@ -202,6 +229,21 @@ function createGlobals(random) {
       expectList(BUILTINS.JOIN, list, node);
       expectString(BUILTINS.JOIN, separator, node);
       return list.map((item) => display(item)).join(separator);
+    }),
+    new NativeFunction(BUILTINS.KEYS, 1, ([dict], node) => {
+      expectDict(BUILTINS.KEYS, dict, node);
+      return [...dict.keys()];
+    }),
+    new NativeFunction(BUILTINS.HAS, 2, ([dict, key], node) => {
+      expectDict(BUILTINS.HAS, dict, node);
+      return dict.has(checkKey(key, node));
+    }),
+    new NativeFunction(BUILTINS.REMOVE, 2, ([dict, key], node) => {
+      expectDict(BUILTINS.REMOVE, dict, node);
+      if (!dict.has(checkKey(key, node))) return null;
+      const value = dict.get(key);
+      dict.delete(key);
+      return value;
     }),
   ];
   for (const fn of builtins) globals.declare(fn.name, fn);
@@ -325,12 +367,13 @@ export class Interpreter {
     }
   }
 
-  // Loops over a copy, so adding to or removing from the list inside the loop
-  // doesn't change which items are visited.
+  // Loops over a copy (of a kosh's keys), so adding to or removing from the list
+  // inside the loop doesn't change which items are visited.
   eachValues(node, scope) {
     const value = this.evaluate(node.iterable, scope);
     if (Array.isArray(value)) return [...value];
     if (typeof value === "string") return value.split("");
+    if (isDict(value)) return [...value.keys()];
     throw runtimeError(MSG.notIterable(typeName(value)), node.iterable);
   }
 
@@ -339,12 +382,22 @@ export class Interpreter {
       case "Literal": return node.value;
       case "Identifier": return scope.get(node.name, node);
       case "ListLiteral": return node.elements.map((element) => this.evaluate(element, scope));
+
+      case "DictLiteral": {
+        const dict = new Map();
+        for (const entry of node.entries) {
+          const key = checkKey(this.evaluate(entry.key, scope), entry.key);
+          dict.set(key, this.evaluate(entry.value, scope));
+        }
+        return dict;
+      }
       case "Assignment": return this.assign(node, scope);
 
       case "Index": {
         const object = this.evaluate(node.object, scope);
-        const index = checkIndex(object, this.evaluate(node.index, scope), node);
-        return object[index];
+        const index = this.evaluate(node.index, scope);
+        if (isDict(object)) return getEntry(object, index, node);
+        return object[checkIndex(object, index, node)];
       }
 
       case "Call": {
@@ -389,6 +442,16 @@ export class Interpreter {
     // Index target: evaluate the list and index before the right-hand side, like JS.
     const object = this.evaluate(target.object, scope);
     if (typeof object === "string") throw runtimeError(MSG.stringImmutable(), target);
+
+    if (isDict(object)) {
+      // `d[k] = v` adds or replaces a key; `d[k] += v` needs the key to exist already.
+      const key = checkKey(this.evaluate(target.index, scope), target);
+      const current = compound ? getEntry(object, key, target) : undefined;
+      const value = combine(current, this.evaluate(node.value, scope));
+      object.set(key, value);
+      return value;
+    }
+
     const index = checkIndex(object, this.evaluate(target.index, scope), target);
     const current = compound ? object[index] : undefined;
     const value = combine(current, this.evaluate(node.value, scope));
