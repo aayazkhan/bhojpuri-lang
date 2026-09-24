@@ -1,4 +1,4 @@
-import { KEYWORDS as K } from "./keywords.js";
+import { KEYWORDS as K, LOOP_WORDS as W } from "./keywords.js";
 
 const q = (text) => `"${text}"`;
 
@@ -15,7 +15,7 @@ export const MSG = {
   unterminatedString: () => `String band na bhail — aakhri quote lagawal bhula gail ka?`,
   unterminatedComment: () => `Comment ${q("/*")} ke band kare khatir ${q("*/")} na mil paail.`,
   danglingElse: (kw) => `${q(kw)} se pahile ${q(K.IF)} hoe ke chahi.`,
-  jumpOutsideLoop: (kw) => `${q(kw)} khali ${q(K.WHILE)} loop ke bhitar chal sakela.`,
+  jumpOutsideLoop: (kw) => `${q(kw)} khali ${q(K.WHILE)} ya ${q(K.FOR)} loop ke bhitar chal sakela.`,
   invalidAssignTarget: () => `Value khali variable ya list ke khana (a[0]) me rakhal ja sakela.`,
   returnOutsideFunction: (kw) => `${q(kw)} khali ${q(K.FUNCTION)} ke bhitar chal sakela.`,
   duplicateParam: (name) => `${q(name)} naam duu baar likhal gail ba.`,
@@ -34,6 +34,13 @@ export const MSG = {
   wrongArgCount: (name, expected, got) =>
     `${q(name)} ${expected} cheez maange la, lekin ${got} dihal gail.`,
   builtinArgType: (name, expected, got) => `${q(name)} ke ${expected} chahi, lekin ${got} mil gail.`,
+  notANumber: (text) => `${q(text)} sankhya na ha, ekra ke sankhya na banawal ja sakela.`,
+  badRange: (name, a, b) => `${q(name)} ke pahila sankhya dusra se chhota ya barabar hoe ke chahi, lekin ${a} aur ${b} mil gail.`,
+  loopBoundNotNumber: (word, got) => `${q(K.FOR)} loop me ${q(word)} ke baad sankhya chahi, lekin ${got} mil gail.`,
+  zeroStep: () => `${q(W.STEP)} 0 na ho sakela, na ta loop kabhi aage na badhi.`,
+  notIterable: (type) => `${q(K.FOR)} loop list, string ya kosh pe chal sakela, ${type} pe na.`,
+  badKey: (type) => `Kosh ke chaabi string ya sankhya hoe ke chahi, lekin ${type} mil gail.`,
+  missingKey: (key) => `Kosh me ${key} chaabi na ba. Pahile ${q("ba(kosh, chaabi)")} se jaanch l.`,
   notIndexable: (type) => `${type} me [ ] se index na lagawal ja sakela.`,
   badIndex: (got) => `Index pura sankhya (0, 1, 2 ...) hoe ke chahi, lekin ${got} mil gail.`,
   indexOutOfRange: (index, length) => `Index ${index} bahar ba — lambai khali ${length} ba.`,

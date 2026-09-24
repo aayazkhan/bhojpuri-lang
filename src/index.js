@@ -7,7 +7,7 @@ import { Interpreter } from "./interpreter.js";
  * Throws a BhojpuriError (with line/col) on syntax or runtime errors.
  *
  * @param {string} source
- * @param {{ print?: (line: string) => void, maxLoopIterations?: number }} [options]
+ * @param {{ print?: (line: string) => void, maxLoopIterations?: number, random?: () => number }} [options]
  */
 export function run(source, options) {
   new Interpreter(options).run(parse(tokenize(source)));
@@ -16,4 +16,4 @@ export function run(source, options) {
 export { tokenize, parse, Interpreter };
 export { display } from "./interpreter.js";
 export { BhojpuriError, formatError } from "./errors.js";
-export { KEYWORDS, KEYWORD_MEANINGS, BUILTINS, BUILTIN_MEANINGS } from "./keywords.js";
+export { KEYWORDS, KEYWORD_MEANINGS, LOOP_WORDS, BUILTINS, BUILTIN_MEANINGS } from "./keywords.js";

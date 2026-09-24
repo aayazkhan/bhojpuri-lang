@@ -10,6 +10,7 @@ export const KEYWORDS = Object.freeze({
   ELSE_IF: "na ta jadi",
   ELSE: "na ta",
   WHILE: "jab le",
+  FOR: "har",
   BREAK: "bas kara",
   CONTINUE: "aage badha",
   FUNCTION: "kaam",
@@ -29,6 +30,7 @@ export const KEYWORD_MEANINGS = Object.freeze({
   ELSE_IF: "else if",
   ELSE: "else",
   WHILE: "while loop",
+  FOR: "for loop: har i = 1 se 10 tak { } or har x list me { }",
   BREAK: "break",
   CONTINUE: "continue",
   FUNCTION: "define a function",
@@ -38,16 +40,52 @@ export const KEYWORD_MEANINGS = Object.freeze({
   NULL: "null",
 });
 
+// Words that only have a special meaning inside a `har` loop header, e.g.
+// `har i = 1 se 10 tak kadam 2 { }` or `har x list me { }`. Everywhere else they are
+// ordinary names, so programs can still use them as variables. Each must be one word.
+export const LOOP_WORDS = Object.freeze({
+  FROM: "se",
+  TO: "tak",
+  STEP: "kadam",
+  IN: "me",
+});
+
 // Built-in functions. These are ordinary names, not keywords, so a program may
 // shadow them with its own variables.
 export const BUILTINS = Object.freeze({
   LENGTH: "lambai",
   PUSH: "daal",
   POP: "nikaal",
+  TO_NUMBER: "sankhya",
+  TO_STRING: "shabd",
+  TYPE: "kism",
+  ROUND: "gol",
+  FLOOR: "neeche",
+  RANDOM: "sanyog",
+  UPPER: "bada",
+  LOWER: "chhota",
+  SPLIT: "tod",
+  JOIN: "jod",
+  KEYS: "chaabi",
+  HAS: "ba",
+  REMOVE: "hataw",
 });
 
 export const BUILTIN_MEANINGS = Object.freeze({
-  LENGTH: "length of a list or string",
+  LENGTH: "length of a list or string, or number of keys in a kosh",
   PUSH: "add an item to the end of a list",
   POP: "remove and return the last item of a list",
+  TO_NUMBER: "turn text into a number",
+  TO_STRING: "turn any value into text",
+  TYPE: "the type of a value (sankhya, shabd, list, kosh, ...)",
+  ROUND: "round to the nearest whole number",
+  FLOOR: "round down to a whole number",
+  RANDOM: "random whole number from a to b (inclusive)",
+  UPPER: "text in UPPER case",
+  LOWER: "text in lower case",
+  SPLIT: "split text into a list at each separator",
+  JOIN: "join a list into text with a separator",
+  KEYS: "list of a kosh's keys, in the order they were added",
+  HAS: "sach if a kosh has the key",
+  REMOVE: "remove a key from a kosh and return its value (khaali if missing)",
 });

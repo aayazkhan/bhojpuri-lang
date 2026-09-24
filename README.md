@@ -42,6 +42,8 @@ Statements end with `;`, and blocks use `{ }`.
 | `na ta jadi`         | `else if`          |
 | `na ta`              | `else`             |
 | `jab le`             | `while`            |
+| `har` … `se` … `tak` | counting `for` loop |
+| `har` … `me`         | `for each` item of a list or string, or key of a kosh |
 | `bas kara`           | `break`            |
 | `aage badha`         | `continue`         |
 | `kaam`               | define a function  |
@@ -79,6 +81,36 @@ jadi (a > 10) {
 
 ### Loops
 
+`har` counts from one number to another. Both ends are included, just like "1 se 10 tak":
+
+```
+har i = 1 se 10 tak {
+  bol ho i;                 // 1, 2, … 10
+}
+
+har i = 10 se 0 tak kadam -2 {
+  bol ho i;                 // 10, 8, 6, 4, 2, 0 (kadam sets the step; it defaults to 1)
+}
+```
+
+`har … me` visits each item of a list, each letter of a string, or each key of a kosh:
+
+```
+har phal ["aam", "kela"] me {
+  bol ho phal;
+}
+```
+
+- The loop variable only exists inside the loop.
+- `se`, `tak`, `kadam` and `me` are only special inside a `har` loop's header. Everywhere else they're
+  ordinary names, so you can still use them as variables.
+- The start, end and step are worked out once, before the loop starts. Changing the loop variable or the
+  list inside the loop doesn't change which values the loop visits.
+- With a fractional step, values are rounded to 15 significant digits, so `har i = 0 se 1 tak kadam 0.1`
+  gives `0, 0.1, … 1` without floating-point leftovers like `0.30000000000000004`.
+
+`jab le` repeats while a condition is true:
+
 ```
 maan la i = 0;
 jab le (i < 10) {
@@ -88,6 +120,8 @@ jab le (i < 10) {
   bol ho i;
 }
 ```
+
+`bas kara` (break) and `aage badha` (continue) work in both kinds of loop.
 
 ### Functions
 
@@ -131,13 +165,66 @@ bol ho saaman;              // ["aalu", "tamatar"]
 Indexes start at 0. Strings can be indexed too (`"ghar"[0]` is `g`), but they can't be changed.
 Lists are shared by reference, so a function that changes a list changes it for the caller too.
 
+### Dictionaries (kosh)
+
+A `kosh` stores values under keys:
+
+```
+maan la ramu = { "naam": "Ramu", "umar": 24 };
+bol ho ramu["naam"];            // Ramu
+ramu["gaon"] = "Ballia";        // add a key, or change one that exists
+ramu["umar"] += 1;
+bol ho lambai(ramu);            // 3
+bol ho ramu;                    // {"naam": "Ramu", "umar": 25, "gaon": "Ballia"}
+
+jadi (ba(ramu, "phone")) {      // does the key exist?
+  bol ho ramu["phone"];
+}
+hataw(ramu, "gaon");            // remove a key; returns its value
+
+har k ramu me {                 // loop over the keys
+  bol ho k, "=", ramu[k];
+}
+```
+
+- Keys can be strings or numbers, and `1` and `"1"` are different keys.
+- Keys stay in the order they were added. `chaabi(d)` gives them as a list.
+- Reading a key that doesn't exist is an error, so a typo in a key name gets caught. Check first with
+  `ba(d, key)`. `hataw` on a missing key just returns `khaali`.
+- Like lists, a kosh is shared by reference, and `==` is only `sach` for the very same kosh.
+- A `{` at the start of a statement is still a block. A kosh literal is only read where a value is
+  expected, such as after `=`, in `bol ho` or as a function argument.
+
 ### Built-in functions
 
 | Name                 | Meaning                                  |
 | -------------------- | ---------------------------------------- |
-| `lambai(x)`          | length of a list or string               |
+| `lambai(x)`          | length of a list or string, or the number of keys in a kosh |
 | `daal(list, value)`  | add `value` to the end of `list`         |
 | `nikaal(list)`       | remove and return the last item (`khaali` if empty) |
+| `sankhya(text)`      | turn text into a number: `sankhya("42")` is `42` |
+| `shabd(x)`           | turn any value into text: `shabd(42)` is `"42"` |
+| `kism(x)`            | the type of a value: `sankhya`, `shabd`, `list`, `kosh`, `sach/jhooth`, `khaali` or `kaam` |
+| `gol(n)`             | round to the nearest whole number: `gol(2.6)` is `3` |
+| `neeche(n)`          | round down: `neeche(7 / 2)` is `3`       |
+| `sanyog(a, b)`       | random whole number from `a` to `b`, both included |
+| `bada(text)`         | text in UPPER case                       |
+| `chhota(text)`       | text in lower case                       |
+| `tod(text, sep)`     | split text into a list: `tod("a,b", ",")` is `["a", "b"]` |
+| `jod(list, sep)`     | join a list into text: `jod(["a", "b"], "-")` is `"a-b"` |
+| `chaabi(kosh)`       | list of the keys, in the order they were added |
+| `ba(kosh, key)`      | `sach` if the key exists                 |
+| `hataw(kosh, key)`   | remove a key and return its value (`khaali` if it wasn't there) |
+
+```
+maan la umar = sankhya("24");
+bol ho "Agila saal:", umar + 1;             // Agila saal: 25
+bol ho jod(tod("aalu pyaaz sattu", " "), ", ");  // aalu, pyaaz, sattu
+bol ho "Paasa:", sanyog(1, 6);
+```
+
+Giving a built-in the wrong kind of value is an error, not a silent wrong answer: `sankhya("abc")`
+stops the program and says `"abc"` isn't a number.
 
 Built-in names are ordinary variables, so you can reuse the names for your own variables.
 

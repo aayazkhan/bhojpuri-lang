@@ -6,6 +6,40 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-24
+
+### Added
+
+- Standard library built-ins: `sankhya` (text to number), `shabd` (any value to text), `kism` (type of a
+  value), `gol` (round), `neeche` (round down), `sanyog` (random whole number in a range), `bada` / `chhota`
+  (upper / lower case), `tod` (split text) and `jod` (join a list). Wrong kinds of values give a clear
+  Bhojpuri error, for example `sankhya("abc")`. Like the other built-ins, the names can be reused.
+- A `random` option for `run()` / `new Interpreter()` that replaces `Math.random` for `sanyog`, so
+  programs that use it can be tested.
+- Example `paasa.bhoj` (a dice game) that uses the new built-ins.
+- `har` loops: `har i = 1 se 10 tak { }` counts with both ends included, `kadam` sets the step
+  (`har i = 10 se 0 tak kadam -2`), and `har x list me { }` visits each item of a list or letter of a
+  string. `bas kara` and `aage badha` work inside them. The loop variable only exists inside the loop, and
+  the bounds (or the list) are read once before the loop starts. Values from a fractional `kadam` are
+  rounded to 15 significant digits so they print cleanly.
+- `se`, `tak`, `kadam` and `me` are only special inside a `har` header, so they can still be used as names.
+  They are listed in `LOOP_WORDS` in `src/keywords.js`, which `src/index.js` also exports.
+
+- Dictionaries (`kosh`): `{ "naam": "Ramu", "umar": 24 }` literals (a trailing comma is allowed), reading
+  with `d["naam"]`, and adding or changing keys with `d["gaon"] = "Ballia"` / `d["umar"] += 1`. Keys can be
+  strings or numbers and keep the order they were added in. Reading a missing key is an error.
+  `lambai` counts the keys, `kism` returns `kosh`, and `har k d me { }` loops over the keys.
+- Built-ins for dictionaries: `chaabi` (list of keys), `ba` (does a key exist?) and `hataw` (remove a key).
+- Example `ginti.bhoj`, which counts words with a kosh.
+
+### Changed
+
+- `har` is now a keyword, so it can no longer be used as a variable name.
+- The examples that counted by hand with `jab le` (`pahada`, `fizzbuzz`, `chhatai`, `fibonacci`, `bazaar`,
+  `paasa`) now use `har`. In `bazaar.bhoj`, the helper `jod` is renamed `kul_jor` so it no longer shares a
+  name with the built-in `jod`.
+- The error for `bas kara` / `aage badha` outside a loop now mentions both `jab le` and `har`.
+
 ## [0.2.0] - 2026-09-24
 
 ### Added
@@ -44,6 +78,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Browser playground (`npm run playground`).
 - Example programs and a `node:test` test suite.
 
-[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/aayazkhan/bhojpuri-lang/releases/tag/v0.1.0

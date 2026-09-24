@@ -126,6 +126,90 @@ describe("control flow", () => {
   });
 });
 
+describe("har loops", () => {
+  test("counts from one number to another, both included", () => {
+    assert.deepEqual(out(`har i = 1 se 5 tak { bol ho i; }`), ["1", "2", "3", "4", "5"]);
+    assert.deepEqual(out(`maan la n = 3;\nhar i = n - 1 se n * 2 tak { bol ho i; }`), ["2", "3", "4", "5", "6"]);
+  });
+
+  test("kadam sets the step, including counting down", () => {
+    assert.deepEqual(out(`har i = 0 se 10 tak kadam 4 { bol ho i; }`), ["0", "4", "8"]);
+    assert.deepEqual(out(`har i = 10 se 0 tak kadam -5 { bol ho i; }`), ["10", "5", "0"]);
+    assert.deepEqual(out(`har i = 0 se 0.3 tak kadam 0.1 { bol ho i * 10; }`), ["0", "1", "2", "3"]);
+  });
+
+  test("runs zero times when the range is empty", () => {
+    assert.deepEqual(out(`har i = 5 se 1 tak { bol ho i; }\nhar i = 1 se 5 tak kadam -1 { bol ho i; }\nbol ho "ho gail";`), ["ho gail"]);
+  });
+
+  test("visits each item of a list or letter of a string", () => {
+    assert.deepEqual(out(`har phal ["aam", 2, sach] me { bol ho phal; }`), ["aam", "2", "sach"]);
+    assert.deepEqual(out(`har c "ghar" me { bol ho c; }\nhar x [] me { bol ho x; }`), ["g", "h", "a", "r"]);
+  });
+
+  test("changing the list inside the loop doesn't change what is visited", () => {
+    assert.deepEqual(out(`maan la l = [1, 2];\nhar x l me { daal(l, x * 10); }\nbol ho l;`), ["[1, 2, 10, 20]"]);
+  });
+
+  test("the bounds are read once, and changing the loop variable doesn't skip values", () => {
+    assert.deepEqual(out(`maan la n = 3;\nhar i = 1 se n tak { n = 100; i += 10; bol ho i; }`), ["11", "12", "13"]);
+  });
+
+  test("bas kara and aage badha", () => {
+    assert.deepEqual(
+      out(`har i = 1 se 10 tak {\n  jadi (i % 2 == 0) { aage badha; }\n  jadi (i > 6) { bas kara; }\n  bol ho i;\n}`),
+      ["1", "3", "5"],
+    );
+    assert.deepEqual(out(`har x [1, 2, 3] me { jadi (x == 2) { bas kara; } bol ho x; }`), ["1"]);
+  });
+
+  test("lauta da inside a loop returns from the function", () => {
+    assert.deepEqual(
+      out(`kaam khoj(list, x) {\n  har i = 0 se lambai(list) - 1 tak { jadi (list[i] == x) { lauta da i; } }\n  lauta da -1;\n}\nbol ho khoj([5, 7, 9], 9), khoj([5], 1);`),
+      ["2 -1"],
+    );
+  });
+
+  test("the loop variable only exists inside the loop, and each round gets its own", () => {
+    assertError(program(`har i = 1 se 2 tak {}\nbol ho i;`), { kind: "RuntimeError", line: 3, match: /"i" naam ke koi variable na ba/ });
+    assert.deepEqual(
+      out(`maan la kaam_list = [];\nhar i = 1 se 3 tak {\n  kaam dekhaw() { lauta da i; }\n  daal(kaam_list, dekhaw);\n}\nbol ho kaam_list[0](), kaam_list[2]();`),
+      ["1 3"],
+    );
+    assert.deepEqual(out(`maan la i = "bahar";\nhar i = 1 se 1 tak { bol ho i; }\nbol ho i;`), ["1", "bahar"]);
+  });
+
+  test("se, tak, kadam and me are still ordinary names outside a loop header", () => {
+    assert.deepEqual(
+      out(`maan la se = 1, tak = 3, kadam = 2, me = [7];\nhar i = se se tak tak kadam kadam { bol ho i; }\nhar x me me { bol ho x; }`),
+      ["1", "3", "7"],
+    );
+  });
+
+  test("nested loops", () => {
+    assert.deepEqual(
+      out(`har i = 1 se 2 tak { har j = 1 se 2 tak { bol ho i * j; } }`),
+      ["1", "2", "2", "4"],
+    );
+  });
+
+  test("errors: bad bounds, zero step, not a list, loop guard", () => {
+    assertError(program(`har i = "1" se 5 tak {}`), { kind: "RuntimeError", match: /"se" ke baad sankhya chahi, lekin string/ });
+    assertError(program(`har i = 1 se khaali tak {}`), { kind: "RuntimeError", match: /"tak" ke baad/ });
+    assertError(program(`har i = 1 se 5 tak kadam 0 {}`), { kind: "RuntimeError", line: 2, match: /"kadam" 0 na ho sakela/ });
+    assertError(program(`har x 5 me {}`), { kind: "RuntimeError", match: /list, string ya kosh pe chal sakela, number pe na/ });
+    assert.throws(() => output(program(`har i = 1 se 1000 tak {}`), { maxLoopIterations: 10 }), /10 baar/);
+  });
+
+  test("syntax errors point at the missing word", () => {
+    assertError(program(`har i = 1 se 5 {}`), { kind: "SyntaxError", match: /"tak" chahi/ });
+    assertError(program(`har i = 1 tak 5 {}`), { kind: "SyntaxError", match: /"se" chahi/ });
+    assertError(program(`har x [1] {}`), { kind: "SyntaxError", match: /"me" chahi/ });
+    assertError(program(`har 5 se 1 tak {}`), { kind: "SyntaxError", match: /variable ke naam/ });
+    assertError(program(`har i = 1 se 2 tak bol ho i;`), { kind: "SyntaxError", match: /"\{"/ });
+  });
+});
+
 describe("functions", () => {
   test("define, call and return", () => {
     assert.deepEqual(out(`kaam jodo(a, b) { lauta da a + b; }\nbol ho jodo(2, 3);`), ["5"]);
@@ -234,6 +318,147 @@ describe("lists", () => {
     assertError(program(`maan la s = "ab";\ns[0] = "x";`), { kind: "RuntimeError", match: /String/ });
     assertError(program(`daal(5, 1);`), { kind: "RuntimeError", match: /"daal"/ });
     assertError(program(`jodo(1) = 2;`), { kind: "SyntaxError" });
+  });
+});
+
+describe("kosh (dictionaries)", () => {
+  test("literals, reading, adding and changing keys", () => {
+    assert.deepEqual(
+      out(`maan la ramu = { "naam": "Ramu", "umar": 24 };\nbol ho ramu["naam"];\nramu["gaon"] = "Ballia";\nramu["umar"] += 1;\nbol ho ramu;`),
+      ["Ramu", '{"naam": "Ramu", "umar": 25, "gaon": "Ballia"}'],
+    );
+  });
+
+  test("empty, nested, trailing comma, multi-line and computed keys", () => {
+    assert.deepEqual(
+      out(`maan la k = "chaabi";\nmaan la d = {\n  k: 1,\n  "andar": { "list": [1, "2"] },\n};\nbol ho {}, d, d["andar"]["list"][1];`),
+      ['{} {"chaabi": 1, "andar": {"list": [1, "2"]}} 2'],
+    );
+  });
+
+  test("number and string keys stay different, and later duplicates win", () => {
+    assert.deepEqual(out(`maan la d = { 1: "ek", "1": "one", 1: "EK" };\nbol ho d[1], d["1"], lambai(d);`), ["EK one 2"]);
+  });
+
+  test("keys keep the order they were added in", () => {
+    assert.deepEqual(out(`maan la d = { "b": 1 };\nd["a"] = 2; d["b"] = 3;\nbol ho chaabi(d);`), ['["b", "a"]']);
+  });
+
+  test("lambai, chaabi, ba and hataw", () => {
+    assert.deepEqual(
+      out(`maan la d = { "a": 1, "b": 2 };\nbol ho lambai(d), chaabi(d), ba(d, "a"), ba(d, "z");\nbol ho hataw(d, "a"), hataw(d, "a"), d;`),
+      ['2 ["a", "b"] sach jhooth', "1 khaali {\"b\": 2}"],
+    );
+  });
+
+  test("har loops over the keys", () => {
+    assert.deepEqual(
+      out(`maan la daam = { "aalu": 30, "pyaaz": 40 };\nhar k daam me { bol ho k, daam[k]; }`),
+      ["aalu 30", "pyaaz 40"],
+    );
+    assert.deepEqual(out(`maan la d = { "a": 1 };\nhar k d me { d["b"] = 2; bol ho k; }\nbol ho lambai(d);`), ["a", "2"]);
+  });
+
+  test("shared by reference, compared by identity, and a type of its own", () => {
+    assert.deepEqual(
+      out(`kaam badal(d) { d["x"] = 1; }\nmaan la a = {};\nbadal(a);\nbol ho a, a == a, {} == {}, kism(a), shabd(a);`),
+      ['{"x": 1} sach jhooth kosh {"x": 1}'],
+    );
+  });
+
+  test("counting words with a kosh", () => {
+    assert.deepEqual(
+      out(`maan la ginti = {};\nhar s tod("aam kela aam", " ") me {\n  jadi (ba(ginti, s)) { ginti[s] += 1; } na ta { ginti[s] = 1; }\n}\nbol ho ginti;`),
+      ['{"aam": 2, "kela": 1}'],
+    );
+  });
+
+  test("a kosh containing itself prints safely", () => {
+    assert.deepEqual(out(`maan la d = {};\nd["khud"] = d;\nbol ho d;`), ['{"khud": {...}}']);
+  });
+
+  test("a { at the start of a statement is still a block", () => {
+    assert.deepEqual(out(`{ maan la a = 1; bol ho a; }\nmaan la a = 2;\nbol ho a;`), ["1", "2"]);
+  });
+
+  test("errors: missing keys, bad keys, wrong types", () => {
+    assertError(program(`maan la d = {};\nbol ho d["phone"];`), { kind: "RuntimeError", line: 3, match: /Kosh me "phone" chaabi na ba/ });
+    assertError(program(`maan la d = {};\nd["n"] += 1;`), { kind: "RuntimeError", match: /"n" chaabi na ba/ });
+    assertError(program(`bol ho {}[1];`), { kind: "RuntimeError", match: /Kosh me 1 chaabi na ba/ });
+    assertError(program(`maan la d = { [1]: 2 };`), { kind: "RuntimeError", match: /chaabi string ya sankhya hoe ke chahi, lekin list/ });
+    assertError(program(`maan la d = {};\nd[khaali] = 1;`), { kind: "RuntimeError", match: /lekin khaali/ });
+    assertError(program(`bol ho ba({}, sach);`), { kind: "RuntimeError", match: /chaabi string ya sankhya/ });
+    assertError(program(`bol ho chaabi([1]);`), { kind: "RuntimeError", match: /"chaabi" ke kosh chahi, lekin list/ });
+    assertError(program(`bol ho hataw("a", "a");`), { kind: "RuntimeError", match: /"hataw" ke kosh chahi/ });
+    assertError(program(`bol ho { "a" 1 };`), { kind: "SyntaxError", match: /":" chahi/ });
+    assertError(program(`bol ho { "a": 1;`), { kind: "SyntaxError", match: /"\}" chahi/ });
+  });
+});
+
+describe("standard library", () => {
+  const withRandom = (random, body) => output(program(body), { random });
+
+  test("sankhya turns text into a number", () => {
+    assert.deepEqual(out(`bol ho sankhya("42") + 1, sankhya(" 3.5 "), sankhya("-7"), sankhya(9);`), ["43 3.5 -7 9"]);
+  });
+
+  test("sankhya rejects text that isn't a number", () => {
+    assertError(program(`bol ho sankhya("abc");`), { kind: "RuntimeError", line: 2, match: /"abc" sankhya na ha/ });
+    assertError(program(`bol ho sankhya("");`), { kind: "RuntimeError", match: /sankhya na ha/ });
+    assertError(program(`bol ho sankhya("Infinity");`), { kind: "RuntimeError", match: /sankhya na ha/ });
+    assertError(program(`bol ho sankhya([1]);`), { kind: "RuntimeError", match: /"sankhya" ke string chahi/ });
+  });
+
+  test("shabd turns any value into text", () => {
+    assert.deepEqual(
+      out(`bol ho shabd(12) + shabd(3), lambai(shabd(100)), shabd(sach), shabd(khaali), shabd(["a", 1]);`),
+      ['123 3 sach khaali ["a", 1]'],
+    );
+  });
+
+  test("kism names the type of a value", () => {
+    assert.deepEqual(
+      out(`kaam f() {}\nbol ho kism(1), kism("a"), kism([]), kism(sach), kism(khaali), kism(f), kism(lambai);`),
+      ["sankhya shabd list sach/jhooth khaali kaam kaam"],
+    );
+  });
+
+  test("gol rounds, neeche rounds down", () => {
+    assert.deepEqual(out(`bol ho gol(2.4), gol(2.5), gol(-2.6), neeche(7 / 2), neeche(-0.5), neeche(4);`), ["2 3 -3 3 -1 4"]);
+    assertError(program(`bol ho gol("2");`), { kind: "RuntimeError", match: /"gol" ke sankhya chahi/ });
+    assertError(program(`bol ho neeche(khaali);`), { kind: "RuntimeError", match: /"neeche"/ });
+  });
+
+  test("sanyog picks a whole number in the range, inclusive", () => {
+    assert.deepEqual(withRandom(() => 0, `bol ho sanyog(1, 6);`), ["1"]);
+    assert.deepEqual(withRandom(() => 0.9999, `bol ho sanyog(1, 6);`), ["6"]);
+    assert.deepEqual(withRandom(() => 0.5, `bol ho sanyog(-2, 2), sanyog(5, 5);`), ["0 5"]);
+    const rolls = out(`maan la i = 0;\njab le (i < 200) { bol ho sanyog(1, 3); i += 1; }`);
+    assert.deepEqual([...new Set(rolls)].sort(), ["1", "2", "3"]);
+  });
+
+  test("sanyog rejects bad ranges", () => {
+    assertError(program(`bol ho sanyog(6, 1);`), { kind: "RuntimeError", match: /6 aur 1/ });
+    assertError(program(`bol ho sanyog(1.5, 3);`), { kind: "RuntimeError", match: /pura sankhya/ });
+    assertError(program(`bol ho sanyog(1);`), { kind: "RuntimeError", match: /"sanyog" 2 cheez/ });
+  });
+
+  test("bada and chhota change case", () => {
+    assert.deepEqual(out(`bol ho bada("Ram ji"), chhota("PATNA"), bada("नाम");`), ["RAM JI patna नाम"]);
+    assertError(program(`bol ho bada(5);`), { kind: "RuntimeError", match: /"bada" ke string chahi/ });
+  });
+
+  test("tod splits text, jod joins a list", () => {
+    assert.deepEqual(
+      out(`maan la l = tod("aalu,pyaaz,,sattu", ",");\nbol ho l, lambai(l), tod("abc", "");\nbol ho jod(["a", 1, sach], "-"), jod([], ","), jod(tod("1 2 3", " "), "+");`),
+      ['["aalu", "pyaaz", "", "sattu"] 4 ["a", "b", "c"]', "a-1-sach  1+2+3"],
+    );
+    assertError(program(`bol ho tod("a,b", 1);`), { kind: "RuntimeError", match: /"tod" ke string chahi/ });
+    assertError(program(`bol ho jod("ab", ",");`), { kind: "RuntimeError", match: /"jod" ke list chahi/ });
+  });
+
+  test("new built-in names can be shadowed", () => {
+    assert.deepEqual(out(`kaam jod(a, b) { lauta da a + b; }\nmaan la gol = "round";\nbol ho jod(2, 3), gol;`), ["5 round"]);
   });
 });
 

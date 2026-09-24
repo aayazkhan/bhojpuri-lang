@@ -1,0 +1,33 @@
+// Paasa ke khel: standard library ke kaam (sankhya, shabd, gol, neeche, sanyog, bada, tod, jod)
+ka ho bhaiya
+  maan la khiladi = tod("ramu,shyamu,gita", ",");
+  maan la ank = [];
+
+  // Har khiladi teen baar paasa phenkela.
+  har naam khiladi me {
+    maan la kul = 0, phenk = [];
+    har baari = 1 se 3 tak {
+      maan la paasa = sanyog(1, 6);
+      daal(phenk, paasa);
+      kul += paasa;
+    }
+    daal(ank, kul);
+    bol ho bada(naam) + ":", jod(phenk, " + "), "=", kul;
+  }
+
+  // Sab se bada ank kekar ba?
+  maan la jeeta = 0;
+  har i = 1 se lambai(ank) - 1 tak {
+    jadi (ank[i] > ank[jeeta]) { jeeta = i; }
+  }
+  bol ho "Jeetal:", khiladi[jeeta];
+
+  maan la jor = 0;
+  har a ank me { jor += a; }
+  bol ho "Ausat ank:", gol(jor / lambai(ank) * 10) / 10;
+  bol ho "Aadha jor:", neeche(jor / 2), "(" + kism(jor) + ")";
+
+  // Text se sankhya aur sankhya se text.
+  maan la likhal = "12";
+  bol ho likhal + " + 1 =", sankhya(likhal) + 1, "aur", shabd(sankhya(likhal) + 1) + "!";
+chalat bani bhaiya
