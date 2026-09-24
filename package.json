@@ -23,7 +23,7 @@
     "src"
   ],
   "scripts": {
-    "test": "node --test",
+    "test": "node --test test/*.test.js",
     "playground": "node scripts/serve.js",
     "prepublishOnly": "npm test"
   },

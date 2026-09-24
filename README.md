@@ -437,7 +437,7 @@ src/                 tokenizer, parser, interpreter, keywords, messages
 examples/*.bhoj      sample programs
 playground/          browser playground (uses src/ directly as ES modules)
 scripts/serve.js     zero-dependency static server for the playground
-test/                node:test suite
+test/                node:test suite, one *.test.js file per topic
 ```
 
 ## Contributing
