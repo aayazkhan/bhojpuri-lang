@@ -12,7 +12,20 @@ ka ho bhaiya
 chalat bani bhaiya
 ```
 
-## Quick start
+## Install
+
+```bash
+npm install -g @aayazk/bhojpuri-lang   # gives you the `bhojpuri` command
+bhojpuri program.bhoj
+```
+
+Or run a file without installing anything:
+
+```bash
+npx @aayazk/bhojpuri-lang program.bhoj
+```
+
+## Quick start (from a clone of this repo)
 
 ```bash
 npm test                              # run the test suite
@@ -265,7 +278,8 @@ source code ──► tokenizer ──► tokens ──► parser ──► AST 
 ## Using it as a library
 
 ```js
-import { run, formatError, BhojpuriError } from "bhojpuri-lang";
+// npm install @aayazk/bhojpuri-lang
+import { run, formatError, BhojpuriError } from "@aayazk/bhojpuri-lang";
 
 const lines = [];
 try {
