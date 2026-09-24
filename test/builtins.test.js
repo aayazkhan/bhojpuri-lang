@@ -104,6 +104,28 @@ describe("standard library", () => {
     assertError(program(`bol ho ba("abc", 1);`), { kind: "RuntimeError", match: /"ba" ke string chahi/ });
   });
 
+  test("saaf trims spaces, tabs and newlines from both ends", () => {
+    assert.deepEqual(out(`bol ho \`[{saaf("  Ramu \\t\\n")}]\`, \`[{saaf("a b")}]\`, \`[{saaf("   ")}]\`;`), ["[Ramu] [a b] []"]);
+    assertError(program(`bol ho saaf(5);`), { kind: "RuntimeError", match: /"saaf" ke string chahi/ });
+  });
+
+  test("jagah replaces every match", () => {
+    assert.deepEqual(
+      out(`bol ho jagah("aam aam kela", "aam", "seb"), jagah("a.b.c", ".", ""), jagah("abc", "z", "y"), jagah("नमस्ते", "स्ते", "स्कार");`),
+      ["seb seb kela abc abc नमस्कार"],
+    );
+    assertError(program(`bol ho jagah("abc", "", "x");`), { kind: "RuntimeError", match: /"jagah" ke khoje wala text khaali/ });
+    assertError(program(`bol ho jagah("abc", "a", 1);`), { kind: "RuntimeError", match: /"jagah" ke string chahi, lekin number/ });
+  });
+
+  test("shuru_me and ant_me check the start and end", () => {
+    assert.deepEqual(
+      out(`bol ho shuru_me("Dr Ramu", "Dr"), shuru_me("Ramu", "Dr"), ant_me("file.bhoj", ".bhoj"), ant_me("file.txt", ".bhoj"), shuru_me("x", "");`),
+      ["sach jhooth sach jhooth sach"],
+    );
+    assertError(program(`bol ho ant_me(["a"], "a");`), { kind: "RuntimeError", match: /"ant_me" ke string chahi, lekin list/ });
+  });
+
   test("new built-in names can be shadowed", () => {
     assert.deepEqual(out(`kaam jod(a, b) { lauta da a + b; }\nmaan la gol = "round";\nbol ho jod(2, 3), gol;`), ["5 round"]);
   });

@@ -245,6 +245,26 @@ function createGlobals({ random, input, call }) {
       expectString(BUILTINS.JOIN, separator, node);
       return list.map((item) => display(item)).join(separator);
     }),
+    new NativeFunction(BUILTINS.TRIM, 1, ([text], node) => {
+      expectString(BUILTINS.TRIM, text, node);
+      return text.trim();
+    }),
+    // Every `old` becomes `replacement`.
+    new NativeFunction(BUILTINS.REPLACE, 3, ([text, old, replacement], node) => {
+      for (const value of [text, old, replacement]) expectString(BUILTINS.REPLACE, value, node);
+      if (old === "") throw runtimeError(MSG.emptySearch(BUILTINS.REPLACE), node);
+      return text.split(old).join(replacement);
+    }),
+    new NativeFunction(BUILTINS.STARTS_WITH, 2, ([text, start], node) => {
+      expectString(BUILTINS.STARTS_WITH, text, node);
+      expectString(BUILTINS.STARTS_WITH, start, node);
+      return text.startsWith(start);
+    }),
+    new NativeFunction(BUILTINS.ENDS_WITH, 2, ([text, end], node) => {
+      expectString(BUILTINS.ENDS_WITH, text, node);
+      expectString(BUILTINS.ENDS_WITH, end, node);
+      return text.endsWith(end);
+    }),
     // Call a function on each item: a new list of the results (map).
     new NativeFunction(BUILTINS.MAP, 2, ([list, fn], node) => {
       expectList(BUILTINS.MAP, list, node);

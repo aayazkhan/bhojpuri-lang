@@ -11,6 +11,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Functions without names: `kaam(x) { ... }` makes a function wherever a value is expected, e.g.
   `maan la dugna = kaam(x) { lauta da x * 2 };`. It can be passed, returned, stored and called straight away,
   and it keeps its surrounding variables like any function. `kaam naam(...)` still defines a named function.
+- String helpers: `saaf` (trim spaces, tabs and newlines from both ends), `jagah(text, purana, naya)`
+  (replace every match; an empty search text is an error), `shuru_me` and `ant_me` (starts / ends with).
 - `badal(list, kaam)` (map: a new list with the `kaam` applied to every item) and `chhaan(list, kaam)`
   (filter: a new list of the items the `kaam` says `sach` to). Any function works, including built-ins.
 
