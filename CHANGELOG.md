@@ -8,6 +8,17 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Functions: `kaam naam(a, b) { ... }` and `lauta da` (return). Functions support recursion and closures,
+  and they are values that can be passed to or returned from other functions.
+- Lists: `[1, 2, 3]` literals (a trailing comma is allowed), indexing `l[0]` (strings too), and index
+  assignment `l[0] = 5` / `l[0] += 1`.
+- Built-in functions `lambai` (length), `daal` (push) and `nikaal` (pop). Their names can be shadowed.
+- Clear errors for a wrong number of arguments, calling something that isn't a function, `lauta da`
+  outside a function, bad or out-of-range indexes, changing a string, and runaway recursion (reported
+  instead of crashing with a JavaScript stack overflow).
+- Examples `fibonacci.bhoj`, `bazaar.bhoj` and `chhatai.bhoj` (bubble sort). The playground and
+  `bhojpuri --help` list the built-in functions.
+
 - `CONTRIBUTING.md` describing the Git Flow branching model, documentation rules and the release process.
 - This changelog.
 - Pull request template.
