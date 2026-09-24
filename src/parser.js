@@ -139,9 +139,12 @@ class Parser {
     return body;
   }
 
-  /** The `;` after a statement. At the prompt, the end of the input will do as well. */
+  /**
+   * The `;` after a statement. At the prompt it can be left out at the end of the input and
+   * before a `}`, so `koshish kara { phenk da "x" } galti pe { bol ho 1 }` works there.
+   */
   endStatement() {
-    if (this.interactive && this.peek().type === "eof") return;
+    if (this.interactive && (this.peek().type === "eof" || this.isPunct("}"))) return;
     this.expectPunct(";");
   }
 
