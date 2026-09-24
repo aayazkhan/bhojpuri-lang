@@ -1,0 +1,14 @@
+// Hisaab: dusra file ke kaam "le aaw" se le aaw aur istemal kar.
+ka ho bhaiya
+  le aaw "lib/ganit.bhoj";
+
+  bol ho `7 ke varg: {varg(7)}`;
+  bol ho `3 radius wala gol ke chhetrafal: {gol(gol_ke_chhetrafal(3) * 100) / 100}`;
+  bol ho `[80, 65, 92] ke ausat: {ausat([80, 65, 92])}`;
+
+  koshish kara {
+    ausat([]);
+  } galti pe (g) {
+    bol ho "Galti:", g;
+  }
+chalat bani bhaiya

@@ -45,6 +45,10 @@ export const MSG = {
   // An error thrown with `phenk da` that nobody caught: show the value itself.
   thrown: (text) => text,
   emptySearch: (name) => `${q(name)} ke khoje wala text khaali ("") na ho sakela.`,
+  noFiles: (kw) => `Ihaan ${q(kw)} na chal sakela: dusra file padhe ke koi intazaam na ba. Terminal me ${q("bhojpuri")} se chalaw.`,
+  fileNotFound: (path) => `${q(path)} file na mil paail.`,
+  circularImport: (path) => `${q(path)} ghuma-phira ke khud ke le aawat ba. Duno file ek dusra ke na le aa sakela.`,
+  importClash: (name, path) => `${q(name)} pahile se banal ba, aur ${q(path)} bhi ek ${q(name)} deta. Ek ke naam badal.`,
   notANumber: (text) => `${q(text)} sankhya na ha, ekra ke sankhya na banawal ja sakela.`,
   badRange: (name, a, b) => `${q(name)} ke pahila sankhya dusra se chhota ya barabar hoe ke chahi, lekin ${a} aur ${b} mil gail.`,
   loopBoundNotNumber: (word, got) => `${q(K.FOR)} loop me ${q(word)} ke baad sankhya chahi, lekin ${got} mil gail.`,
@@ -63,6 +67,7 @@ export const MSG = {
   things: {
     variableName: "variable ke naam",
     functionName: "kaam ke naam",
+    fileName: `file ke naam (jaise ${q("ganit.bhoj")})`,
     value: "koi value",
     endOfFile: "file ke ant",
   },

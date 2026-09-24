@@ -19,10 +19,11 @@ const NAME_END = "(?![\\p{L}\\p{M}\\p{N}_])";
 const words = (ids) => alternatives(ids.map((id) => KEYWORDS[id]));
 
 const CONTROL = ["IF", "ELSE_IF", "ELSE", "WHILE", "BREAK", "CONTINUE", "RETURN", "TRY", "CATCH", "THROW"];
+const IMPORT = ["IMPORT"];
 const LITERALS = ["TRUE", "FALSE", "NULL"];
 const PROGRAM = ["PROGRAM_START", "PROGRAM_END"];
 const OTHER = Object.keys(KEYWORDS).filter(
-  (id) => ![...CONTROL, ...LITERALS, ...PROGRAM, "FOR", "LET", "FUNCTION", "PRINT"].includes(id),
+  (id) => ![...CONTROL, ...IMPORT, ...LITERALS, ...PROGRAM, "FOR", "LET", "FUNCTION", "PRINT"].includes(id),
 );
 if (OTHER.length) throw new Error(`Give these keywords a colour in build-vscode-grammar.js: ${OTHER.join(", ")}`);
 
@@ -107,6 +108,7 @@ export function buildGrammar() {
           { name: "keyword.control.bhojpuri", match: `(?<![\\p{L}\\p{M}\\p{N}_])(?:${words(CONTROL)})${NAME_END}` },
           { name: "keyword.other.program.bhojpuri", match: `(?<![\\p{L}\\p{M}\\p{N}_])(?:${words(PROGRAM)})${NAME_END}` },
           { name: "storage.type.bhojpuri", match: `(?<![\\p{L}\\p{M}\\p{N}_])(?:${words(["LET", "FUNCTION"])})${NAME_END}` },
+          { name: "keyword.control.import.bhojpuri", match: `(?<![\\p{L}\\p{M}\\p{N}_])(?:${words(IMPORT)})${NAME_END}` },
           { name: "keyword.other.print.bhojpuri", match: `(?<![\\p{L}\\p{M}\\p{N}_])(?:${words(["PRINT"])})${NAME_END}` },
           { name: "constant.language.bhojpuri", match: `(?<![\\p{L}\\p{M}\\p{N}_])(?:${words(LITERALS)})${NAME_END}` },
         ],
