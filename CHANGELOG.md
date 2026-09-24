@@ -6,6 +6,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Text is counted in letters as people see them (Unicode grapheme clusters), so a Devanagari letter with
+  its vowel signs, or an emoji with a skin tone, is one letter. Before, `lambai("नाम")` was 3; now it's 2,
+  and `ulta`, indexes, `hissa`, `khoj`, `tod(text, "")` and `har … me` no longer split letters apart
+  (`ulta("नमस्ते")` was `ेत्समन`). English text is unaffected. How some Devanagari conjuncts group
+  follows the Unicode version of the browser or Node.js.
+
 ## [0.7.0] - 2026-09-24
 
 ### Added

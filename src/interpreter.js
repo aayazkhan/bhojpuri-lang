@@ -6,8 +6,9 @@ import { parse } from "./parser.js";
 import { Scope } from "./scope.js";
 import { createBuiltins } from "./builtins.js";
 import {
-  UserFunction, NativeFunction, isDict, display, typeName, truthy, checkIndex, checkKey, getEntry,
+  UserFunction, NativeFunction, isDict, display, typeName, truthy, checkIndex, readIndex, checkKey, getEntry,
 } from "./values.js";
+import { letters } from "./text.js";
 
 // Runs a parsed program: statements, expressions, calls and `le aaw`. The values it works
 // with are in values.js, variables in scope.js and the built-in functions in builtins.js.
@@ -295,7 +296,7 @@ export class Interpreter {
   eachValues(node, scope) {
     const value = this.evaluate(node.iterable, scope);
     if (Array.isArray(value)) return [...value];
-    if (typeof value === "string") return value.split("");
+    if (typeof value === "string") return letters(value);
     if (isDict(value)) return [...value.keys()];
     throw runtimeError(MSG.notIterable(typeName(value)), node.iterable);
   }
@@ -325,7 +326,7 @@ export class Interpreter {
         const object = this.evaluate(node.object, scope);
         const index = this.evaluate(node.index, scope);
         if (isDict(object)) return getEntry(object, index, node);
-        return object[checkIndex(object, index, node)];
+        return readIndex(object, index, node);
       }
 
       case "Call": {
