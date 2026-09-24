@@ -4,7 +4,7 @@ import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "n
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
-import { run, tokenize, BhojpuriError, formatError } from "../src/index.js";
+import { run, tokenize, Session, BhojpuriError, formatError } from "../src/index.js";
 
 const program = (body) => `ka ho bhaiya\n${body}\nchalat bani bhaiya`;
 
@@ -590,6 +590,83 @@ describe("examples", () => {
   });
 });
 
+describe("interactive prompt (Session)", () => {
+  function session(options) {
+    const printed = [];
+    const s = new Session({ print: (line) => printed.push(line), ...options });
+    return { s, printed, result: (source) => s.run(source).result };
+  }
+
+  test("shows the value of an expression, with strings in quotes", () => {
+    const { result } = session();
+    assert.equal(result("2 + 3 * 4"), "14");
+    assert.equal(result(`"Ram" + "u"`), '"Ramu"');
+    assert.equal(result(`[1, "a"]`), '[1, "a"]');
+    assert.equal(result(`({ "a": 1 })`), '{"a": 1}');
+    assert.equal(result("1 < 2"), "sach");
+  });
+
+  test("shows nothing for statements, assignments and khaali", () => {
+    const { result, printed } = session();
+    assert.equal(result(`maan la x = 1`), null);
+    assert.equal(result(`x = 5`), null);
+    assert.equal(result(`khaali`), null);
+    assert.equal(result(`bol ho "namaste", x`), null);
+    assert.deepEqual(printed, ["namaste 5"]);
+  });
+
+  test("the ; after the last statement is optional, and several statements can share a line", () => {
+    const { result } = session();
+    assert.equal(result(`maan la a = 2; maan la b = 3; a * b`), "6");
+    assert.equal(result(`a;`), "2");
+    assert.throws(() => result(`maan la c = 1 bol ho c`), /";" chahi/);
+  });
+
+  test("variables and functions carry over, and names can be declared again", () => {
+    const { result } = session();
+    result(`kaam dugna(x) {\n  lauta da x * 2;\n}`);
+    result(`maan la n = 21`);
+    assert.equal(result(`dugna(n)`), "42");
+    result(`maan la n = "naya"`);
+    assert.equal(result(`n`), '"naya"');
+    result(`maan la lambai = 3`);
+    assert.equal(result(`lambai`), "3");
+  });
+
+  test("an error doesn't end the session", () => {
+    const { s, result } = session();
+    assert.throws(() => result(`naam`), (err) => err instanceof BhojpuriError && /"naam" naam ke koi variable/.test(err.message));
+    assert.throws(() => result(`bol ho (`), (err) => err.kind === "SyntaxError");
+    result(`maan la naam = "Ramu"`);
+    assert.equal(s.run(`naam`).exit, false);
+    assert.equal(result(`naam`), '"Ramu"');
+  });
+
+  test("chalat bani bhaiya ends the session", () => {
+    const { s } = session();
+    assert.deepEqual(s.run(`chalat bani bhaiya`), { exit: true, result: null });
+    assert.deepEqual(s.run(`  chalat   bani bhaiya  `), { exit: true, result: null });
+    assert.throws(() => s.run(`chalat bani bhaiya 1`));
+  });
+
+  test("isComplete waits for open brackets and comments", () => {
+    const { s } = session();
+    assert.equal(s.isComplete(`kaam f() {`), false);
+    assert.equal(s.isComplete(`kaam f() {\n  lauta da 1;`), false);
+    assert.equal(s.isComplete(`kaam f() {\n  lauta da 1;\n}`), true);
+    assert.equal(s.isComplete(`maan la l = [1,`), false);
+    assert.equal(s.isComplete(`/* abhi likhat bani`), false);
+    assert.equal(s.isComplete(`"band na bhail`), true); // run reports the unterminated string
+    assert.equal(s.isComplete(`}`), true);
+  });
+
+  test("poochh and sanyog work at the prompt", () => {
+    const { result } = session({ input: () => "24", random: () => 0 });
+    assert.equal(result(`sankhya(poochh("Umar? ")) + 1`), "25");
+    assert.equal(result(`sanyog(1, 6)`), "1");
+  });
+});
+
 describe("cli", () => {
   const cli = new URL("../bin/bhojpuri.js", import.meta.url).pathname;
   const example = (file) => new URL(`../examples/${file}`, import.meta.url).pathname;
@@ -626,6 +703,34 @@ describe("cli", () => {
     const result = bhojpuri([example("andaaz.bhoj")], "das\n");
     assert.equal(result.status, 1);
     assert.match(result.stderr, /"das" sankhya na ha/);
+  });
+
+  test("with no file, runs piped lines as an interactive session", () => {
+    const lines = [
+      "2 + 3 * 4",
+      `maan la naam = "Ramu"`,
+      "naam",
+      "kaam dugna(x) {",
+      "  lauta da x * 2;",
+      "}",
+      "dugna(21)",
+      "naam[10]",
+      `maan la umar = sankhya(poochh("Umar? "))`,
+      "24",
+      "umar + 1",
+      "chalat bani bhaiya",
+      `bol ho "ee na chali"`,
+    ];
+    const result = bhojpuri([], lines.join("\n") + "\n");
+    assert.equal(result.status, 0);
+    assert.equal(result.stdout, `14\n"Ramu"\n42\nUmar? 25\n`);
+    assert.match(result.stderr, /Index 10 bahar ba/);
+  });
+
+  test("the session reports code left unfinished at the end of input", () => {
+    const result = bhojpuri([], "kaam f() {\n");
+    assert.equal(result.status, 0);
+    assert.match(result.stderr, /"\}" chahi/);
   });
 
   test("--version and --help", () => {

@@ -16,12 +16,21 @@ and this project follows [Semantic Versioning](https://semver.org/).
   runtime error.
 - Example `andaaz.bhoj`, a number-guessing game.
 - CLI tests that run `bin/bhojpuri.js` with piped input.
+- Interactive prompt: `bhojpuri` without a file opens a `bhojpuri>` prompt. Each line runs straight away,
+  without `ka ho bhaiya`, and the last `;` is optional. Values are shown (strings in quotes), and variables
+  and functions carry over between lines (`maan la` can be run again for the same name). Unclosed brackets
+  continue on a `...` prompt. Errors don't end the session. The arrow keys recall earlier lines, Ctrl+C
+  clears the line, and `chalat bani bhaiya` or Ctrl+D leaves. Piped lines run the same way, without
+  prompts.
+- `Session` in the library API (`run`, `isComplete`) for building your own prompt.
 
 ### Changed
 
 - The CLI writes output with `fs.writeSync` instead of `console.log`, so questions and answers stay in
   order.
 - CI runs the examples with empty stdin, so examples that ask questions don't wait for input.
+- `bhojpuri` with no arguments opens the interactive prompt, instead of printing help and exiting with
+  code 1. Use `bhojpuri --help` for help. Errors from the CLI now go to stderr with `fs.writeSync`.
 
 ## [0.3.1] - 2026-09-24
 
