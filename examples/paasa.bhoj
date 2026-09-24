@@ -4,32 +4,26 @@ ka ho bhaiya
   maan la ank = [];
 
   // Har khiladi teen baar paasa phenkela.
-  maan la i = 0;
-  jab le (i < lambai(khiladi)) {
-    maan la kul = 0, phenk = [], j = 0;
-    jab le (j < 3) {
+  har naam khiladi me {
+    maan la kul = 0, phenk = [];
+    har baari = 1 se 3 tak {
       maan la paasa = sanyog(1, 6);
       daal(phenk, paasa);
       kul += paasa;
-      j += 1;
     }
     daal(ank, kul);
-    bol ho bada(khiladi[i]) + ":", jod(phenk, " + "), "=", kul;
-    i += 1;
+    bol ho bada(naam) + ":", jod(phenk, " + "), "=", kul;
   }
 
   // Sab se bada ank kekar ba?
   maan la jeeta = 0;
-  i = 1;
-  jab le (i < lambai(ank)) {
+  har i = 1 se lambai(ank) - 1 tak {
     jadi (ank[i] > ank[jeeta]) { jeeta = i; }
-    i += 1;
   }
   bol ho "Jeetal:", khiladi[jeeta];
 
   maan la jor = 0;
-  i = 0;
-  jab le (i < lambai(ank)) { jor += ank[i]; i += 1; }
+  har a ank me { jor += a; }
   bol ho "Ausat ank:", gol(jor / lambai(ank) * 10) / 10;
   bol ho "Aadha jor:", neeche(jor / 2), "(" + kism(jor) + ")";
 

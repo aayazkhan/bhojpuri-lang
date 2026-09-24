@@ -2,18 +2,14 @@
 ka ho bhaiya
   kaam chhaant(list) {
     maan la n = lambai(list);
-    maan la i = 0;
-    jab le (i < n) {
-      maan la j = 0;
-      jab le (j < n - i - 1) {
+    har i = 0 se n - 2 tak {
+      har j = 0 se n - i - 2 tak {
         jadi (list[j] > list[j + 1]) {
           maan la rakhal = list[j];
           list[j] = list[j + 1];
           list[j + 1] = rakhal;
         }
-        j += 1;
       }
-      i += 1;
     }
     lauta da list;
   }
