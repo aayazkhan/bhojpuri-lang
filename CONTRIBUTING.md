@@ -31,6 +31,11 @@ feature/*            ●───●   ●─●
 Both `main` and `develop` are protected on GitHub: direct pushes are blocked, and a PR can only
 merge after CI passes.
 
+## Reporting bugs and ideas
+
+Open an [issue](https://github.com/aayazkhan/bhojpuri-lang/issues/new/choose). The bug report form asks for a
+short program that shows the problem. In the playground, **Baantaw 🔗** copies a link to your code.
+
 ## Making a change
 
 1. **Start from an up-to-date `develop`:**

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Try it in the playground
+    url: https://aayazkhan.github.io/bhojpuri-lang/
+    about: Run code in your browser. The 📘 Sikh lessons cover the basics.
+  - name: Read the language guide
+    url: https://github.com/aayazkhan/bhojpuri-lang#the-language
+    about: Every keyword and built-in, with examples.

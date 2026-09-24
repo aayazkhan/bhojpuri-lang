@@ -20,6 +20,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - `badal(list, kaam)` (map: a new list with the `kaam` applied to every item) and `chhaan(list, kaam)`
   (filter: a new list of the items the `kaam` says `sach` to). Any function works, including built-ins.
 
+- Issue templates: a bug report form (program, what happened, what you expected, where it ran, version)
+  and an idea form, plus links to the playground and the language guide.
+
 ### Changed
 
 - The `;` can be left out just before a `}` in files too (before, only at the interactive prompt), so short
