@@ -16,10 +16,12 @@ class Scope {
   constructor(parent = null) {
     this.parent = parent;
     this.vars = new Map();
+    // At the interactive prompt, `maan la x = ...` may be typed again to start over.
+    this.allowRedeclare = false;
   }
 
   declare(name, value, node) {
-    if (this.vars.has(name)) throw runtimeError(MSG.alreadyDeclared(name), node);
+    if (this.vars.has(name) && !this.allowRedeclare) throw runtimeError(MSG.alreadyDeclared(name), node);
     this.vars.set(name, value);
   }
 
@@ -284,7 +286,35 @@ export class Interpreter {
 
   run(program) {
     // The program gets its own scope so it can shadow built-in names.
-    this.execAll(program.body, new Scope(createGlobals({ random: this.random, input: this.input })));
+    this.execAll(program.body, this.programScope());
+  }
+
+  programScope() {
+    return new Scope(createGlobals({ random: this.random, input: this.input }));
+  }
+
+  /** A scope for the interactive prompt: it lasts between inputs, and names can be declared again. */
+  sessionScope() {
+    const scope = this.programScope();
+    scope.allowRedeclare = true;
+    return scope;
+  }
+
+  /**
+   * Run statements from the prompt in `scope`. Returns the value of the last statement when it
+   * is an expression other than an assignment (like `2 + 3` or `naam`), and undefined otherwise.
+   */
+  runInteractive(statements, scope) {
+    let result;
+    for (const statement of statements) {
+      result = undefined;
+      if (statement.type === "ExpressionStatement" && statement.expression.type !== "Assignment") {
+        result = this.evaluate(statement.expression, scope);
+      } else {
+        this.exec(statement, scope);
+      }
+    }
+    return result;
   }
 
   execAll(statements, scope) {

@@ -16,7 +16,8 @@ chalat bani bhaiya
 
 ```bash
 npm install -g @aayazk/bhojpuri-lang   # gives you the `bhojpuri` command
-bhojpuri program.bhoj
+bhojpuri program.bhoj                  # run a program
+bhojpuri                               # open the interactive prompt
 ```
 
 Or run a file without installing anything:
@@ -30,6 +31,7 @@ npx @aayazk/bhojpuri-lang program.bhoj
 ```bash
 npm test                              # run the test suite
 node bin/bhojpuri.js examples/fizzbuzz.bhoj
+node bin/bhojpuri.js                  # interactive prompt
 npm run playground                    # browser playground at http://localhost:3000
 ```
 
@@ -39,6 +41,39 @@ To get a global `bhojpuri` command while developing:
 npm link
 bhojpuri examples/hello.bhoj
 ```
+
+## Interactive prompt
+
+Run `bhojpuri` without a file to try things out one line at a time:
+
+```
+$ bhojpuri
+Bhojpuri Lang 0.3.1 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
+bhojpuri> 2 + 3 * 4
+14
+bhojpuri> maan la naam = "Ramu"
+bhojpuri> bol ho "Pranam,", naam
+Pranam, Ramu
+bhojpuri> kaam dugna(x) {
+...   lauta da x * 2;
+... }
+bhojpuri> dugna(21)
+42
+bhojpuri> chalat bani bhaiya
+```
+
+- **No markers needed:** there's no `ka ho bhaiya`, and the `;` at the end of a line is optional.
+- **Values are shown:** typing a value shows it, with strings in quotes. Statements, assignments and `khaali`
+  show nothing.
+- **Everything is remembered:** variables and functions carry over between lines. You can run
+  `maan la x = ...` again to start a variable over.
+- **Multi-line code:** while a `{`, `(` or `[` is still open, the prompt changes to `...` and keeps reading.
+- **Errors don't end the session.** The arrow keys bring back earlier lines, Ctrl+C throws away the current
+  line, and `chalat bani bhaiya` or Ctrl+D leaves.
+- **A line starting with `{` is a block.** To see a kosh, wrap it in brackets (`({ "a": 1 })`) or put it in a
+  variable first.
+- **Piped input:** lines piped into `bhojpuri` without a file run the same way, without the prompts:
+  `printf '2 + 3\nsanyog(1, 6)\n' | bhojpuri`.
 
 ## The language
 
@@ -313,6 +348,17 @@ try {
 } catch (err) {
   if (err instanceof BhojpuriError) console.error(formatError(err, source));
 }
+```
+
+To build your own prompt, use `Session`. It keeps variables between inputs, and `run` returns the value to show:
+
+```js
+import { Session } from "@aayazk/bhojpuri-lang";
+
+const session = new Session({ print: console.log });
+session.run(`maan la x = 20`);
+session.run(`x + 1`);          // { exit: false, result: "21" }
+session.isComplete(`kaam f() {`); // false: still waiting for the closing }
 ```
 
 Without an `input` option, `poochh` stops with a Bhojpuri error, because there's no one to answer it.

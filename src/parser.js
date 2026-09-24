@@ -52,9 +52,19 @@ export function parse(tokens) {
   return new Parser(tokens).parseProgram();
 }
 
+/**
+ * Parse one input of the interactive prompt: statements without `ka ho bhaiya` /
+ * `chalat bani bhaiya`, where the last statement doesn't need its `;`.
+ * @param {import("./tokenizer.js").Token[]} tokens
+ */
+export function parseInteractive(tokens) {
+  return new Parser(tokens, { interactive: true }).parseStatements();
+}
+
 class Parser {
-  constructor(tokens) {
+  constructor(tokens, { interactive = false } = {}) {
     this.tokens = tokens;
+    this.interactive = interactive;
     this.i = 0;
     this.loopDepth = 0;
     this.functionDepth = 0;
@@ -121,6 +131,18 @@ class Parser {
     return { type: "Program", body, ...pos(first) };
   }
 
+  parseStatements() {
+    const body = [];
+    while (this.peek().type !== "eof") body.push(this.parseStatement());
+    return body;
+  }
+
+  /** The `;` after a statement. At the prompt, the end of the input will do as well. */
+  endStatement() {
+    if (this.interactive && this.peek().type === "eof") return;
+    this.expectPunct(";");
+  }
+
   parseStatement() {
     const t = this.peek();
 
@@ -148,7 +170,7 @@ class Parser {
     }
 
     const expression = this.parseExpression();
-    this.expectPunct(";");
+    this.endStatement();
     return { type: "ExpressionStatement", expression, ...pos(t) };
   }
 
@@ -166,14 +188,14 @@ class Parser {
       }
       declarations.push({ name: id.value, init, ...pos(id) });
     } while (this.isPunct(",") && this.next());
-    this.expectPunct(";");
+    this.endStatement();
     return { type: "Let", declarations, ...pos(start) };
   }
 
   parsePrint() {
     const start = this.next();
     const args = this.parseList();
-    this.expectPunct(";");
+    this.endStatement();
     return { type: "Print", args, ...pos(start) };
   }
 
@@ -271,14 +293,14 @@ class Parser {
     const t = this.next();
     if (this.functionDepth === 0) throw syntaxError(MSG.returnOutsideFunction(t.text), t);
     const argument = this.isPunct(";") ? null : this.parseExpression();
-    this.expectPunct(";");
+    this.endStatement();
     return { type: "Return", argument, ...pos(t) };
   }
 
   parseJump() {
     const t = this.next();
     if (this.loopDepth === 0) throw syntaxError(MSG.jumpOutsideLoop(t.text), t);
-    this.expectPunct(";");
+    this.endStatement();
     return { type: t.value === "BREAK" ? "Break" : "Continue", ...pos(t) };
   }
 
