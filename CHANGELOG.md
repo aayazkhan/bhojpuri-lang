@@ -6,13 +6,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-24
+
 ### Added
 
 - Text in strings: a string written with backticks can contain `{expression}`, and each expression's value
   is written into the text, e.g. `` `Pranam {naam}, agila saal {umar + 1}` ``. Values look the way `bol ho`
   shows them. `\{` is a literal brace. Errors inside `{ }` point at the exact line and column. `"..."` and
   `'...'` strings are unchanged.
-
 - Playground share links: the **Baantaw 🔗** button copies a link with the code compressed into the part of
   the address after `#`, which never reaches a server. Opening the link loads that code into the editor.
   Damaged links are ignored.
@@ -34,7 +35,6 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 - The playground toolbar wraps on narrow screens instead of squeezing its buttons.
 - `fibonacci.bhoj` and `andaaz.bhoj` use backtick strings instead of joining text with `+`.
-
 - The tests are split by topic into `test/*.test.js` (language, loops, functions, collections, built-ins,
   catching errors, prompt, CLI, examples), with shared helpers in `test/helpers.js`. `npm test` runs
   `node --test test/*.test.js`.
@@ -173,7 +173,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Browser playground (`npm run playground`).
 - Example programs and a `node:test` test suite.
 
-[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.3.0...v0.3.1
