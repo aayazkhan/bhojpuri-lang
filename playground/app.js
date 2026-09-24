@@ -4,6 +4,7 @@ import {
 import { encodeCode, decodeHash } from "./share.js";
 import { highlight } from "./highlight.js";
 import { setUpConsole } from "./console.js";
+import { setUpLessons } from "./lesson-panel.js";
 
 const EXAMPLES = [
   { file: "hello.bhoj", title: "Pranam duniya" },
@@ -184,8 +185,20 @@ editor.addEventListener("keydown", (e) => {
 });
 
 // A share link wins; then the code from last time; then the first example.
-if (!(await openSharedLink())) {
-  const saved = restore();
+const openedLink = await openSharedLink();
+const saved = restore();
+if (!openedLink) {
   if (saved) setCode(saved);
   else await loadExample(EXAMPLES[0].file);
 }
+
+setUpLessons({
+  setCode: (code) => {
+    setCode(code);
+    examples.selectedIndex = -1;
+    save();
+  },
+  getCode: () => editor.value,
+  runCode,
+  firstVisit: !saved && !openedLink,
+});

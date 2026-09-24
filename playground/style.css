@@ -70,6 +70,16 @@ h2 {
   font-size: 1rem;
 }
 
+.header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.header-row > div { flex: 1 1 280px; }
+#lesson-toggle { flex: none; }
+
 .tagline {
   margin: 4px 0 0;
   color: var(--muted);
@@ -231,6 +241,40 @@ kbd {
   border: 1px solid var(--border);
   border-radius: 4px;
   background: var(--surface-2);
+}
+
+/* Sikh (lessons) panel. */
+.lesson { margin-bottom: 16px; }
+.lesson-body p, .exercise p { margin: 0 0 8px; }
+.lesson code, .exercise code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  color: var(--accent);
+  background: var(--surface-2);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+.exercise {
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+.exercise h3 { margin: 0 0 6px; font-size: 0.95rem; }
+.exercise .actions { margin: 10px 0 0; }
+button:disabled { opacity: 0.45; cursor: default; }
+
+.lesson-result p { margin: 10px 0 6px; font-weight: 600; }
+.lesson-result.ok p { color: #15803d; }
+.lesson-result.wrong p { color: var(--accent); }
+.lesson-result pre {
+  min-height: 0;
+  margin: 0 0 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+.lesson-result pre.want { border-left: 3px solid #22c55e; }
+.lesson-result .label { display: block; font-size: 0.75rem; color: var(--muted); margin: 6px 0 2px; }
+@media (prefers-color-scheme: dark) {
+  .lesson-result.ok p { color: #4ade80; }
 }
 
 /* Console: the interactive prompt in the page. Dark like the editor. */

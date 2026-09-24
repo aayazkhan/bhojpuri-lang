@@ -11,6 +11,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Functions without names: `kaam(x) { ... }` makes a function wherever a value is expected, e.g.
   `maan la dugna = kaam(x) { lauta da x * 2 };`. It can be passed, returned, stored and called straight away,
   and it keeps its surrounding variables like any function. `kaam naam(...)` still defines a named function.
+- "Sikh" (learn) lessons in the playground: the **📘 Sikh** button opens 12 short lessons, from `bol ho` to
+  `koshish kara`. Each has an explanation, an example that opens in the editor, and an exercise. **Jaanch
+  kar** checks your output against the expected one (showing both when they differ), and **Jawab dekhaw**
+  loads a solution. The panel opens for first-time visitors and remembers the current lesson.
 - String helpers: `saaf` (trim spaces, tabs and newlines from both ends), `jagah(text, purana, naya)`
   (replace every match; an empty search text is an error), `shuru_me` and `ant_me` (starts / ends with).
 - `badal(list, kaam)` (map: a new list with the `kaam` applied to every item) and `chhaan(list, kaam)`
