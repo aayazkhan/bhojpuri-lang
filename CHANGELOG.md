@@ -6,7 +6,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Text in strings: a string written with backticks can contain `{expression}`, and each expression's value
+  is written into the text, e.g. `` `Pranam {naam}, agila saal {umar + 1}` ``. Values look the way `bol ho`
+  shows them. `\{` is a literal brace. Errors inside `{ }` point at the exact line and column. `"..."` and
+  `'...'` strings are unchanged.
+
 ### Changed
+
+- `fibonacci.bhoj` and `andaaz.bhoj` use backtick strings instead of joining text with `+`.
 
 - The tests are split by topic into `test/*.test.js` (language, loops, functions, collections, built-ins,
   catching errors, prompt, CLI, examples), with shared helpers in `test/helpers.js`. `npm test` runs
