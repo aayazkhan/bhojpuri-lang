@@ -16,7 +16,8 @@ import { KEYWORDS, LOOP_WORDS } from "./keywords.js";
  *   for        := FOR IDENT "=" expr FROM expr TO expr (STEP expr)? block
  *               | FOR IDENT expr IN block
  *                  (FROM, TO, STEP and IN are LOOP_WORDS: plain names that are only special here)
- *   function   := FUNCTION IDENT "(" (IDENT ("," IDENT)*)? ")" block
+ *   function   := FUNCTION IDENT params block
+ *   params     := "(" (IDENT ("," IDENT)*)? ")"
  *   return     := RETURN expr? ";"
  *   try        := TRY block CATCH ("(" IDENT ")")? block
  *   throw      := THROW expr ";"
@@ -34,6 +35,7 @@ import { KEYWORDS, LOOP_WORDS } from "./keywords.js";
  *   postfix    := primary ("(" args? ")" | "[" expr "]")*
  *   args       := expr ("," expr)*
  *   primary    := NUMBER | STRING | TEMPLATE | TRUE | FALSE | NULL | IDENT | "(" expr ")"
+ *               | FUNCTION params block                      (a function without a name)
  *               | "[" (expr ("," expr)* ","?)? "]"
  *               | "{" (expr ":" expr ("," expr ":" expr)* ","?)? "}"
  *
@@ -152,11 +154,11 @@ class Parser {
   }
 
   /**
-   * The `;` after a statement. At the prompt it can be left out at the end of the input and
-   * before a `}`, so `koshish kara { phenk da "x" } galti pe { bol ho 1 }` works there.
+   * The `;` after a statement. It can be left out just before a `}`, so one-line blocks like
+   * `kaam(x) { lauta da x * 2 }` work, and at the prompt also at the end of the input.
    */
   endStatement() {
-    if (this.interactive && (this.peek().type === "eof" || this.isPunct("}"))) return;
+    if (this.isPunct("}") || (this.interactive && this.peek().type === "eof")) return;
     this.expectPunct(";");
   }
 
@@ -170,7 +172,10 @@ class Parser {
         case "IF": return this.parseIf();
         case "WHILE": return this.parseWhile();
         case "FOR": return this.parseFor();
-        case "FUNCTION": return this.parseFunction();
+        // `kaam naam(...)` defines a function; `kaam(...)` is a function value (an expression).
+        case "FUNCTION":
+          if (this.tokens[this.i + 1]?.type === "identifier") return this.parseFunction();
+          break;
         case "RETURN": return this.parseReturn();
         case "TRY": return this.parseTry();
         case "THROW": return this.parseThrow();
@@ -282,7 +287,17 @@ class Parser {
     const name = this.peek();
     if (name.type !== "identifier") throw this.unexpected(MSG.things.functionName);
     this.next();
+    return { type: "Function", name: name.value, ...this.parseParamsAndBody(), ...pos(start) };
+  }
 
+  /** `kaam(x) { ... }` where a value is expected: a function without a name. */
+  parseFunctionExpression() {
+    const start = this.next();
+    if (!this.isPunct("(")) throw this.unexpected(`${MSG.things.functionName} ya ${MSG.quote("(")}`);
+    return { type: "FunctionExpression", name: null, ...this.parseParamsAndBody(), ...pos(start) };
+  }
+
+  parseParamsAndBody() {
     this.expectPunct("(");
     const params = [];
     if (!this.isPunct(")")) {
@@ -301,8 +316,7 @@ class Parser {
     this.loopDepth = 0;
     this.functionDepth++;
     try {
-      const body = this.parseBlock();
-      return { type: "Function", name: name.value, params, body, ...pos(start) };
+      return { params, body: this.parseBlock() };
     } finally {
       this.loopDepth = outerLoopDepth;
       this.functionDepth--;
@@ -456,6 +470,8 @@ class Parser {
       this.next();
       return { type: "Identifier", name: t.value, ...pos(t) };
     }
+
+    if (t.type === "keyword" && t.value === "FUNCTION") return this.parseFunctionExpression();
 
     if (this.isPunct("(")) {
       this.next();

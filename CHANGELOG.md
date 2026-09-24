@@ -6,7 +6,20 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Functions without names: `kaam(x) { ... }` makes a function wherever a value is expected, e.g.
+  `maan la dugna = kaam(x) { lauta da x * 2 };`. It can be passed, returned, stored and called straight away,
+  and it keeps its surrounding variables like any function. `kaam naam(...)` still defines a named function.
+- `badal(list, kaam)` (map: a new list with the `kaam` applied to every item) and `chhaan(list, kaam)`
+  (filter: a new list of the items the `kaam` says `sach` to). Any function works, including built-ins.
+
 ### Changed
+
+- The `;` can be left out just before a `}` in files too (before, only at the interactive prompt), so short
+  blocks like `jadi (x > 0) { bol ho "haan" }` and `kaam(x) { lauta da x * 2 }` work anywhere. Only more
+  programs are accepted; two statements on one line still need a `;`.
+- `bazaar.bhoj` uses `chhaan` and `badal`.
 
 - Decimals are shown to 15 significant digits everywhere a number becomes text (`bol ho`, backtick strings,
   `shabd`, `jod`, `+` with a string, lists, kosh and the prompt), so `0.1 + 0.2` shows as `0.3`. Only the
