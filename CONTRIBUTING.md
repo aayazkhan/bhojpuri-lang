@@ -60,7 +60,8 @@ merge after CI passes.
    git push origin vx.y.z
    ```
 4. Merge `main` back into `develop` with a PR so `develop` has the release commit.
-5. Optional: `npm publish` from `main`.
+5. GitHub Pages serves the playground from `main`, so it updates on its own a minute or two after the merge.
+6. Optional: `npm publish` from `main` (`prepublishOnly` runs the tests first).
 
 **Hotfixes** follow the same steps, but branch from `main` as `hotfix/x.y.z` and bump the patch version.
 
