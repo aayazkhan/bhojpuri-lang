@@ -4,7 +4,8 @@ A toy programming language with Bhojpuri keywords, inspired by [Bhailang](https:
 Written in plain JavaScript with zero dependencies. It runs in Node.js and in the browser.
 
 **[Try it in the playground →](https://aayazkhan.github.io/bhojpuri-lang/)** New to programming? Press
-**📘 Sikh** there for 12 short lessons, each with an example and a small exercise that checks your answer.
+**📘 Sikh** there for 12 short lessons in Bhojpuri (or English), each with an example and a small exercise
+that checks your answer.
 Write code (with colours as you type), run it, and press
 **Baantaw 🔗** to copy a link that opens your code for anyone you send it to. The **Console** below the
 editor runs one line at a time, like the [interactive prompt](#interactive-prompt).
@@ -15,6 +16,11 @@ ka ho bhaiya
   bol ho "Pranam", naam;
 chalat bani bhaiya
 ```
+
+> **Bhojpuri me:** Bhojpuri Lang ek khilauna programming language ha, jekar keyword Bhojpuri me ba. Browser me
+> [playground](https://aayazkhan.github.io/bhojpuri-lang/) khol ke turant code likh aur chalaw. **📘 Sikh**
+> dabawe pe 12 go chhot-chhot paath milela, har paath ke saath ek abhyas bhi. Apna computer pe chalawe
+> khatir `npx @aayazk/bhojpuri-lang` likh. Neeche ke puri jaankari angrezi me ba.
 
 ## Install
 

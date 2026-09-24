@@ -1,9 +1,10 @@
-import { LESSONS, checkExercise } from "./lessons.js";
+import { LESSONS, LANGUAGES, checkExercise } from "./lessons.js";
 
 // The "Sikh" panel above the editor: one lesson at a time, with its example and exercise.
 
 const LESSON_KEY = "bhojpuri-lang:lesson";
 const OPEN_KEY = "bhojpuri-lang:lesson-open";
+const LANGUAGE_KEY = "bhojpuri-lang:lesson-language";
 
 function load(key) {
   try {
@@ -28,16 +29,23 @@ export function setUpLessons({ setCode, getCode, runCode, firstVisit }) {
   const toggle = $("lesson-toggle");
   const result = $("lesson-result");
   let index = Math.min(Math.max(Number(load(LESSON_KEY)) || 0, 0), LESSONS.length - 1);
+  let language = load(LANGUAGE_KEY) in LANGUAGES ? load(LANGUAGE_KEY) : "bho";
+  const languageButton = $("lesson-language");
 
   function show(i) {
     index = i;
     store(LESSON_KEY, String(i));
     const lesson = LESSONS[i];
     $("lesson-count").textContent = `${i + 1} / ${LESSONS.length}`;
-    $("lesson-title").textContent = `Sikh ${i + 1}: ${lesson.title}`;
+    $("lesson-title").textContent = `Sikh ${i + 1}: ${lesson.title[language]}`;
     // Lesson text is our own static HTML from lessons.js, not user input.
-    $("lesson-body").innerHTML = lesson.body;
-    $("lesson-task").innerHTML = lesson.exercise.task;
+    $("lesson-body").innerHTML = lesson.body[language];
+    $("lesson-task").innerHTML = lesson.exercise.task[language];
+    $("lesson").lang = language === "en" ? "en" : "bho";
+    // The button offers the other language.
+    const other = language === "en" ? "bho" : "en";
+    languageButton.textContent = LANGUAGES[other];
+    languageButton.title = other === "en" ? "Read the lessons in English" : "Sikh Bhojpuri me padh";
     $("lesson-prev").disabled = i === 0;
     $("lesson-next").disabled = i === LESSONS.length - 1;
     result.replaceChildren();
@@ -91,6 +99,11 @@ export function setUpLessons({ setCode, getCode, runCode, firstVisit }) {
   });
   $("lesson-solution").addEventListener("click", () => setCode(LESSONS[index].exercise.solution));
   $("lesson-check").addEventListener("click", check);
+  languageButton.addEventListener("click", () => {
+    language = language === "en" ? "bho" : "en";
+    store(LANGUAGE_KEY, language);
+    show(index);
+  });
 
   show(index);
   // Newcomers see the first lesson straight away; after that it remembers open or closed.

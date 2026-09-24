@@ -21,6 +21,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Did-you-mean hints: when a variable, function or built-in name isn't found but a similar one exists, the
   error suggests it, e.g. `"naam" naam ke koi variable na ba. Kahin "naamm" ta na?`. Missing kosh keys get
   the same hint. Short names (one or two letters) only get a hint for a difference in capitals.
+- The Sikh lessons are written in Bhojpuri (Roman letters) as well as English. Bhojpuri is shown by
+  default, and a button switches language (remembered). A test checks that both ask for the same code.
+  The README starts with a short introduction in Bhojpuri.
 - "Sikh" (learn) lessons in the playground: the **📘 Sikh** button opens 12 short lessons, from `bol ho` to
   `koshish kara`. Each has an explanation, an example that opens in the editor, and an exercise. **Jaanch
   kar** checks your output against the expected one (showing both when they differ), and **Jawab dekhaw**
