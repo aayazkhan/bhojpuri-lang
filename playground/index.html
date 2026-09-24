@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bhojpuri Lang Playground</title>
+  <meta name="description" content="A toy programming language with Bhojpuri keywords — run code in your browser.">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <h1>Bhojpuri Lang</h1>
+      <p class="tagline">Ek khilauna programming language — Bhojpuri me code likh, browser me chalaw.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="workspace">
+      <section class="panel">
+        <div class="toolbar">
+          <label class="field">
+            <span>Example</span>
+            <select id="examples"></select>
+          </label>
+          <button id="run" class="primary" type="button">Chalaw ▶</button>
+        </div>
+        <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Code editor"></textarea>
+        <p class="hint"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Enter</kbd> se chalaw</p>
+      </section>
+
+      <section class="panel">
+        <div class="toolbar">
+          <h2>Output</h2>
+          <button id="clear" type="button">Saaf kar</button>
+        </div>
+        <pre id="output" aria-live="polite"></pre>
+      </section>
+    </div>
+
+    <section class="cheatsheet">
+      <h2>Keywords</h2>
+      <table>
+        <thead><tr><th>Bhojpuri</th><th>Matlab</th></tr></thead>
+        <tbody id="keywords"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

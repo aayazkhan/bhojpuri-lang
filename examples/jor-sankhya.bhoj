@@ -1,0 +1,14 @@
+// Jor (even) sankhya 12 tak — "aage badha" aur "bas kara" ke istemal
+ka ho bhaiya
+  maan la i = 0;
+  jab le (sach) {
+    i += 1;
+    jadi (i > 12) {
+      bas kara;
+    }
+    jadi (i % 2 != 0) {
+      aage badha;
+    }
+    bol ho i, "jor sankhya ba";
+  }
+chalat bani bhaiya

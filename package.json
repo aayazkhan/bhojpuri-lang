@@ -1,0 +1,28 @@
+{
+  "name": "bhojpuri-lang",
+  "version": "0.1.0",
+  "description": "A toy programming language with Bhojpuri keywords",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": "./src/index.js",
+  "bin": {
+    "bhojpuri": "bin/bhojpuri.js"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "playground": "node scripts/serve.js"
+  },
+  "keywords": [
+    "bhojpuri",
+    "programming-language",
+    "interpreter",
+    "toy-language"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,9 @@
+// 5 ke factorial: 5 x 4 x 3 x 2 x 1
+ka ho bhaiya
+  maan la n = 5, jawab = 1;
+  jab le (n > 1) {
+    jawab *= n;
+    n -= 1;
+  }
+  bol ho "5 ke factorial =", jawab;
+chalat bani bhaiya

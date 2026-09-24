@@ -1,0 +1,16 @@
+// FizzBuzz: 1 se 15 tak
+ka ho bhaiya
+  maan la i = 1;
+  jab le (i <= 15) {
+    jadi (i % 15 == 0) {
+      bol ho "FizzBuzz";
+    } na ta jadi (i % 3 == 0) {
+      bol ho "Fizz";
+    } na ta jadi (i % 5 == 0) {
+      bol ho "Buzz";
+    } na ta {
+      bol ho i;
+    }
+    i += 1;
+  }
+chalat bani bhaiya
