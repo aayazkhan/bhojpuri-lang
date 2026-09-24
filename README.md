@@ -310,6 +310,10 @@ har k ramu me {                 // loop over the keys
 | `hissa(x, start, end)` | part of a list or string (see below)   |
 | `khoj(x, item)`      | where `item` first appears in a list (or text in a string), or `-1` |
 | `kul(list)`          | the total of a list of numbers           |
+| `saaf(text)`         | text without the spaces, tabs and newlines at the start and end |
+| `jagah(text, purana, naya)` | text with every `purana` replaced by `naya` |
+| `shuru_me(text, x)`  | `sach` if the text starts with `x`       |
+| `ant_me(text, x)`    | `sach` if the text ends with `x`         |
 | `badal(list, kaam)`  | a new list: the `kaam` applied to every item (see [Functions without names](#functions-without-names)) |
 | `chhaan(list, kaam)` | a new list of the items the `kaam` says `sach` to |
 
@@ -330,6 +334,14 @@ bol ho hissa(ank, 1, 3);      // [7, 19]          from index 1 up to (not includ
 bol ho hissa(ank, -2);        // [19, 3]          leave out the end to go to the end; negatives count back
 bol ho khoj(ank, 19), kul(ank);   // 2 71
 bol ho ba(ank, 7), ba("namaste", "mas");   // sach sach
+```
+
+Working with text:
+
+```
+maan la naam = saaf("  Ramu  ");                    // "Ramu"
+bol ho jagah("aam aam kela", "aam", "seb");          // seb seb kela
+bol ho shuru_me(naam, "Ra"), ant_me("x.bhoj", ".bhoj");   // sach sach
 ```
 
 `chhaant`, `ulta` and `hissa` return new lists and leave the original alone. `chhaant` sorts numbers by

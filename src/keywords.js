@@ -83,6 +83,10 @@ export const BUILTINS = Object.freeze({
   SUM: "kul",
   MAP: "badal",
   FILTER: "chhaan",
+  TRIM: "saaf",
+  REPLACE: "jagah",
+  STARTS_WITH: "shuru_me",
+  ENDS_WITH: "ant_me",
 });
 
 export const BUILTIN_MEANINGS = Object.freeze({
@@ -110,4 +114,8 @@ export const BUILTIN_MEANINGS = Object.freeze({
   SUM: "the total of a list of numbers",
   MAP: "a new list: a kaam applied to every item, badal(list, kaam(x) { ... })",
   FILTER: "a new list of the items a kaam says sach to, chhaan(list, kaam(x) { ... })",
+  TRIM: "text without the spaces at the start and end",
+  REPLACE: "text with every purana replaced by naya: jagah(text, purana, naya)",
+  STARTS_WITH: "sach if the text starts with the given text",
+  ENDS_WITH: "sach if the text ends with the given text",
 });

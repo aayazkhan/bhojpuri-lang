@@ -41,6 +41,7 @@ export const MSG = {
   cantSort: (name, a, b) => `${q(name)} khali sab sankhya ya sab string wala list chhaant sakela, lekin ${a} aur ${b} mil gail.`,
   // An error thrown with `phenk da` that nobody caught: show the value itself.
   thrown: (text) => text,
+  emptySearch: (name) => `${q(name)} ke khoje wala text khaali ("") na ho sakela.`,
   notANumber: (text) => `${q(text)} sankhya na ha, ekra ke sankhya na banawal ja sakela.`,
   badRange: (name, a, b) => `${q(name)} ke pahila sankhya dusra se chhota ya barabar hoe ke chahi, lekin ${a} aur ${b} mil gail.`,
   loopBoundNotNumber: (word, got) => `${q(K.FOR)} loop me ${q(word)} ke baad sankhya chahi, lekin ${got} mil gail.`,
