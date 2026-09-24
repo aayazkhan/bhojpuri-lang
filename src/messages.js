@@ -15,6 +15,7 @@ export const MSG = {
   unterminatedString: () => `String band na bhail — aakhri quote lagawal bhula gail ka?`,
   unterminatedComment: () => `Comment ${q("/*")} ke band kare khatir ${q("*/")} na mil paail.`,
   danglingElse: (kw) => `${q(kw)} se pahile ${q(K.IF)} hoe ke chahi.`,
+  danglingCatch: (kw) => `${q(kw)} se pahile ${q(K.TRY)} { ... } hoe ke chahi.`,
   jumpOutsideLoop: (kw) => `${q(kw)} khali ${q(K.WHILE)} ya ${q(K.FOR)} loop ke bhitar chal sakela.`,
   invalidAssignTarget: () => `Value khali variable ya list ke khana (a[0]) me rakhal ja sakela.`,
   returnOutsideFunction: (kw) => `${q(kw)} khali ${q(K.FUNCTION)} ke bhitar chal sakela.`,
@@ -36,6 +37,8 @@ export const MSG = {
   builtinArgType: (name, expected, got) => `${q(name)} ke ${expected} chahi, lekin ${got} mil gail.`,
   noInput: (name) => `Ihaan ${q(name)} ke jawab dewe wala koi na ba (input na mil sakela).`,
   cantSort: (name, a, b) => `${q(name)} khali sab sankhya ya sab string wala list chhaant sakela, lekin ${a} aur ${b} mil gail.`,
+  // An error thrown with `phenk da` that nobody caught: show the value itself.
+  thrown: (text) => text,
   notANumber: (text) => `${q(text)} sankhya na ha, ekra ke sankhya na banawal ja sakela.`,
   badRange: (name, a, b) => `${q(name)} ke pahila sankhya dusra se chhota ya barabar hoe ke chahi, lekin ${a} aur ${b} mil gail.`,
   loopBoundNotNumber: (word, got) => `${q(K.FOR)} loop me ${q(word)} ke baad sankhya chahi, lekin ${got} mil gail.`,

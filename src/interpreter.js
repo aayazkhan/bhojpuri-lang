@@ -1,5 +1,5 @@
 import { KEYWORDS, LOOP_WORDS, BUILTINS } from "./keywords.js";
-import { runtimeError } from "./errors.js";
+import { BhojpuriError, runtimeError } from "./errors.js";
 import { MSG } from "./messages.js";
 
 // Signals returned (not thrown) by statements to unwind to the nearest loop or function.
@@ -411,6 +411,26 @@ export class Interpreter {
 
       case "Return":
         return new ReturnSignal(node.argument ? this.evaluate(node.argument, scope) : null);
+
+      case "Try":
+        try {
+          return this.exec(node.body, scope);
+        } catch (err) {
+          // Only runtime errors can be caught; anything else is a bug in the interpreter.
+          if (!(err instanceof BhojpuriError) || err.kind !== "RuntimeError") throw err;
+          const handlerScope = new Scope(scope);
+          if (node.param) {
+            handlerScope.declare(node.param, Object.hasOwn(err, "value") ? err.value : err.message, node);
+          }
+          return this.exec(node.handler, handlerScope);
+        }
+
+      case "Throw": {
+        const value = this.evaluate(node.argument, scope);
+        const err = runtimeError(MSG.thrown(display(value)), node);
+        err.value = value; // what `galti pe (g)` receives, unchanged
+        throw err;
+      }
 
       case "Break": return BREAK;
       case "Continue": return CONTINUE;
