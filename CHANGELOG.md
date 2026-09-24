@@ -33,7 +33,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 ### Changed
 
 - The CLI writes output with `fs.writeSync` instead of `console.log`, so questions and answers stay in
-  order.
+  order. If the program reading its output stops early (e.g. `bhojpuri x.bhoj | head`), it exits quietly
+  instead of crashing with a broken-pipe error.
 - CI runs the examples with empty stdin, so examples that ask questions don't wait for input.
 - Examples: `chhatai.bhoj` compares its bubble sort with `chhaant`, and `bazaar.bhoj` uses `kul`, `khoj`,
   `chhaant` and `ulta`.
