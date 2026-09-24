@@ -6,6 +6,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- The tests are split by topic into `test/*.test.js` (language, loops, functions, collections, built-ins,
+  catching errors, prompt, CLI, examples), with shared helpers in `test/helpers.js`. `npm test` runs
+  `node --test test/*.test.js`.
+
 ## [0.4.1] - 2026-09-24
 
 ### Fixed
