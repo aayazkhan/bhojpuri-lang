@@ -138,6 +138,26 @@ Lists are shared by reference, so a function that changes a list changes it for 
 | `lambai(x)`          | length of a list or string               |
 | `daal(list, value)`  | add `value` to the end of `list`         |
 | `nikaal(list)`       | remove and return the last item (`khaali` if empty) |
+| `sankhya(text)`      | turn text into a number: `sankhya("42")` is `42` |
+| `shabd(x)`           | turn any value into text: `shabd(42)` is `"42"` |
+| `kism(x)`            | the type of a value: `sankhya`, `shabd`, `list`, `sach/jhooth`, `khaali` or `kaam` |
+| `gol(n)`             | round to the nearest whole number: `gol(2.6)` is `3` |
+| `neeche(n)`          | round down: `neeche(7 / 2)` is `3`       |
+| `sanyog(a, b)`       | random whole number from `a` to `b`, both included |
+| `bada(text)`         | text in UPPER case                       |
+| `chhota(text)`       | text in lower case                       |
+| `tod(text, sep)`     | split text into a list: `tod("a,b", ",")` is `["a", "b"]` |
+| `jod(list, sep)`     | join a list into text: `jod(["a", "b"], "-")` is `"a-b"` |
+
+```
+maan la umar = sankhya("24");
+bol ho "Agila saal:", umar + 1;             // Agila saal: 25
+bol ho jod(tod("aalu pyaaz sattu", " "), ", ");  // aalu, pyaaz, sattu
+bol ho "Paasa:", sanyog(1, 6);
+```
+
+Giving a built-in the wrong kind of value is an error, not a silent wrong answer: `sankhya("abc")`
+stops the program and says `"abc"` isn't a number.
 
 Built-in names are ordinary variables, so you can reuse the names for your own variables.
 

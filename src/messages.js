@@ -34,6 +34,8 @@ export const MSG = {
   wrongArgCount: (name, expected, got) =>
     `${q(name)} ${expected} cheez maange la, lekin ${got} dihal gail.`,
   builtinArgType: (name, expected, got) => `${q(name)} ke ${expected} chahi, lekin ${got} mil gail.`,
+  notANumber: (text) => `${q(text)} sankhya na ha, ekra ke sankhya na banawal ja sakela.`,
+  badRange: (name, a, b) => `${q(name)} ke pahila sankhya dusra se chhota ya barabar hoe ke chahi, lekin ${a} aur ${b} mil gail.`,
   notIndexable: (type) => `${type} me [ ] se index na lagawal ja sakela.`,
   badIndex: (got) => `Index pura sankhya (0, 1, 2 ...) hoe ke chahi, lekin ${got} mil gail.`,
   indexOutOfRange: (index, length) => `Index ${index} bahar ba — lambai khali ${length} ba.`,

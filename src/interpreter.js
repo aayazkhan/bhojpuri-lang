@@ -126,10 +126,26 @@ function checkIndex(object, index, node) {
   return index;
 }
 
-function createGlobals() {
+// What `kism` returns for each kind of value.
+function kindName(value) {
+  if (typeof value === "number") return "sankhya";
+  if (typeof value === "string") return "shabd";
+  return typeName(value);
+}
+
+function createGlobals(random) {
   const globals = new Scope();
   const expectList = (name, value, node) => {
     if (!Array.isArray(value)) throw runtimeError(MSG.builtinArgType(name, "list", typeName(value)), node);
+  };
+  const expectNumber = (name, value, node) => {
+    if (typeof value !== "number") throw runtimeError(MSG.builtinArgType(name, "sankhya", typeName(value)), node);
+  };
+  const expectInteger = (name, value, node) => {
+    if (!Number.isInteger(value)) throw runtimeError(MSG.builtinArgType(name, "pura sankhya", display(value)), node);
+  };
+  const expectString = (name, value, node) => {
+    if (typeof value !== "string") throw runtimeError(MSG.builtinArgType(name, "string", typeName(value)), node);
   };
 
   const builtins = [
@@ -146,6 +162,47 @@ function createGlobals() {
       expectList(BUILTINS.POP, list, node);
       return list.length ? list.pop() : null;
     }),
+    new NativeFunction(BUILTINS.TO_NUMBER, 1, ([value], node) => {
+      if (typeof value === "number") return value;
+      expectString(BUILTINS.TO_NUMBER, value, node);
+      const number = value.trim() === "" ? NaN : Number(value);
+      if (!Number.isFinite(number)) throw runtimeError(MSG.notANumber(value), node);
+      return number;
+    }),
+    new NativeFunction(BUILTINS.TO_STRING, 1, ([value]) => display(value)),
+    new NativeFunction(BUILTINS.TYPE, 1, ([value]) => kindName(value)),
+    new NativeFunction(BUILTINS.ROUND, 1, ([value], node) => {
+      expectNumber(BUILTINS.ROUND, value, node);
+      return Math.round(value);
+    }),
+    new NativeFunction(BUILTINS.FLOOR, 1, ([value], node) => {
+      expectNumber(BUILTINS.FLOOR, value, node);
+      return Math.floor(value);
+    }),
+    new NativeFunction(BUILTINS.RANDOM, 2, ([low, high], node) => {
+      expectInteger(BUILTINS.RANDOM, low, node);
+      expectInteger(BUILTINS.RANDOM, high, node);
+      if (low > high) throw runtimeError(MSG.badRange(BUILTINS.RANDOM, low, high), node);
+      return low + Math.floor(random() * (high - low + 1));
+    }),
+    new NativeFunction(BUILTINS.UPPER, 1, ([text], node) => {
+      expectString(BUILTINS.UPPER, text, node);
+      return text.toUpperCase();
+    }),
+    new NativeFunction(BUILTINS.LOWER, 1, ([text], node) => {
+      expectString(BUILTINS.LOWER, text, node);
+      return text.toLowerCase();
+    }),
+    new NativeFunction(BUILTINS.SPLIT, 2, ([text, separator], node) => {
+      expectString(BUILTINS.SPLIT, text, node);
+      expectString(BUILTINS.SPLIT, separator, node);
+      return text.split(separator);
+    }),
+    new NativeFunction(BUILTINS.JOIN, 2, ([list, separator], node) => {
+      expectList(BUILTINS.JOIN, list, node);
+      expectString(BUILTINS.JOIN, separator, node);
+      return list.map((item) => display(item)).join(separator);
+    }),
   ];
   for (const fn of builtins) globals.declare(fn.name, fn);
   return globals;
@@ -153,18 +210,20 @@ function createGlobals() {
 
 export class Interpreter {
   /**
-   * @param {{ print?: (line: string) => void, maxLoopIterations?: number }} [options]
+   * @param {{ print?: (line: string) => void, maxLoopIterations?: number, random?: () => number }} [options]
    *   print: where `bol ho` output goes (defaults to console.log).
    *   maxLoopIterations: guard against infinite loops, e.g. in the browser playground.
+   *   random: source of numbers in [0, 1) for `sanyog` (defaults to Math.random; handy for tests).
    */
-  constructor({ print = console.log, maxLoopIterations = Infinity } = {}) {
+  constructor({ print = console.log, maxLoopIterations = Infinity, random = Math.random } = {}) {
     this.print = print;
     this.maxLoopIterations = maxLoopIterations;
+    this.random = random;
   }
 
   run(program) {
     // The program gets its own scope so it can shadow built-in names.
-    this.execAll(program.body, new Scope(createGlobals()));
+    this.execAll(program.body, new Scope(createGlobals(this.random)));
   }
 
   execAll(statements, scope) {

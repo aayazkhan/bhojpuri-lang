@@ -237,6 +237,73 @@ describe("lists", () => {
   });
 });
 
+describe("standard library", () => {
+  const withRandom = (random, body) => output(program(body), { random });
+
+  test("sankhya turns text into a number", () => {
+    assert.deepEqual(out(`bol ho sankhya("42") + 1, sankhya(" 3.5 "), sankhya("-7"), sankhya(9);`), ["43 3.5 -7 9"]);
+  });
+
+  test("sankhya rejects text that isn't a number", () => {
+    assertError(program(`bol ho sankhya("abc");`), { kind: "RuntimeError", line: 2, match: /"abc" sankhya na ha/ });
+    assertError(program(`bol ho sankhya("");`), { kind: "RuntimeError", match: /sankhya na ha/ });
+    assertError(program(`bol ho sankhya("Infinity");`), { kind: "RuntimeError", match: /sankhya na ha/ });
+    assertError(program(`bol ho sankhya([1]);`), { kind: "RuntimeError", match: /"sankhya" ke string chahi/ });
+  });
+
+  test("shabd turns any value into text", () => {
+    assert.deepEqual(
+      out(`bol ho shabd(12) + shabd(3), lambai(shabd(100)), shabd(sach), shabd(khaali), shabd(["a", 1]);`),
+      ['123 3 sach khaali ["a", 1]'],
+    );
+  });
+
+  test("kism names the type of a value", () => {
+    assert.deepEqual(
+      out(`kaam f() {}\nbol ho kism(1), kism("a"), kism([]), kism(sach), kism(khaali), kism(f), kism(lambai);`),
+      ["sankhya shabd list sach/jhooth khaali kaam kaam"],
+    );
+  });
+
+  test("gol rounds, neeche rounds down", () => {
+    assert.deepEqual(out(`bol ho gol(2.4), gol(2.5), gol(-2.6), neeche(7 / 2), neeche(-0.5), neeche(4);`), ["2 3 -3 3 -1 4"]);
+    assertError(program(`bol ho gol("2");`), { kind: "RuntimeError", match: /"gol" ke sankhya chahi/ });
+    assertError(program(`bol ho neeche(khaali);`), { kind: "RuntimeError", match: /"neeche"/ });
+  });
+
+  test("sanyog picks a whole number in the range, inclusive", () => {
+    assert.deepEqual(withRandom(() => 0, `bol ho sanyog(1, 6);`), ["1"]);
+    assert.deepEqual(withRandom(() => 0.9999, `bol ho sanyog(1, 6);`), ["6"]);
+    assert.deepEqual(withRandom(() => 0.5, `bol ho sanyog(-2, 2), sanyog(5, 5);`), ["0 5"]);
+    const rolls = out(`maan la i = 0;\njab le (i < 200) { bol ho sanyog(1, 3); i += 1; }`);
+    assert.deepEqual([...new Set(rolls)].sort(), ["1", "2", "3"]);
+  });
+
+  test("sanyog rejects bad ranges", () => {
+    assertError(program(`bol ho sanyog(6, 1);`), { kind: "RuntimeError", match: /6 aur 1/ });
+    assertError(program(`bol ho sanyog(1.5, 3);`), { kind: "RuntimeError", match: /pura sankhya/ });
+    assertError(program(`bol ho sanyog(1);`), { kind: "RuntimeError", match: /"sanyog" 2 cheez/ });
+  });
+
+  test("bada and chhota change case", () => {
+    assert.deepEqual(out(`bol ho bada("Ram ji"), chhota("PATNA"), bada("नाम");`), ["RAM JI patna नाम"]);
+    assertError(program(`bol ho bada(5);`), { kind: "RuntimeError", match: /"bada" ke string chahi/ });
+  });
+
+  test("tod splits text, jod joins a list", () => {
+    assert.deepEqual(
+      out(`maan la l = tod("aalu,pyaaz,,sattu", ",");\nbol ho l, lambai(l), tod("abc", "");\nbol ho jod(["a", 1, sach], "-"), jod([], ","), jod(tod("1 2 3", " "), "+");`),
+      ['["aalu", "pyaaz", "", "sattu"] 4 ["a", "b", "c"]', "a-1-sach  1+2+3"],
+    );
+    assertError(program(`bol ho tod("a,b", 1);`), { kind: "RuntimeError", match: /"tod" ke string chahi/ });
+    assertError(program(`bol ho jod("ab", ",");`), { kind: "RuntimeError", match: /"jod" ke list chahi/ });
+  });
+
+  test("new built-in names can be shadowed", () => {
+    assert.deepEqual(out(`kaam jod(a, b) { lauta da a + b; }\nmaan la gol = "round";\nbol ho jod(2, 3), gol;`), ["5 round"]);
+  });
+});
+
 describe("errors", () => {
   test("missing start / end / code after end", () => {
     assertError(`bol ho 1;`, { kind: "SyntaxError", match: /ka ho bhaiya/ });
