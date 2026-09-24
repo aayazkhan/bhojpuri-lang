@@ -5,7 +5,8 @@ Written in plain JavaScript with zero dependencies. It runs in Node.js and in th
 
 **[Try it in the playground →](https://aayazkhan.github.io/bhojpuri-lang/)** Write code (with colours as you
 type), run it, and press
-**Baantaw 🔗** to copy a link that opens your code for anyone you send it to.
+**Baantaw 🔗** to copy a link that opens your code for anyone you send it to. The **Console** below the
+editor runs one line at a time, like the [interactive prompt](#interactive-prompt).
 
 ```
 ka ho bhaiya

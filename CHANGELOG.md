@@ -19,6 +19,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Coloured code in the playground editor: keywords, `sach`/`jhooth`/`khaali`, strings, numbers, comments and
   built-in calls each get a colour as you type. The `{…}` parts of backtick strings are coloured as code, and
   `se`/`tak`/`kadam`/`me` only inside a `har` header. Half-typed code is coloured too.
+- Playground console: a panel under the editor that runs one line at a time, like `bhojpuri` with no file.
+  Results, printed output and errors show in the log, and variables and functions carry over. Unclosed
+  `{` `(` `[` continue on a `...` line (Shift+Enter always adds a line). ↑/↓ recall earlier lines, `poochh`
+  uses the question box, and **Naya shuru** starts a fresh session.
 
 ### Changed
 
