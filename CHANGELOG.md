@@ -8,6 +8,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- MIT license (`LICENSE`, the `license` field in `package.json`, and a License section in the README).
 - Functions: `kaam naam(a, b) { ... }` and `lauta da` (return). Functions support recursion and closures,
   and they are values that can be passed to or returned from other functions.
 - Lists: `[1, 2, 3]` literals (a trailing comma is allowed), indexing `l[0]` (strings too), and index
