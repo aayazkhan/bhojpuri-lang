@@ -6,6 +6,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Internal: the interpreter is split into smaller files. `src/values.js` holds the kinds of value and how
+  they're shown, `src/scope.js` the variables, and `src/builtins.js` the built-in functions, grouped by topic.
+  `src/interpreter.js` only runs statements and expressions. Behaviour is unchanged, and the tests are unchanged.
+
 ## [0.6.0] - 2026-09-24
 
 ### Added

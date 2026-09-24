@@ -511,6 +511,9 @@ source code ──► tokenizer ──► tokens ──► parser ──► AST 
 - **Tokenizer** splits the source into keywords, numbers, strings, names and operators. Multi-word keywords are matched longest-first.
 - **Parser** is a recursive-descent parser that builds an abstract syntax tree (AST). The full grammar is at the top of `src/parser.js`.
 - **Interpreter** walks the AST with a chain of scopes. `bas kara`, `aage badha` and `lauta da` are returned as signals up to the enclosing loop or function. Functions keep a reference to the scope they were defined in, which is what makes closures work.
+  - `src/values.js`: the kinds of value and how they're shown.
+  - `src/scope.js`: variables.
+  - `src/builtins.js`: the built-in functions, grouped by topic.
 
 ## Using it as a library
 
@@ -552,7 +555,8 @@ There's also a `random` option that replaces `Math.random` for `sanyog`, which i
 
 ```
 bin/bhojpuri.js      CLI
-src/                 tokenizer, parser, interpreter, keywords, messages
+src/                 tokenizer, parser, interpreter, values, scope, builtins, keywords, messages,
+                     suggest (did-you-mean hints), session (interactive prompt)
 examples/*.bhoj      sample programs (examples/lib/ holds a file that hisaab.bhoj brings in)
 playground/          browser playground (uses src/ directly as ES modules)
 editors/vscode/      VS Code extension (colours, comments, brackets)
