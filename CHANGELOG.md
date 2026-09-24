@@ -8,6 +8,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `STABILITY.md`: what stays the same from 1.0 on (keywords, built-ins, output, which situations are errors,
+  the CLI, the library API, share links), what doesn't (message wording, the playground, the VS Code
+  colours, internals), and how changes happen. In particular, new keywords only come in a major version.
+- README: string escapes, the `bhojpuri` command and its exit codes, and every library export with the
+  fields of `BhojpuriError`.
 - `le aaw` in the playground: file tabs above the editor (`main.bhoj` plus any files added with
   **+ Naya file**, including folders like `lib/ganit.bhoj` and Devanagari names).
   - `le aaw` finds the other tabs using the same path rules as the CLI, and errors name the tab they

@@ -59,6 +59,10 @@ short program that shows the problem. In the playground, **Baantaw 🔗** copies
 
 ## Releasing
 
+Before a release, check the changes against [STABILITY.md](STABILITY.md). From 1.0, anything it covers
+may only change in a new major version. New built-ins are fine in any release, but a new keyword needs a
+major version.
+
 1. `git switch -c release/x.y.z develop`
 2. Bump `version` in `package.json` and move the `[Unreleased]` entries in `CHANGELOG.md` into a new
    `## [x.y.z] - YYYY-MM-DD` section.

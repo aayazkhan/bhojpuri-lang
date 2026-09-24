@@ -37,6 +37,18 @@ Or run a file without installing anything:
 npx @aayazk/bhojpuri-lang program.bhoj
 ```
 
+| Command | What it does |
+| --- | --- |
+| `bhojpuri program.bhoj` | runs the program. `poochh` reads answers from what you type (or from piped input) |
+| `bhojpuri` | opens the [interactive prompt](#interactive-prompt); piped lines run without prompts |
+| `bhojpuri --help` | lists every keyword and built-in |
+| `bhojpuri --version` | prints the version |
+
+The command exits with code `0` when the program finishes, and `1` for a syntax or runtime error (printed
+to stderr) or a file that can't be read.
+
+From 1.0, [STABILITY.md](STABILITY.md) says what stays the same between versions.
+
 ## Quick start (from a clone of this repo)
 
 ```bash
@@ -130,6 +142,17 @@ Variables are block-scoped. Names can be written in Devanagari too (`maan la न
 ```
 bol ho "jawab:", a * 2;     // several values are joined with a space
 ```
+
+### Strings
+
+Strings use double or single quotes: `"Pranam"` or `'Pranam'`. They end on the same line, and `+` joins
+them. A backslash starts an escape:
+
+| Escape | Gives |
+| --- | --- |
+| `\n` `\t` `\r` `\0` | new line, tab, carriage return, the zero character |
+| `\"` `\'` `\\` | the quote or backslash itself |
+| `\` + anything else | that character, e.g. `\{` in a backtick string |
 
 ### Text in strings
 
@@ -553,6 +576,26 @@ in error messages, and `from` is the `id` of the file that asks.
 
 Without an `input` option, `poochh` stops with a Bhojpuri error, because there's no one to answer it.
 There's also a `random` option that replaces `Math.random` for `sanyog`, which is handy in tests.
+
+Everything the package exports:
+
+| Export | What it is |
+| --- | --- |
+| `run(source, options)` | tokenizes, parses and runs a program. Options: `print`, `input`, `maxLoopIterations`, `random`, `loadFile`, `file` (all described above) |
+| `Session` | the interactive prompt: `new Session(options)`, then `run(source)` → `{ exit, result }` and `isComplete(source)` |
+| `BhojpuriError` | what `run` throws for a mistake in the program |
+| `formatError(err, source)` | the error as text, with the line and a `^` under the column |
+| `tokenize(source)`, `parse(tokens)`, `Interpreter` | the three steps `run` uses, for tools that need them separately |
+| `display(value)` | a value as `bol ho` would print it |
+| `KEYWORDS`, `KEYWORD_MEANINGS`, `LOOP_WORDS`, `BUILTINS`, `BUILTIN_MEANINGS` | the names of everything, and what each means in English |
+
+A `BhojpuriError` has these fields:
+- `kind`: `"SyntaxError"` or `"RuntimeError"`.
+- `message`: the Bhojpuri message. Its wording may improve between versions.
+- `line`, `col`: where the mistake is.
+- `file`, `source`: the name and code of the file it's in, when that's a file brought in with `le aaw`
+  rather than the main program.
+- `value`: the value given to `phenk da`, for an uncaught `phenk da`.
 
 ## Project layout
 
