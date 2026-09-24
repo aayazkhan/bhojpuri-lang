@@ -12,6 +12,8 @@ export const KEYWORDS = Object.freeze({
   WHILE: "jab le",
   BREAK: "bas kara",
   CONTINUE: "aage badha",
+  FUNCTION: "kaam",
+  RETURN: "lauta da",
   TRUE: "sach",
   FALSE: "jhooth",
   NULL: "khaali",
@@ -29,7 +31,23 @@ export const KEYWORD_MEANINGS = Object.freeze({
   WHILE: "while loop",
   BREAK: "break",
   CONTINUE: "continue",
+  FUNCTION: "define a function",
+  RETURN: "return",
   TRUE: "true",
   FALSE: "false",
   NULL: "null",
+});
+
+// Built-in functions. These are ordinary names, not keywords, so a program may
+// shadow them with its own variables.
+export const BUILTINS = Object.freeze({
+  LENGTH: "lambai",
+  PUSH: "daal",
+  POP: "nikaal",
+});
+
+export const BUILTIN_MEANINGS = Object.freeze({
+  LENGTH: "length of a list or string",
+  PUSH: "add an item to the end of a list",
+  POP: "remove and return the last item of a list",
 });

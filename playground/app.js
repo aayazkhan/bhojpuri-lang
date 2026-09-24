@@ -1,4 +1,6 @@
-import { run, formatError, BhojpuriError, KEYWORDS, KEYWORD_MEANINGS } from "../src/index.js";
+import {
+  run, formatError, BhojpuriError, KEYWORDS, KEYWORD_MEANINGS, BUILTINS, BUILTIN_MEANINGS,
+} from "../src/index.js";
 
 const EXAMPLES = [
   { file: "hello.bhoj", title: "Pranam duniya" },
@@ -6,6 +8,9 @@ const EXAMPLES = [
   { file: "pahada.bhoj", title: "Pahada (table)" },
   { file: "factorial.bhoj", title: "Factorial" },
   { file: "jor-sankhya.bhoj", title: "Jor sankhya (break/continue)" },
+  { file: "fibonacci.bhoj", title: "Fibonacci (kaam)" },
+  { file: "bazaar.bhoj", title: "Bazaar (list)" },
+  { file: "chhatai.bhoj", title: "Chhatai (bubble sort)" },
 ];
 
 const STORAGE_KEY = "bhojpuri-lang:code";
@@ -59,17 +64,23 @@ for (const { file, title } of EXAMPLES) {
   examples.append(new Option(title, file));
 }
 
+function cheatRow(text, meaning) {
+  const row = document.createElement("tr");
+  const word = document.createElement("td");
+  const code = document.createElement("code");
+  code.textContent = text;
+  word.append(code);
+  const desc = document.createElement("td");
+  desc.textContent = meaning;
+  row.append(word, desc);
+  return row;
+}
+
 document.getElementById("keywords").append(
-  ...Object.entries(KEYWORDS).map(([id, text]) => {
-    const row = document.createElement("tr");
-    const kw = document.createElement("td");
-    kw.innerHTML = "<code></code>";
-    kw.firstChild.textContent = text;
-    const meaning = document.createElement("td");
-    meaning.textContent = KEYWORD_MEANINGS[id];
-    row.append(kw, meaning);
-    return row;
-  }),
+  ...Object.entries(KEYWORDS).map(([id, text]) => cheatRow(text, KEYWORD_MEANINGS[id])),
+);
+document.getElementById("builtins").append(
+  ...Object.entries(BUILTINS).map(([id, name]) => cheatRow(`${name}(…)`, BUILTIN_MEANINGS[id])),
 );
 
 examples.addEventListener("change", () => loadExample(examples.value));

@@ -1,10 +1,16 @@
-import { KEYWORDS } from "./keywords.js";
+import { KEYWORDS, BUILTINS } from "./keywords.js";
 import { runtimeError } from "./errors.js";
 import { MSG } from "./messages.js";
 
-// Signals returned (not thrown) by statements to unwind to the nearest loop.
+// Signals returned (not thrown) by statements to unwind to the nearest loop or function.
 const BREAK = Symbol("break");
 const CONTINUE = Symbol("continue");
+
+class ReturnSignal {
+  constructor(value) {
+    this.value = value;
+  }
+}
 
 class Scope {
   constructor(parent = null) {
@@ -33,17 +39,50 @@ class Scope {
   }
 }
 
+/** A function defined with `kaam`; it closes over the scope it was defined in. */
+class UserFunction {
+  constructor(node, closure) {
+    this.name = node.name;
+    this.params = node.params;
+    this.body = node.body;
+    this.closure = closure;
+  }
+}
+
+class NativeFunction {
+  constructor(name, arity, impl) {
+    this.name = name;
+    this.arity = arity;
+    this.impl = impl;
+  }
+}
+
+// V8/JavaScriptCore throw RangeError; Firefox throws InternalError ("too much recursion").
+const isStackOverflow = (err) => err instanceof RangeError || err?.name === "InternalError";
+
+const isFunction = (value) => value instanceof UserFunction || value instanceof NativeFunction;
+
 /** How a value looks when printed or joined into a string. */
-export function display(value) {
+export function display(value, seen = new Set()) {
   if (value === null) return KEYWORDS.NULL;
   if (value === true) return KEYWORDS.TRUE;
   if (value === false) return KEYWORDS.FALSE;
+  if (isFunction(value)) return `<${KEYWORDS.FUNCTION} ${value.name}>`;
+  if (Array.isArray(value)) {
+    if (seen.has(value)) return "[...]";
+    seen.add(value);
+    const items = value.map((item) => (typeof item === "string" ? JSON.stringify(item) : display(item, seen)));
+    seen.delete(value);
+    return `[${items.join(", ")}]`;
+  }
   return String(value);
 }
 
 function typeName(value) {
   if (value === null) return KEYWORDS.NULL;
   if (typeof value === "boolean") return `${KEYWORDS.TRUE}/${KEYWORDS.FALSE}`;
+  if (Array.isArray(value)) return "list";
+  if (isFunction(value)) return KEYWORDS.FUNCTION;
   return typeof value;
 }
 
@@ -77,6 +116,41 @@ function binaryOp(op, a, b, node) {
   throw runtimeError(MSG.badOperands(op, typeName(a), typeName(b)), node);
 }
 
+/** Validate `object[index]` and return the index as a number. */
+function checkIndex(object, index, node) {
+  if (!Array.isArray(object) && typeof object !== "string") {
+    throw runtimeError(MSG.notIndexable(typeName(object)), node);
+  }
+  if (!Number.isInteger(index)) throw runtimeError(MSG.badIndex(display(index)), node);
+  if (index < 0 || index >= object.length) throw runtimeError(MSG.indexOutOfRange(index, object.length), node);
+  return index;
+}
+
+function createGlobals() {
+  const globals = new Scope();
+  const expectList = (name, value, node) => {
+    if (!Array.isArray(value)) throw runtimeError(MSG.builtinArgType(name, "list", typeName(value)), node);
+  };
+
+  const builtins = [
+    new NativeFunction(BUILTINS.LENGTH, 1, ([value], node) => {
+      if (Array.isArray(value) || typeof value === "string") return value.length;
+      throw runtimeError(MSG.builtinArgType(BUILTINS.LENGTH, "list ya string", typeName(value)), node);
+    }),
+    new NativeFunction(BUILTINS.PUSH, 2, ([list, value], node) => {
+      expectList(BUILTINS.PUSH, list, node);
+      list.push(value);
+      return list;
+    }),
+    new NativeFunction(BUILTINS.POP, 1, ([list], node) => {
+      expectList(BUILTINS.POP, list, node);
+      return list.length ? list.pop() : null;
+    }),
+  ];
+  for (const fn of builtins) globals.declare(fn.name, fn);
+  return globals;
+}
+
 export class Interpreter {
   /**
    * @param {{ print?: (line: string) => void, maxLoopIterations?: number }} [options]
@@ -89,7 +163,8 @@ export class Interpreter {
   }
 
   run(program) {
-    this.execAll(program.body, new Scope());
+    // The program gets its own scope so it can shadow built-in names.
+    this.execAll(program.body, new Scope(createGlobals()));
   }
 
   execAll(statements, scope) {
@@ -122,10 +197,19 @@ export class Interpreter {
           if (++iterations > this.maxLoopIterations) {
             throw runtimeError(MSG.tooManyIterations(this.maxLoopIterations), node);
           }
-          if (this.exec(node.body, scope) === BREAK) break;
+          const signal = this.exec(node.body, scope);
+          if (signal === BREAK) break;
+          if (signal instanceof ReturnSignal) return signal;
         }
         return;
       }
+
+      case "Function":
+        scope.declare(node.name, new UserFunction(node, scope), node);
+        return;
+
+      case "Return":
+        return new ReturnSignal(node.argument ? this.evaluate(node.argument, scope) : null);
 
       case "Break": return BREAK;
       case "Continue": return CONTINUE;
@@ -145,13 +229,19 @@ export class Interpreter {
     switch (node.type) {
       case "Literal": return node.value;
       case "Identifier": return scope.get(node.name, node);
+      case "ListLiteral": return node.elements.map((element) => this.evaluate(element, scope));
+      case "Assignment": return this.assign(node, scope);
 
-      case "Assignment": {
-        const current = node.operator === "=" ? undefined : scope.get(node.name, node);
-        let value = this.evaluate(node.value, scope);
-        if (node.operator !== "=") value = binaryOp(node.operator.slice(0, -1), current, value, node);
-        scope.set(node.name, value, node);
-        return value;
+      case "Index": {
+        const object = this.evaluate(node.object, scope);
+        const index = checkIndex(object, this.evaluate(node.index, scope), node);
+        return object[index];
+      }
+
+      case "Call": {
+        const callee = this.evaluate(node.callee, scope);
+        const args = node.args.map((arg) => this.evaluate(arg, scope));
+        return this.call(callee, args, node);
       }
 
       case "Logical": {
@@ -172,6 +262,53 @@ export class Interpreter {
 
       default:
         throw new Error(`Unknown expression type: ${node.type}`);
+    }
+  }
+
+  assign(node, scope) {
+    const { target, operator } = node;
+    const compound = operator !== "=";
+    const combine = (current, value) => (compound ? binaryOp(operator.slice(0, -1), current, value, node) : value);
+
+    if (target.type === "Identifier") {
+      const current = compound ? scope.get(target.name, target) : undefined;
+      const value = combine(current, this.evaluate(node.value, scope));
+      scope.set(target.name, value, target);
+      return value;
+    }
+
+    // Index target: evaluate the list and index before the right-hand side, like JS.
+    const object = this.evaluate(target.object, scope);
+    if (typeof object === "string") throw runtimeError(MSG.stringImmutable(), target);
+    const index = checkIndex(object, this.evaluate(target.index, scope), target);
+    const current = compound ? object[index] : undefined;
+    const value = combine(current, this.evaluate(node.value, scope));
+    object[index] = value;
+    return value;
+  }
+
+  call(callee, args, node) {
+    if (callee instanceof NativeFunction) {
+      if (args.length !== callee.arity) throw runtimeError(MSG.wrongArgCount(callee.name, callee.arity, args.length), node);
+      return callee.impl(args, node);
+    }
+
+    if (!(callee instanceof UserFunction)) throw runtimeError(MSG.notAFunction(typeName(callee)), node);
+    if (args.length !== callee.params.length) {
+      throw runtimeError(MSG.wrongArgCount(callee.name, callee.params.length, args.length), node);
+    }
+
+    const scope = new Scope(callee.closure);
+    callee.params.forEach((param, i) => scope.declare(param, args[i], node));
+
+    try {
+      const signal = this.execAll(callee.body.body, scope);
+      return signal instanceof ReturnSignal ? signal.value : null;
+    } catch (err) {
+      // How deep recursion can go depends on the JS engine, so rather than guess a
+      // limit we translate the engine's own stack overflow into a Bhojpuri error.
+      if (isStackOverflow(err)) throw runtimeError(MSG.tooDeep(), node);
+      throw err;
     }
   }
 }

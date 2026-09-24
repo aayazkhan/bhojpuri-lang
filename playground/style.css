@@ -169,6 +169,7 @@ kbd {
 }
 
 .cheatsheet h2 { margin-bottom: 10px; }
+.cheatsheet .subhead { margin-top: 24px; }
 
 table {
   width: 100%;

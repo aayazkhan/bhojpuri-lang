@@ -16,7 +16,9 @@ export const MSG = {
   unterminatedComment: () => `Comment ${q("/*")} ke band kare khatir ${q("*/")} na mil paail.`,
   danglingElse: (kw) => `${q(kw)} se pahile ${q(K.IF)} hoe ke chahi.`,
   jumpOutsideLoop: (kw) => `${q(kw)} khali ${q(K.WHILE)} loop ke bhitar chal sakela.`,
-  invalidAssignTarget: () => `Value khali variable me rakhal ja sakela.`,
+  invalidAssignTarget: () => `Value khali variable ya list ke khana (a[0]) me rakhal ja sakela.`,
+  returnOutsideFunction: (kw) => `${q(kw)} khali ${q(K.FUNCTION)} ke bhitar chal sakela.`,
+  duplicateParam: (name) => `${q(name)} naam duu baar likhal gail ba.`,
 
   notDeclared: (name) =>
     `${q(name)} naam ke koi variable na ba. Pahile ${q(`${K.LET} ${name}`)} likh ke banaw.`,
@@ -27,9 +29,19 @@ export const MSG = {
   badOperand: (op, a) => `${q(op)} ${a} pe na chal sakela.`,
   tooManyIterations: (n) =>
     `Loop ${n} baar se jyada chal gail. Kahin i loop kabhi khatam na hoi ka?`,
+  tooDeep: () => `Kaam bahut gahiraai tak khud ke bolawat gail. Kahin recursion kabhi khatam na hoi ka?`,
+  notAFunction: (type) => `${type} kaam na ha, ekra ke bolawal (call) na ja sakela.`,
+  wrongArgCount: (name, expected, got) =>
+    `${q(name)} ${expected} cheez maange la, lekin ${got} dihal gail.`,
+  builtinArgType: (name, expected, got) => `${q(name)} ke ${expected} chahi, lekin ${got} mil gail.`,
+  notIndexable: (type) => `${type} me [ ] se index na lagawal ja sakela.`,
+  badIndex: (got) => `Index pura sankhya (0, 1, 2 ...) hoe ke chahi, lekin ${got} mil gail.`,
+  indexOutOfRange: (index, length) => `Index ${index} bahar ba — lambai khali ${length} ba.`,
+  stringImmutable: () => `String ke bhitar ke akshar badlal na ja sakela.`,
 
   things: {
     variableName: "variable ke naam",
+    functionName: "kaam ke naam",
     value: "koi value",
     endOfFile: "file ke ant",
   },

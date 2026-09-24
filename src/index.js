@@ -16,4 +16,4 @@ export function run(source, options) {
 export { tokenize, parse, Interpreter };
 export { display } from "./interpreter.js";
 export { BhojpuriError, formatError } from "./errors.js";
-export { KEYWORDS, KEYWORD_MEANINGS } from "./keywords.js";
+export { KEYWORDS, KEYWORD_MEANINGS, BUILTINS, BUILTIN_MEANINGS } from "./keywords.js";

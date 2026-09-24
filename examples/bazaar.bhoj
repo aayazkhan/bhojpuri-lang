@@ -1,0 +1,27 @@
+// Bazaar ke hisaab: list, index aur built-in kaam (lambai, daal, nikaal)
+ka ho bhaiya
+  maan la saaman = ["aalu", "pyaaz", "sattu"];
+  maan la daam = [30, 40, 120];
+
+  daal(saaman, "litti");
+  daal(daam, 50);
+
+  kaam jod(list) {
+    maan la kul = 0, i = 0;
+    jab le (i < lambai(list)) {
+      kul += list[i];
+      i += 1;
+    }
+    lauta da kul;
+  }
+
+  maan la i = 0;
+  jab le (i < lambai(saaman)) {
+    bol ho saaman[i], "—", daam[i], "rupiya";
+    i += 1;
+  }
+  bol ho "Kul hisaab:", jod(daam), "rupiya";
+
+  maan la hataawal = nikaal(saaman);
+  bol ho hataawal, "hata dihal gail. Bachal:", saaman;
+chalat bani bhaiya
