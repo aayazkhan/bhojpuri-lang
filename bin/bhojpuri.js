@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
-import { run, formatError, BhojpuriError, KEYWORDS, KEYWORD_MEANINGS } from "../src/index.js";
+import {
+  run, formatError, BhojpuriError, KEYWORDS, KEYWORD_MEANINGS, BUILTINS, BUILTIN_MEANINGS,
+} from "../src/index.js";
 
 const args = process.argv.slice(2);
 
@@ -11,10 +13,12 @@ if (args[0] === "-v" || args[0] === "--version") {
 }
 
 if (args.length === 0 || args[0] === "-h" || args[0] === "--help") {
-  const width = Math.max(...Object.values(KEYWORDS).map((k) => k.length));
-  const table = Object.entries(KEYWORDS)
-    .map(([id, text]) => `  ${text.padEnd(width)}  ${KEYWORD_MEANINGS[id]}`)
-    .join("\n");
+  const rows = [
+    ...Object.entries(KEYWORDS).map(([id, text]) => [text, KEYWORD_MEANINGS[id]]),
+    ...Object.entries(BUILTINS).map(([id, name]) => [`${name}(…)`, BUILTIN_MEANINGS[id]]),
+  ];
+  const width = Math.max(...rows.map(([text]) => text.length));
+  const table = rows.map(([text, meaning]) => `  ${text.padEnd(width)}  ${meaning}`).join("\n");
   console.log(`Bhojpuri Lang — Bhojpuri me code likh.
 
 Usage:
@@ -22,7 +26,7 @@ Usage:
   bhojpuri --help        i madad dekhaw
   bhojpuri --version     version dekhaw
 
-Keywords:
+Keywords aur built-in kaam:
 ${table}`);
   process.exit(args.length === 0 ? 1 : 0);
 }
