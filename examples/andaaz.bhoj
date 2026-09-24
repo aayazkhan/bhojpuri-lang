@@ -1,5 +1,6 @@
 // Andaaz lagaw: computer 1 se 100 ke beech ek sankhya sochela, tu 7 koshish me pata lagaw.
-// "poochh" se jawab maango. Jawab na mile (Ctrl+D, ya playground me Cancel) ta khel ruk jaala.
+// "poochh" se jawab maango, "koshish kara ... galti pe" se galat jawab sambhaar. Jawab na mile
+// (Ctrl+D, ya playground me Cancel) ta khel ruk jaala.
 ka ho bhaiya
   maan la gupt = sanyog(1, 100);
   maan la mil_gail = jhooth;
@@ -12,7 +13,15 @@ ka ho bhaiya
       bas kara;
     }
 
-    maan la andaaz = sankhya(jawab);
+    // Sankhya ke jagah kuchh aur likhal gail ta khel na ruki: galti pakad ke agila koshish.
+    maan la andaaz = khaali;
+    koshish kara {
+      andaaz = sankhya(jawab);
+    } galti pe {
+      bol ho "\"" + jawab + "\" sankhya na ha — ee koshish bekaar gail.";
+      aage badha;
+    }
+
     jadi (andaaz == gupt) {
       bol ho "Waah! Sahi jawab —", gupt, "—", koshish, "koshish me.";
       mil_gail = sach;

@@ -1,12 +1,12 @@
 import { syntaxError } from "./errors.js";
 import { MSG } from "./messages.js";
-import { LOOP_WORDS } from "./keywords.js";
+import { KEYWORDS, LOOP_WORDS } from "./keywords.js";
 
 /*
  * Grammar (recursive descent):
  *
  *   program    := PROGRAM_START statement* PROGRAM_END
- *   statement  := let | print | if | while | for | function | return
+ *   statement  := let | print | if | while | for | function | return | try | throw
  *               | BREAK ";" | CONTINUE ";" | block | ";" | expr ";"
  *   let        := LET IDENT ("=" expr)? ("," IDENT ("=" expr)?)* ";"
  *   print      := PRINT expr ("," expr)* ";"
@@ -17,6 +17,8 @@ import { LOOP_WORDS } from "./keywords.js";
  *                  (FROM, TO, STEP and IN are LOOP_WORDS: plain names that are only special here)
  *   function   := FUNCTION IDENT "(" (IDENT ("," IDENT)*)? ")" block
  *   return     := RETURN expr? ";"
+ *   try        := TRY block CATCH ("(" IDENT ")")? block
+ *   throw      := THROW expr ";"
  *   block      := "{" statement* "}"
  *
  *   expr       := target ("=" | "+=" | "-=" | "*=" | "/=" | "%=") expr | or
@@ -155,6 +157,9 @@ class Parser {
         case "FOR": return this.parseFor();
         case "FUNCTION": return this.parseFunction();
         case "RETURN": return this.parseReturn();
+        case "TRY": return this.parseTry();
+        case "THROW": return this.parseThrow();
+        case "CATCH": throw syntaxError(MSG.danglingCatch(t.text), t);
         case "BREAK":
         case "CONTINUE": return this.parseJump();
         case "ELSE":
@@ -287,6 +292,31 @@ class Parser {
       this.loopDepth = outerLoopDepth;
       this.functionDepth--;
     }
+  }
+
+  parseTry() {
+    const start = this.next();
+    const body = this.parseBlock();
+    if (!this.isKeyword("CATCH")) throw this.unexpected(MSG.quote(KEYWORDS.CATCH));
+    this.next();
+    let param = null;
+    if (this.isPunct("(")) {
+      this.next();
+      const name = this.peek();
+      if (name.type !== "identifier") throw this.unexpected(MSG.things.variableName);
+      this.next();
+      param = name.value;
+      this.expectPunct(")");
+    }
+    const handler = this.parseBlock();
+    return { type: "Try", body, param, handler, ...pos(start) };
+  }
+
+  parseThrow() {
+    const start = this.next();
+    const argument = this.parseExpression();
+    this.endStatement();
+    return { type: "Throw", argument, ...pos(start) };
   }
 
   parseReturn() {

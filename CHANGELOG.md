@@ -26,6 +26,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - List helpers: `chhaant` (a new sorted list), `ulta` (reverse a list or string), `hissa` (part of a list or
   string, with an optional end and negative indexes), `khoj` (index of an item or piece of text, or `-1`)
   and `kul` (sum of a list of numbers). `chhaant`, `ulta` and `hissa` don't change the original.
+- Catching errors: `koshish kara { ... } galti pe (g) { ... }` runs the second block when a runtime error
+  happens in the first, even inside a function it calls. `g` (optional) is the error message. `phenk da
+  value;` throws your own error with any value, and `galti pe (g)` receives the value unchanged. An uncaught
+  `phenk da` stops the program and shows the value. Syntax errors can't be caught.
 - `ba` also works on lists (does it contain the item?) and strings (does it contain the text?).
 - Built-in functions can take optional arguments. The error for a wrong number of arguments then says
   "2 ya 3".
@@ -36,6 +40,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
   order. If the program reading its output stops early (e.g. `bhojpuri x.bhoj | head`), it exits quietly
   instead of crashing with a broken-pipe error.
 - CI runs the examples with empty stdin, so examples that ask questions don't wait for input.
+- `koshish kara`, `galti pe` and `phenk da` are keywords. The single words `koshish`, `galti` and `phenk`
+  can still be used as names.
+- `andaaz.bhoj` catches an answer that isn't a number instead of stopping.
 - Examples: `chhatai.bhoj` compares its bubble sort with `chhaant`, and `bazaar.bhoj` uses `kul`, `khoj`,
   `chhaant` and `ulta`.
 - `bhojpuri` with no arguments opens the interactive prompt, instead of printing help and exiting with

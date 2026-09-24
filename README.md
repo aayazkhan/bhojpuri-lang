@@ -96,6 +96,8 @@ Statements end with `;`, and blocks use `{ }`.
 | `aage badha`         | `continue`         |
 | `kaam`               | define a function  |
 | `lauta da`           | `return`           |
+| `koshish kara` … `galti pe` | `try` … `catch` |
+| `phenk da`           | `throw`            |
 | `sach` / `jhooth`    | `true` / `false`   |
 | `khaali`             | `null`             |
 
@@ -317,6 +319,47 @@ bol ho "Agila saal:", umar + 1;
   `printf '50\n25\n' | bhojpuri examples/andaaz.bhoj`.
 - In the playground, it opens the browser's question box. The box also shows what was printed since the
   last question, and the question and answer are added to the output.
+
+### Catching errors
+
+`koshish kara` ("try doing") runs a block. If something goes wrong inside it, even deep inside a function
+it calls, the `galti pe` ("on error") block runs instead of the program stopping:
+
+```
+koshish kara {
+  maan la umar = sankhya(poochh("Umar? "));
+  bol ho "Agila saal:", umar + 1;
+} galti pe (g) {
+  bol ho "Galti bhail:", g;     // g is the error message
+}
+```
+
+`phenk da` ("throw it") raises your own error. It can be any value, and `galti pe (g)` gets it unchanged:
+
+```
+kaam bhugtaan(paisa) {
+  jadi (paisa < 100) {
+    phenk da { "kod": 402, "sandesh": "Paisa kam ba" };
+  }
+  lauta da "ho gail";
+}
+
+koshish kara {
+  bhugtaan(50);
+} galti pe (g) {
+  bol ho g["sandesh"];          // Paisa kam ba
+}
+```
+
+- The `(g)` is optional: `} galti pe {` is fine when you don't need the error.
+- A `phenk da` that nobody catches stops the program and shows the value as the error message.
+- Runtime errors can be caught, including runaway recursion and the playground's loop guard. Syntax errors
+  can't, because they're found before the program starts.
+- `bas kara`, `aage badha` and `lauta da` work inside both blocks.
+- Write `galti pe` on the same line as the `}` that closes `koshish kara`, as with `na ta`. This matters
+  most at the interactive prompt.
+- On their own, `koshish`, `galti` and `phenk` are still ordinary names. Only the two-word forms are
+  keywords.
 
 ### Operators
 
