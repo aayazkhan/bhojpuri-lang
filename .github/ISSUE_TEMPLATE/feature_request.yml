@@ -1,0 +1,24 @@
+name: Idea or feature request
+description: Suggest a keyword, built-in, playground feature or anything else.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What would you like to do?
+      description: What's hard or impossible today? A short example helps.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+      description: How could it look in Bhojpuri Lang? Suggestions for Bhojpuri names are very welcome.
+      render: text
+      placeholder: |
+        maan la ulta_naam = ulta(naam);
+  - type: textarea
+    id: other
+    attributes:
+      label: Anything else
+      description: Other options you thought about, or how other languages do it.
