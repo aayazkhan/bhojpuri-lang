@@ -2,6 +2,7 @@ import { KEYWORDS } from "./keywords.js";
 import { runtimeError } from "./errors.js";
 import { MSG } from "./messages.js";
 import { closestName } from "./suggest.js";
+import { letters } from "./text.js";
 
 // The kinds of value a program works with, how they're shown, and the rules for indexes and keys.
 // Numbers, strings, sach/jhooth and khaali are plain JS values; a list is an array; a kosh is a Map.
@@ -72,14 +73,21 @@ export function typeName(value) {
 
 export const truthy = (value) => value !== null && value !== false && value !== 0 && value !== "" && !Number.isNaN(value);
 
-/** Validate `object[index]` and return the index as a number. */
-export function checkIndex(object, index, node) {
+/** Validate `object[index]` for a list or string and return the index as a number. */
+export function checkIndex(object, index, node, length = object.length) {
   if (!Array.isArray(object) && typeof object !== "string") {
     throw runtimeError(MSG.notIndexable(typeName(object)), node);
   }
   if (!Number.isInteger(index)) throw runtimeError(MSG.badIndex(display(index)), node);
-  if (index < 0 || index >= object.length) throw runtimeError(MSG.indexOutOfRange(index, object.length), node);
+  if (index < 0 || index >= length) throw runtimeError(MSG.indexOutOfRange(index, length), node);
   return index;
+}
+
+/** `object[index]` for a list, or a string (counted in letters, see text.js). */
+export function readIndex(object, index, node) {
+  if (typeof object !== "string") return object[checkIndex(object, index, node)];
+  const all = letters(object);
+  return all[checkIndex(object, index, node, all.length)];
 }
 
 

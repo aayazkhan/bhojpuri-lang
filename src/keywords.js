@@ -92,7 +92,7 @@ export const BUILTINS = Object.freeze({
 });
 
 export const BUILTIN_MEANINGS = Object.freeze({
-  LENGTH: "length of a list or string, or number of keys in a kosh",
+  LENGTH: "length of a list, letters in a string, or number of keys in a kosh",
   PUSH: "add an item to the end of a list",
   POP: "remove and return the last item of a list",
   TO_NUMBER: "turn text into a number",
