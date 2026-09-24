@@ -739,6 +739,19 @@ describe("cli", () => {
     }
   });
 
+  test("stops quietly when the reader of its output goes away", () => {
+    const dir = mkdtempSync(join(tmpdir(), "bhojpuri-"));
+    const file = join(dir, "bahut.bhoj");
+    writeFileSync(file, `ka ho bhaiya\nhar i = 1 se 200000 tak { bol ho i; }\nchalat bani bhaiya`);
+    try {
+      const result = spawnSync("sh", ["-c", `"${process.execPath}" "${cli}" "${file}" | head -2`], { encoding: "utf8" });
+      assert.equal(result.stdout, "1\n2\n");
+      assert.equal(result.stderr, "");
+    } finally {
+      rmSync(dir, { recursive: true });
+    }
+  });
+
   test("errors go to stderr with exit code 1", () => {
     const result = bhojpuri([example("andaaz.bhoj")], "das\n");
     assert.equal(result.status, 1);

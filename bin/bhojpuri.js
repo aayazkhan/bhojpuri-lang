@@ -8,13 +8,30 @@ import {
 const args = process.argv.slice(2);
 const version = () => JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
 
+// Sleep without spinning the CPU while a non-blocking stdin or stdout isn't ready yet.
+const pause = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+
 // Output and `poochh` both go straight to the file descriptors. Writing synchronously keeps the
 // question on screen before we block waiting for the answer, and keeps everything in order.
-const print = (line) => writeSync(1, line + "\n");
-const printError = (err, source) => writeSync(2, formatError(err, source) + "\n");
+function write(fd, text) {
+  let bytes = Buffer.from(text);
+  while (bytes.length) {
+    try {
+      bytes = bytes.subarray(writeSync(fd, bytes));
+    } catch (err) {
+      if (err.code === "EAGAIN") {
+        pause(20);
+        continue;
+      }
+      // Whoever reads our output has stopped (e.g. `bhojpuri x.bhoj | head`): stop quietly.
+      if (err.code === "EPIPE") process.exit(0);
+      throw err;
+    }
+  }
+}
 
-// Sleep without spinning the CPU while a non-blocking stdin has no data yet.
-const pause = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+const print = (line) => write(1, line + "\n");
+const printError = (err, source) => write(2, formatError(err, source) + "\n");
 
 /** Read one line from stdin, without the newline. Returns null at the end of input. */
 function readLine() {
@@ -39,9 +56,9 @@ function readLine() {
 }
 
 function input(question) {
-  if (question) writeSync(1, question);
+  if (question) write(1, question);
   const answer = readLine();
-  if (answer === null && question) writeSync(1, "\n"); // keep the next output on its own line
+  if (answer === null && question) write(1, "\n"); // keep the next output on its own line
   return answer;
 }
 
@@ -150,13 +167,13 @@ function replInTerminal(session) {
     buffer = "";
     rl.write(null, { ctrl: true, name: "e" });
     rl.write(null, { ctrl: true, name: "u" });
-    writeSync(1, "\n");
+    write(1, "\n");
     rl.setPrompt(PROMPT);
     rl.prompt();
   });
 
   rl.on("close", () => {
-    writeSync(1, "\n");
+    write(1, "\n");
     process.exit(0);
   });
 }
