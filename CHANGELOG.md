@@ -6,9 +6,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-24
+
 ### Added
 
-- MIT license (`LICENSE`, the `license` field in `package.json`, and a License section in the README).
 - Functions: `kaam naam(a, b) { ... }` and `lauta da` (return). Functions support recursion and closures,
   and they are values that can be passed to or returned from other functions.
 - Lists: `[1, 2, 3]` literals (a trailing comma is allowed), indexing `l[0]` (strings too), and index
@@ -23,7 +24,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
   from `main`, so the live site always matches the latest release.
 - npm package metadata (`author`, `repository`, `homepage`, `bugs`), plus a `prepublishOnly` script that
   runs the tests before `npm publish`.
-
+- MIT license (`LICENSE`, the `license` field in `package.json`, and a License section in the README).
 - `CONTRIBUTING.md` describing the Git Flow branching model, documentation rules and the release process.
 - This changelog.
 - Pull request template.
@@ -43,5 +44,6 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Browser playground (`npm run playground`).
 - Example programs and a `node:test` test suite.
 
-[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/aayazkhan/bhojpuri-lang/releases/tag/v0.1.0
