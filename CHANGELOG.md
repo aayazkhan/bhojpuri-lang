@@ -6,6 +6,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Standard library built-ins: `sankhya` (text to number), `shabd` (any value to text), `kism` (type of a
+  value), `gol` (round), `neeche` (round down), `sanyog` (random whole number in a range), `bada` / `chhota`
+  (upper / lower case), `tod` (split text) and `jod` (join a list). Wrong kinds of values give a clear
+  Bhojpuri error, for example `sankhya("abc")`. Like the other built-ins, the names can be reused.
+- A `random` option for `run()` / `new Interpreter()` that replaces `Math.random` for `sanyog`, so
+  programs that use it can be tested.
+- Example `paasa.bhoj` (a dice game) that uses the new built-ins.
+
 ## [0.2.0] - 2026-09-24
 
 ### Added

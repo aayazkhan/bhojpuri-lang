@@ -7,7 +7,7 @@ import { Interpreter } from "./interpreter.js";
  * Throws a BhojpuriError (with line/col) on syntax or runtime errors.
  *
  * @param {string} source
- * @param {{ print?: (line: string) => void, maxLoopIterations?: number }} [options]
+ * @param {{ print?: (line: string) => void, maxLoopIterations?: number, random?: () => number }} [options]
  */
 export function run(source, options) {
   new Interpreter(options).run(parse(tokenize(source)));

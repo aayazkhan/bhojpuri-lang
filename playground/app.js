@@ -11,6 +11,7 @@ const EXAMPLES = [
   { file: "fibonacci.bhoj", title: "Fibonacci (kaam)" },
   { file: "bazaar.bhoj", title: "Bazaar (list)" },
   { file: "chhatai.bhoj", title: "Chhatai (bubble sort)" },
+  { file: "paasa.bhoj", title: "Paasa (built-in kaam)" },
 ];
 
 const STORAGE_KEY = "bhojpuri-lang:code";
