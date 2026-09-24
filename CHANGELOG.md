@@ -20,6 +20,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Error messages name types the way `kism` does: `sankhya`, `shabd`, `list`, `kosh`, `sach/jhooth`,
+  `khaali` and `kaam`, instead of JavaScript's `number`, `string` and so on. For example:
+  `"bada" ke shabd chahi, lekin sankhya mil gail.`
+- In error messages, "only" is now `sirf` instead of `khali`, so it can't be mistaken for the keyword
+  `khaali`. The message for an invalid assignment also mentions kosh keys (`d["k"]`).
+- The lessons call `!` "nahi" (not), instead of "ulta", which is the name of the reverse built-in.
 - Internal: the interpreter is split into smaller files. `src/values.js` holds the kinds of value and how
   they're shown, `src/scope.js` the variables, and `src/builtins.js` the built-in functions, grouped by topic.
   `src/interpreter.js` only runs statements and expressions. Behaviour is unchanged, and the tests are unchanged.

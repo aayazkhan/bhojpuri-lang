@@ -98,7 +98,7 @@ export const LESSONS = [
       bho: `<p><code>jadi</code> (agar) ke bhitar wala block tabe chalela jab shart sach hoe. Dusra halat
         khatir <code>na ta jadi</code> (na ta agar) aur <code>na ta</code> (nahi ta) ba.</p>
         <p>Tulna <code>== != &lt; &gt; &lt;= &gt;=</code> se hola, aur <code>&amp;&amp;</code> (aur),
-        <code>||</code> (ya) aur <code>!</code> (ulta) se shart jodal jaala.</p>`,
+        <code>||</code> (ya) aur <code>!</code> (nahi) se shart jodal jaala.</p>`,
       en: `<p><code>jadi</code> (if) runs a block when its condition is true. <code>na ta jadi</code> (else if)
         and <code>na ta</code> (else) handle the other cases.</p>
         <p>Compare with <code>== != &lt; &gt; &lt;= &gt;=</code>, and combine with <code>&amp;&amp;</code> (and),

@@ -55,7 +55,13 @@ export function display(value, seen = new Set()) {
   return String(value);
 }
 
+/**
+ * The name of a value's type, as `kism` returns it and as error messages say it:
+ * sankhya, shabd, sach/jhooth, khaali, list, kosh or kaam.
+ */
 export function typeName(value) {
+  if (typeof value === "number") return "sankhya";
+  if (typeof value === "string") return "shabd";
   if (value === null) return KEYWORDS.NULL;
   if (typeof value === "boolean") return `${KEYWORDS.TRUE}/${KEYWORDS.FALSE}`;
   if (Array.isArray(value)) return "list";
@@ -76,12 +82,6 @@ export function checkIndex(object, index, node) {
   return index;
 }
 
-// What `kism` returns for each kind of value.
-export function kindName(value) {
-  if (typeof value === "number") return "sankhya";
-  if (typeof value === "string") return "shabd";
-  return typeName(value);
-}
 
 /** Validate a kosh key: only strings and numbers can be keys. */
 export function checkKey(key, node) {

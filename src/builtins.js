@@ -1,7 +1,7 @@
 import { BUILTINS } from "./keywords.js";
 import { runtimeError } from "./errors.js";
 import { MSG } from "./messages.js";
-import { NativeFunction, isFunction, isDict, display, typeName, kindName, truthy, checkKey } from "./values.js";
+import { NativeFunction, isFunction, isDict, display, typeName, truthy, checkKey } from "./values.js";
 
 /**
  * The built-in functions, grouped by topic. Their names come from BUILTINS in keywords.js.
@@ -26,11 +26,11 @@ export function createBuiltins({ random, input, call }) {
   };
   const expectListOrString = (name, value, node) => {
     if (!Array.isArray(value) && typeof value !== "string") {
-      throw runtimeError(MSG.builtinArgType(name, "list ya string", typeName(value)), node);
+      throw runtimeError(MSG.builtinArgType(name, "list ya shabd", typeName(value)), node);
     }
   };
   const expectString = (name, value, node) => {
-    if (typeof value !== "string") throw runtimeError(MSG.builtinArgType(name, "string", typeName(value)), node);
+    if (typeof value !== "string") throw runtimeError(MSG.builtinArgType(name, "shabd", typeName(value)), node);
   };
 
 
@@ -39,7 +39,7 @@ export function createBuiltins({ random, input, call }) {
     new NativeFunction(BUILTINS.LENGTH, 1, ([value], node) => {
       if (Array.isArray(value) || typeof value === "string") return value.length;
       if (isDict(value)) return value.size;
-      throw runtimeError(MSG.builtinArgType(BUILTINS.LENGTH, "list, string ya kosh", typeName(value)), node);
+      throw runtimeError(MSG.builtinArgType(BUILTINS.LENGTH, "list, shabd ya kosh", typeName(value)), node);
     }),
     new NativeFunction(BUILTINS.TO_STRING, 1, ([value]) => display(value)),
     new NativeFunction(BUILTINS.TO_NUMBER, 1, ([value], node) => {
@@ -49,7 +49,7 @@ export function createBuiltins({ random, input, call }) {
       if (!Number.isFinite(number)) throw runtimeError(MSG.notANumber(value), node);
       return number;
     }),
-    new NativeFunction(BUILTINS.TYPE, 1, ([value]) => kindName(value)),
+    new NativeFunction(BUILTINS.TYPE, 1, ([value]) => typeName(value)),
 
     // ---- Numbers ----
     new NativeFunction(BUILTINS.ROUND, 1, ([value], node) => {
@@ -168,7 +168,7 @@ export function createBuiltins({ random, input, call }) {
         expectString(BUILTINS.HAS, item, node);
         return container.includes(item);
       }
-      throw runtimeError(MSG.builtinArgType(BUILTINS.HAS, "kosh, list ya string", typeName(container)), node);
+      throw runtimeError(MSG.builtinArgType(BUILTINS.HAS, "kosh, list ya shabd", typeName(container)), node);
     }),
     new NativeFunction(BUILTINS.REMOVE, 2, ([dict, key], node) => {
       expectDict(BUILTINS.REMOVE, dict, node);

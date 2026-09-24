@@ -13,7 +13,7 @@ describe("standard library", () => {
     assertError(program(`bol ho sankhya("abc");`), { kind: "RuntimeError", line: 2, match: /"abc" sankhya na ha/ });
     assertError(program(`bol ho sankhya("");`), { kind: "RuntimeError", match: /sankhya na ha/ });
     assertError(program(`bol ho sankhya("Infinity");`), { kind: "RuntimeError", match: /sankhya na ha/ });
-    assertError(program(`bol ho sankhya([1]);`), { kind: "RuntimeError", match: /"sankhya" ke string chahi/ });
+    assertError(program(`bol ho sankhya([1]);`), { kind: "RuntimeError", match: /"sankhya" ke shabd chahi/ });
   });
 
   test("shabd turns any value into text", () => {
@@ -52,7 +52,7 @@ describe("standard library", () => {
 
   test("bada and chhota change case", () => {
     assert.deepEqual(out(`bol ho bada("Ram ji"), chhota("PATNA"), bada("नाम");`), ["RAM JI patna नाम"]);
-    assertError(program(`bol ho bada(5);`), { kind: "RuntimeError", match: /"bada" ke string chahi/ });
+    assertError(program(`bol ho bada(5);`), { kind: "RuntimeError", match: /"bada" ke shabd chahi/ });
   });
 
   test("tod splits text, jod joins a list", () => {
@@ -60,7 +60,7 @@ describe("standard library", () => {
       out(`maan la l = tod("aalu,pyaaz,,sattu", ",");\nbol ho l, lambai(l), tod("abc", "");\nbol ho jod(["a", 1, sach], "-"), jod([], ","), jod(tod("1 2 3", " "), "+");`),
       ['["aalu", "pyaaz", "", "sattu"] 4 ["a", "b", "c"]', "a-1-sach  1+2+3"],
     );
-    assertError(program(`bol ho tod("a,b", 1);`), { kind: "RuntimeError", match: /"tod" ke string chahi/ });
+    assertError(program(`bol ho tod("a,b", 1);`), { kind: "RuntimeError", match: /"tod" ke shabd chahi/ });
     assertError(program(`bol ho jod("ab", ",");`), { kind: "RuntimeError", match: /"jod" ke list chahi/ });
   });
 
@@ -69,14 +69,14 @@ describe("standard library", () => {
       out(`maan la l = [42, 7, 19, 3, 88, 1];\nbol ho chhaant(l), l;\nbol ho chhaant(["kela", "aam", "Zebra"]), chhaant([]), chhaant([2.5, -1, 2]);`),
       ["[1, 3, 7, 19, 42, 88] [42, 7, 19, 3, 88, 1]", '["Zebra", "aam", "kela"] [] [-1, 2, 2.5]'],
     );
-    assertError(program(`bol ho chhaant([1, "a"]);`), { kind: "RuntimeError", match: /"chhaant" khali sab sankhya ya sab string .* number aur string/ });
+    assertError(program(`bol ho chhaant([1, "a"]);`), { kind: "RuntimeError", match: /"chhaant" sirf sab sankhya ya sab shabd .* sankhya aur shabd/ });
     assertError(program(`bol ho chhaant([[1], [2]]);`), { kind: "RuntimeError", match: /"chhaant"/ });
     assertError(program(`bol ho chhaant("cba");`), { kind: "RuntimeError", match: /"chhaant" ke list chahi/ });
   });
 
   test("ulta reverses a list or string without changing the original", () => {
     assert.deepEqual(out(`maan la l = [1, 2, 3];\nbol ho ulta(l), l, ulta("ghar"), ulta([]);`), ["[3, 2, 1] [1, 2, 3] rahg []"]);
-    assertError(program(`bol ho ulta(5);`), { kind: "RuntimeError", match: /"ulta" ke list ya string chahi/ });
+    assertError(program(`bol ho ulta(5);`), { kind: "RuntimeError", match: /"ulta" ke list ya shabd chahi/ });
   });
 
   test("hissa takes part of a list or string", () => {
@@ -90,23 +90,23 @@ describe("standard library", () => {
 
   test("khoj finds where an item or text first appears", () => {
     assert.deepEqual(out(`bol ho khoj([5, 7, 7], 7), khoj([5], 1), khoj([1, "1"], "1"), khoj("namaste", "ste"), khoj("abc", "z");`), ["1 -1 1 4 -1"]);
-    assertError(program(`bol ho khoj("abc", 1);`), { kind: "RuntimeError", match: /"khoj" ke string chahi/ });
+    assertError(program(`bol ho khoj("abc", 1);`), { kind: "RuntimeError", match: /"khoj" ke shabd chahi/ });
   });
 
   test("kul adds up a list of numbers", () => {
     assert.deepEqual(out(`bol ho kul([30, 40, 120]), kul([]), kul([-1.5, 1]);`), ["190 0 -0.5"]);
-    assertError(program(`bol ho kul([1, "2"]);`), { kind: "RuntimeError", match: /"kul" ke sankhya ke list chahi, lekin string bhi/ });
+    assertError(program(`bol ho kul([1, "2"]);`), { kind: "RuntimeError", match: /"kul" ke sankhya ke list chahi, lekin shabd bhi/ });
   });
 
   test("ba also checks lists and strings", () => {
     assert.deepEqual(out(`bol ho ba([1, 2], 2), ba([1, 2], "2"), ba("namaste", "mas"), ba("namaste", "x"), ba({ "a": 1 }, "a");`), ["sach jhooth sach jhooth sach"]);
-    assertError(program(`bol ho ba(5, 1);`), { kind: "RuntimeError", match: /"ba" ke kosh, list ya string chahi/ });
-    assertError(program(`bol ho ba("abc", 1);`), { kind: "RuntimeError", match: /"ba" ke string chahi/ });
+    assertError(program(`bol ho ba(5, 1);`), { kind: "RuntimeError", match: /"ba" ke kosh, list ya shabd chahi/ });
+    assertError(program(`bol ho ba("abc", 1);`), { kind: "RuntimeError", match: /"ba" ke shabd chahi/ });
   });
 
   test("saaf trims spaces, tabs and newlines from both ends", () => {
     assert.deepEqual(out(`bol ho \`[{saaf("  Ramu \\t\\n")}]\`, \`[{saaf("a b")}]\`, \`[{saaf("   ")}]\`;`), ["[Ramu] [a b] []"]);
-    assertError(program(`bol ho saaf(5);`), { kind: "RuntimeError", match: /"saaf" ke string chahi/ });
+    assertError(program(`bol ho saaf(5);`), { kind: "RuntimeError", match: /"saaf" ke shabd chahi/ });
   });
 
   test("jagah replaces every match", () => {
@@ -115,7 +115,7 @@ describe("standard library", () => {
       ["seb seb kela abc abc नमस्कार"],
     );
     assertError(program(`bol ho jagah("abc", "", "x");`), { kind: "RuntimeError", match: /"jagah" ke khoje wala text khaali/ });
-    assertError(program(`bol ho jagah("abc", "a", 1);`), { kind: "RuntimeError", match: /"jagah" ke string chahi, lekin number/ });
+    assertError(program(`bol ho jagah("abc", "a", 1);`), { kind: "RuntimeError", match: /"jagah" ke shabd chahi, lekin sankhya/ });
   });
 
   test("shuru_me and ant_me check the start and end", () => {
@@ -123,7 +123,7 @@ describe("standard library", () => {
       out(`bol ho shuru_me("Dr Ramu", "Dr"), shuru_me("Ramu", "Dr"), ant_me("file.bhoj", ".bhoj"), ant_me("file.txt", ".bhoj"), shuru_me("x", "");`),
       ["sach jhooth sach jhooth sach"],
     );
-    assertError(program(`bol ho ant_me(["a"], "a");`), { kind: "RuntimeError", match: /"ant_me" ke string chahi, lekin list/ });
+    assertError(program(`bol ho ant_me(["a"], "a");`), { kind: "RuntimeError", match: /"ant_me" ke shabd chahi, lekin list/ });
   });
 
   test("new built-in names can be shadowed", () => {
