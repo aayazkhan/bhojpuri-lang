@@ -58,7 +58,7 @@ Run `bhojpuri` without a file to try things out one line at a time:
 
 ```
 $ bhojpuri
-Bhojpuri Lang 0.5.0 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
+Bhojpuri Lang 0.6.0 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
 bhojpuri> 2 + 3 * 4
 14
 bhojpuri> maan la naam = "Ramu"
