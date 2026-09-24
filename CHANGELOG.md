@@ -13,8 +13,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
   shows them. `\{` is a literal brace. Errors inside `{ }` point at the exact line and column. `"..."` and
   `'...'` strings are unchanged.
 
+- Playground share links: the **Baantaw 🔗** button copies a link with the code compressed into the part of
+  the address after `#`, which never reaches a server. Opening the link loads that code into the editor.
+  Damaged links are ignored.
+
 ### Changed
 
+- The playground toolbar wraps on narrow screens instead of squeezing its buttons.
 - `fibonacci.bhoj` and `andaaz.bhoj` use backtick strings instead of joining text with `+`.
 
 - The tests are split by topic into `test/*.test.js` (language, loops, functions, collections, built-ins,

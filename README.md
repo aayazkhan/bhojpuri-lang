@@ -3,7 +3,8 @@
 A toy programming language with Bhojpuri keywords, inspired by [Bhailang](https://bhailang.js.org/).
 Written in plain JavaScript with zero dependencies. It runs in Node.js and in the browser.
 
-**[Try it in the playground →](https://aayazkhan.github.io/bhojpuri-lang/)**
+**[Try it in the playground →](https://aayazkhan.github.io/bhojpuri-lang/)** Write code, run it, and press
+**Baantaw 🔗** to copy a link that opens your code for anyone you send it to.
 
 ```
 ka ho bhaiya

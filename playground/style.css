@@ -85,9 +85,10 @@ h2 {
 
 .toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px 12px;
   min-height: 36px;
   margin-bottom: 10px;
 }
@@ -112,7 +113,21 @@ select, button {
   min-width: 0;
 }
 
-button { cursor: pointer; }
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+button {
+  cursor: pointer;
+  white-space: nowrap;
+}
 button:hover { border-color: var(--muted); }
 
 button.primary {
