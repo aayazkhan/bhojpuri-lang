@@ -1,6 +1,9 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
-import { LESSONS, checkExercise } from "../playground/lessons.js";
+import { LESSONS, LANGUAGES, checkExercise } from "../playground/lessons.js";
+
+// The code snippets in some lesson text, in order-independent form.
+const codeIn = (html) => [...html.matchAll(/<code>(.*?)<\/code>/gs)].map((m) => m[1].replace(/\s+/g, " ")).sort();
 
 describe("playground lessons (Sikh)", () => {
   test("there are lessons from bol ho up to koshish kara", () => {
@@ -10,7 +13,7 @@ describe("playground lessons (Sikh)", () => {
   });
 
   for (const [i, lesson] of LESSONS.entries()) {
-    test(`${i + 1}. ${lesson.title}: the example runs and the solution passes`, () => {
+    test(`${i + 1}. ${lesson.title.en}: the example runs and the solution passes`, () => {
       const example = checkExercise(lesson.example, { expected: [], input: ["Ramu", "24"] });
       assert.equal(example.error, null);
       assert.ok(example.output.length > 0, "the example prints something");
@@ -23,6 +26,22 @@ describe("playground lessons (Sikh)", () => {
       assert.equal(checkExercise(lesson.example, lesson.exercise).ok, false);
     });
   }
+
+  test("every lesson is written in Bhojpuri and English", () => {
+    assert.deepEqual(Object.keys(LANGUAGES), ["bho", "en"]);
+    for (const lesson of LESSONS) {
+      for (const text of [lesson.title, lesson.body, lesson.exercise.task]) {
+        for (const language of Object.keys(LANGUAGES)) assert.ok(text[language]?.trim(), `${lesson.title.en}: ${language}`);
+      }
+      assert.notEqual(lesson.body.bho, lesson.body.en, `${lesson.title.en}: the Bhojpuri text is a translation`);
+    }
+  });
+
+  test("both languages ask for exactly the same code in each exercise", () => {
+    for (const lesson of LESSONS) {
+      assert.deepEqual(codeIn(lesson.exercise.task.bho), codeIn(lesson.exercise.task.en), lesson.title.en);
+    }
+  });
 
   test("checking reports wrong output and errors", () => {
     const exercise = { expected: ["140"] };
