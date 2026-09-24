@@ -11,6 +11,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Functions without names: `kaam(x) { ... }` makes a function wherever a value is expected, e.g.
   `maan la dugna = kaam(x) { lauta da x * 2 };`. It can be passed, returned, stored and called straight away,
   and it keeps its surrounding variables like any function. `kaam naam(...)` still defines a named function.
+- Did-you-mean hints: when a variable, function or built-in name isn't found but a similar one exists, the
+  error suggests it, e.g. `"naam" naam ke koi variable na ba. Kahin "naamm" ta na?`. Missing kosh keys get
+  the same hint. Short names (one or two letters) only get a hint for a difference in capitals.
 - "Sikh" (learn) lessons in the playground: the **📘 Sikh** button opens 12 short lessons, from `bol ho` to
   `koshish kara`. Each has an explanation, an example that opens in the editor, and an exercise. **Jaanch
   kar** checks your output against the expected one (showing both when they differ), and **Jawab dekhaw**

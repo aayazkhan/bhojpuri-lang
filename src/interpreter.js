@@ -1,6 +1,7 @@
 import { KEYWORDS, LOOP_WORDS, BUILTINS } from "./keywords.js";
 import { BhojpuriError, runtimeError } from "./errors.js";
 import { MSG } from "./messages.js";
+import { closestName } from "./suggest.js";
 
 // Signals returned (not thrown) by statements to unwind to the nearest loop or function.
 const BREAK = Symbol("break");
@@ -29,7 +30,12 @@ class Scope {
     for (let scope = this; scope; scope = scope.parent) {
       if (scope.vars.has(name)) return scope;
     }
-    throw runtimeError(MSG.notDeclared(name), node);
+    throw runtimeError(MSG.notDeclared(name, closestName(name, this.visibleNames())), node);
+  }
+
+  /** Every name that can be used from here, nearest scope first. */
+  *visibleNames() {
+    for (let scope = this; scope; scope = scope.parent) yield* scope.vars.keys();
   }
 
   get(name, node) {
@@ -158,7 +164,8 @@ function checkKey(key, node) {
 /** Read `dict[key]`, which must already exist. */
 function getEntry(dict, key, node) {
   if (!dict.has(checkKey(key, node))) {
-    throw runtimeError(MSG.missingKey(typeof key === "string" ? JSON.stringify(key) : String(key)), node);
+    const hint = typeof key === "string" ? closestName(key, [...dict.keys()].filter((k) => typeof k === "string")) : null;
+    throw runtimeError(MSG.missingKey(typeof key === "string" ? JSON.stringify(key) : String(key), hint), node);
   }
   return dict.get(key);
 }

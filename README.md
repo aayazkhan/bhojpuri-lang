@@ -437,6 +437,13 @@ Chalat samay galti (line 3, col 14): "b" naam ke koi variable na ba. Pahile "maa
     |              ^
 ```
 
+When a name looks like a typo of one that exists, the error suggests it. This works for variables,
+functions, built-ins and kosh keys:
+
+```
+Chalat samay galti (line 3, col 10): "naam" naam ke koi variable na ba. Kahin "naamm" ta na?
+```
+
 ## Changing the keywords
 
 All keywords and built-in function names live in [`src/keywords.js`](src/keywords.js), and all error text lives in
