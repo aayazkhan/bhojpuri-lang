@@ -1,6 +1,7 @@
 import {
   run, formatError, BhojpuriError, KEYWORDS, KEYWORD_MEANINGS, BUILTINS, BUILTIN_MEANINGS,
 } from "../src/index.js";
+import { encodeCode, decodeHash } from "./share.js";
 
 const EXAMPLES = [
   { file: "hello.bhoj", title: "Pranam duniya" },
@@ -73,6 +74,40 @@ function restore() {
   }
 }
 
+// ---- share links ----
+
+const shareStatus = document.getElementById("share-status");
+let statusTimer;
+
+function showStatus(text) {
+  shareStatus.textContent = text;
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => (shareStatus.textContent = ""), 4000);
+}
+
+async function share() {
+  const url = `${location.origin}${location.pathname}#${await encodeCode(editor.value)}`;
+  try {
+    await navigator.clipboard.writeText(url);
+    showStatus("Link copy ho gail!");
+  } catch {
+    window.prompt("Ee link copy kar:", url); // e.g. clipboard blocked by the browser
+  }
+}
+
+/** Load code from a share link in the address. Returns true if there was one. */
+async function openSharedLink() {
+  const code = await decodeHash(location.hash);
+  if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+  if (code === null) return false;
+  editor.value = code;
+  examples.selectedIndex = -1; // it isn't one of the examples
+  save();
+  output.replaceChildren();
+  showStatus("Baantal code khulal.");
+  return true;
+}
+
 // ---- wire up ----
 
 for (const { file, title } of EXAMPLES) {
@@ -99,6 +134,8 @@ document.getElementById("builtins").append(
 );
 
 examples.addEventListener("change", () => loadExample(examples.value));
+document.getElementById("share").addEventListener("click", share);
+window.addEventListener("hashchange", openSharedLink);
 document.getElementById("run").addEventListener("click", runCode);
 document.getElementById("clear").addEventListener("click", () => output.replaceChildren());
 editor.addEventListener("input", save);
@@ -114,6 +151,9 @@ editor.addEventListener("keydown", (e) => {
   }
 });
 
-const saved = restore();
-if (saved) editor.value = saved;
-else await loadExample(EXAMPLES[0].file);
+// A share link wins; then the code from last time; then the first example.
+if (!(await openSharedLink())) {
+  const saved = restore();
+  if (saved) editor.value = saved;
+  else await loadExample(EXAMPLES[0].file);
+}
