@@ -2,6 +2,15 @@
   "name": "bhojpuri-lang",
   "version": "0.1.0",
   "description": "A toy programming language with Bhojpuri keywords",
+  "author": "Ayyaz Khan <khan.shan803@gmail.com>",
+  "homepage": "https://aayazkhan.github.io/bhojpuri-lang/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aayazkhan/bhojpuri-lang.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aayazkhan/bhojpuri-lang/issues"
+  },
   "type": "module",
   "main": "src/index.js",
   "exports": "./src/index.js",
@@ -14,13 +23,15 @@
   ],
   "scripts": {
     "test": "node --test",
-    "playground": "node scripts/serve.js"
+    "playground": "node scripts/serve.js",
+    "prepublishOnly": "npm test"
   },
   "keywords": [
     "bhojpuri",
     "programming-language",
     "interpreter",
-    "toy-language"
+    "toy-language",
+    "esolang"
   ],
   "engines": {
     "node": ">=18"

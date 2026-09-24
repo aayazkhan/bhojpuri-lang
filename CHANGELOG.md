@@ -18,6 +18,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
   instead of crashing with a JavaScript stack overflow).
 - Examples `fibonacci.bhoj`, `bazaar.bhoj` and `chhatai.bhoj` (bubble sort). The playground and
   `bhojpuri --help` list the built-in functions.
+- The playground is published with GitHub Pages at https://aayazkhan.github.io/bhojpuri-lang/, served
+  from `main`, so the live site always matches the latest release.
+- npm package metadata (`author`, `repository`, `homepage`, `bugs`), plus a `prepublishOnly` script that
+  runs the tests before `npm publish`.
 
 - `CONTRIBUTING.md` describing the Git Flow branching model, documentation rules and the release process.
 - This changelog.
