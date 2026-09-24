@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync } from "node:fs";
+import { readFileSync, readSync, writeSync } from "node:fs";
 import {
   run, formatError, BhojpuriError, KEYWORDS, KEYWORD_MEANINGS, BUILTINS, BUILTIN_MEANINGS,
 } from "../src/index.js";
@@ -40,8 +40,38 @@ try {
   process.exit(1);
 }
 
+// Output and `poochh` both go straight to the file descriptors. Writing synchronously keeps the
+// question on screen before we block waiting for the answer, and keeps everything in order.
+const print = (line) => writeSync(1, line + "\n");
+
+/** Read one line from stdin, without the newline. Returns null at the end of input. */
+function readLine() {
+  const bytes = [];
+  const byte = Buffer.alloc(1);
+  for (;;) {
+    let n;
+    try {
+      n = readSync(0, byte, 0, 1, null);
+    } catch (err) {
+      if (err.code === "EAGAIN") continue; // stdin is non-blocking and has no data yet
+      if (err.code === "EOF") n = 0; // Windows reports end of input this way
+      else throw err;
+    }
+    if (n === 0) return bytes.length ? Buffer.from(bytes).toString("utf8") : null;
+    if (byte[0] === 0x0a) return Buffer.from(bytes).toString("utf8").replace(/\r$/, "");
+    bytes.push(byte[0]);
+  }
+}
+
+function input(question) {
+  if (question) writeSync(1, question);
+  const answer = readLine();
+  if (answer === null && question) writeSync(1, "\n"); // keep the next output on its own line
+  return answer;
+}
+
 try {
-  run(source);
+  run(source, { print, input });
 } catch (err) {
   if (!(err instanceof BhojpuriError)) throw err;
   console.error(formatError(err, source));

@@ -1,0 +1,30 @@
+// Andaaz lagaw: computer 1 se 100 ke beech ek sankhya sochela, tu 7 koshish me pata lagaw.
+// "poochh" se jawab maango. Jawab na mile (Ctrl+D, ya playground me Cancel) ta khel ruk jaala.
+ka ho bhaiya
+  maan la gupt = sanyog(1, 100);
+  maan la mil_gail = jhooth;
+  bol ho "Hum 1 se 100 ke beech ek sankhya soch lihni. 7 koshish me batav!";
+
+  har koshish = 1 se 7 tak {
+    maan la jawab = poochh("Koshish " + koshish + ": ");
+    jadi (jawab == khaali) {
+      bol ho "Thik ba, phir kabhi khelal jaai.";
+      bas kara;
+    }
+
+    maan la andaaz = sankhya(jawab);
+    jadi (andaaz == gupt) {
+      bol ho "Waah! Sahi jawab —", gupt, "—", koshish, "koshish me.";
+      mil_gail = sach;
+      bas kara;
+    } na ta jadi (andaaz < gupt) {
+      bol ho andaaz, "chhota ba, aur bada batav.";
+    } na ta {
+      bol ho andaaz, "bada ba, aur chhota batav.";
+    }
+  }
+
+  jadi (!mil_gail) {
+    bol ho "Sankhya rahe:", gupt;
+  }
+chalat bani bhaiya

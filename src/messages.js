@@ -34,6 +34,7 @@ export const MSG = {
   wrongArgCount: (name, expected, got) =>
     `${q(name)} ${expected} cheez maange la, lekin ${got} dihal gail.`,
   builtinArgType: (name, expected, got) => `${q(name)} ke ${expected} chahi, lekin ${got} mil gail.`,
+  noInput: (name) => `Ihaan ${q(name)} ke jawab dewe wala koi na ba (input na mil sakela).`,
   notANumber: (text) => `${q(text)} sankhya na ha, ekra ke sankhya na banawal ja sakela.`,
   badRange: (name, a, b) => `${q(name)} ke pahila sankhya dusra se chhota ya barabar hoe ke chahi, lekin ${a} aur ${b} mil gail.`,
   loopBoundNotNumber: (word, got) => `${q(K.FOR)} loop me ${q(word)} ke baad sankhya chahi, lekin ${got} mil gail.`,

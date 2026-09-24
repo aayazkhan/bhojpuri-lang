@@ -228,6 +228,7 @@ har k ramu me {                 // loop over the keys
 | `chaabi(kosh)`       | list of the keys, in the order they were added |
 | `ba(kosh, key)`      | `sach` if the key exists                 |
 | `hataw(kosh, key)`   | remove a key and return its value (`khaali` if it wasn't there) |
+| `poochh(question)`   | ask a question and return the typed answer as text (see [Input](#input)) |
 
 ```
 maan la umar = sankhya("24");
@@ -240,6 +241,27 @@ Giving a built-in the wrong kind of value is an error, not a silent wrong answer
 stops the program and says `"abc"` isn't a number.
 
 Built-in names are ordinary variables, so you can reuse the names for your own variables.
+
+### Input
+
+`poochh` asks a question, waits for an answer and returns it as text:
+
+```
+maan la naam = poochh("Tohar naam ka ba? ");
+bol ho "Pranam,", naam;
+
+maan la umar = sankhya(poochh("Umar? "));    // turn the answer into a number
+bol ho "Agila saal:", umar + 1;
+```
+
+- The question is optional: `poochh()` just waits for an answer.
+- The answer is always text. Use `sankhya(...)` for numbers.
+- When there's nothing left to read, `poochh` returns `khaali`. That happens at the end of piped input,
+  after Ctrl+D in a terminal, or on Cancel in the playground. Check with `jadi (jawab == khaali)`.
+- In a terminal, it reads a line of what you type, and piped input works too:
+  `printf '50\n25\n' | bhojpuri examples/andaaz.bhoj`.
+- In the playground, it opens the browser's question box. The box also shows what was printed since the
+  last question, and the question and answer are added to the output.
 
 ### Operators
 
@@ -283,11 +305,18 @@ import { run, formatError, BhojpuriError } from "@aayazk/bhojpuri-lang";
 
 const lines = [];
 try {
-  run(source, { print: (line) => lines.push(line), maxLoopIterations: 100_000 });
+  run(source, {
+    print: (line) => lines.push(line),     // where bol ho goes (default: console.log)
+    input: (question) => "Ramu",           // answers poochh; return null for "no more input"
+    maxLoopIterations: 100_000,            // stop runaway loops
+  });
 } catch (err) {
   if (err instanceof BhojpuriError) console.error(formatError(err, source));
 }
 ```
+
+Without an `input` option, `poochh` stops with a Bhojpuri error, because there's no one to answer it.
+There's also a `random` option that replaces `Math.random` for `sanyog`, which is handy in tests.
 
 ## Project layout
 

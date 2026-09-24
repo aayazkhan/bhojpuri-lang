@@ -6,6 +6,23 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `poochh(question)` asks a question and returns the typed answer as text, or `khaali` when there is
+  nothing more to read. The question is optional. In the CLI it reads a line from stdin (piped input
+  works too); in the playground it opens the browser's question box and shows what was printed since the
+  last question.
+- An `input` option for `run()` / `new Interpreter()` that answers `poochh`. Without it, `poochh` is a
+  runtime error.
+- Example `andaaz.bhoj`, a number-guessing game.
+- CLI tests that run `bin/bhojpuri.js` with piped input.
+
+### Changed
+
+- The CLI writes output with `fs.writeSync` instead of `console.log`, so questions and answers stay in
+  order.
+- CI runs the examples with empty stdin, so examples that ask questions don't wait for input.
+
 ## [0.3.1] - 2026-09-24
 
 ### Changed

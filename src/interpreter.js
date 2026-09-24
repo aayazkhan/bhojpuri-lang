@@ -50,9 +50,11 @@ class UserFunction {
 }
 
 class NativeFunction {
-  constructor(name, arity, impl) {
+  /** `arity` is how many arguments it takes; `minArity` is lower when the last ones are optional. */
+  constructor(name, arity, impl, minArity = arity) {
     this.name = name;
     this.arity = arity;
+    this.minArity = minArity;
     this.impl = impl;
   }
 }
@@ -156,7 +158,7 @@ function getEntry(dict, key, node) {
   return dict.get(key);
 }
 
-function createGlobals(random) {
+function createGlobals({ random, input }) {
   const globals = new Scope();
   const expectList = (name, value, node) => {
     if (!Array.isArray(value)) throw runtimeError(MSG.builtinArgType(name, "list", typeName(value)), node);
@@ -230,6 +232,13 @@ function createGlobals(random) {
       expectString(BUILTINS.JOIN, separator, node);
       return list.map((item) => display(item)).join(separator);
     }),
+    // The question is optional. The answer is always text, or khaali when there is
+    // nothing more to read (end of input, or Cancel in the playground).
+    new NativeFunction(BUILTINS.INPUT, 1, ([question], node) => {
+      if (!input) throw runtimeError(MSG.noInput(BUILTINS.INPUT), node);
+      const answer = input(question === undefined ? "" : display(question));
+      return answer === null || answer === undefined ? null : String(answer);
+    }, 0),
     new NativeFunction(BUILTINS.KEYS, 1, ([dict], node) => {
       expectDict(BUILTINS.KEYS, dict, node);
       return [...dict.keys()];
@@ -250,22 +259,32 @@ function createGlobals(random) {
   return globals;
 }
 
+/**
+ * @typedef {{
+ *   print?: (line: string) => void,
+ *   maxLoopIterations?: number,
+ *   random?: () => number,
+ *   input?: (question: string) => string | null,
+ * }} InterpreterOptions
+ *   print: where `bol ho` output goes (defaults to console.log).
+ *   maxLoopIterations: guard against infinite loops, e.g. in the browser playground.
+ *   random: source of numbers in [0, 1) for `sanyog` (defaults to Math.random; handy for tests).
+ *   input: answers `poochh`. It gets the question ("" if none) and returns the answer, or null
+ *     when there is nothing more to read. Without it, `poochh` is a runtime error.
+ */
+
 export class Interpreter {
-  /**
-   * @param {{ print?: (line: string) => void, maxLoopIterations?: number, random?: () => number }} [options]
-   *   print: where `bol ho` output goes (defaults to console.log).
-   *   maxLoopIterations: guard against infinite loops, e.g. in the browser playground.
-   *   random: source of numbers in [0, 1) for `sanyog` (defaults to Math.random; handy for tests).
-   */
-  constructor({ print = console.log, maxLoopIterations = Infinity, random = Math.random } = {}) {
+  /** @param {InterpreterOptions} [options] */
+  constructor({ print = console.log, maxLoopIterations = Infinity, random = Math.random, input = null } = {}) {
     this.print = print;
     this.maxLoopIterations = maxLoopIterations;
     this.random = random;
+    this.input = input;
   }
 
   run(program) {
     // The program gets its own scope so it can shadow built-in names.
-    this.execAll(program.body, new Scope(createGlobals(this.random)));
+    this.execAll(program.body, new Scope(createGlobals({ random: this.random, input: this.input })));
   }
 
   execAll(statements, scope) {
@@ -461,7 +480,10 @@ export class Interpreter {
 
   call(callee, args, node) {
     if (callee instanceof NativeFunction) {
-      if (args.length !== callee.arity) throw runtimeError(MSG.wrongArgCount(callee.name, callee.arity, args.length), node);
+      if (args.length < callee.minArity || args.length > callee.arity) {
+        const expected = callee.minArity === callee.arity ? callee.arity : `${callee.minArity} ya ${callee.arity}`;
+        throw runtimeError(MSG.wrongArgCount(callee.name, expected, args.length), node);
+      }
       return callee.impl(args, node);
     }
 
