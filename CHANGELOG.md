@@ -6,6 +6,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Decimals are shown to 15 significant digits everywhere a number becomes text (`bol ho`, backtick strings,
+  `shabd`, `jod`, `+` with a string, lists, kosh and the prompt), so `0.1 + 0.2` shows as `0.3`. Only the
+  display is rounded: values and `==` are unchanged.
+
 ## [0.5.0] - 2026-09-24
 
 ### Added

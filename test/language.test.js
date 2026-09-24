@@ -79,6 +79,26 @@ describe("expressions", () => {
   });
 });
 
+describe("showing decimals", () => {
+  test("decimals are shown to 15 significant digits", () => {
+    assert.deepEqual(
+      out(`bol ho 0.1 + 0.2, 0.1 * 3, 1 / 3, 10 / 4, -0.1 - 0.2, 123456789.123456789, 5, -7, 0.5;`),
+      ["0.3 0.3 0.333333333333333 2.5 -0.3 123456789.123457 5 -7 0.5"],
+    );
+  });
+
+  test("everywhere a number becomes text", () => {
+    assert.deepEqual(
+      out(`maan la x = 0.1 + 0.2;\nbol ho \`{x}\`, shabd(x), [x], "x=" + x, jod([x, 1.1 + 2.2], " "), { "k": x };`),
+      ['0.3 0.3 [0.3] x=0.3 0.3 3.3 {"k": 0.3}'],
+    );
+  });
+
+  test("only the display is rounded: the value and == are unchanged", () => {
+    assert.deepEqual(out(`maan la x = 0.1 + 0.2;\nbol ho x == 0.3, x * 10 == 3.0000000000000004, gol(x * 10);`), ["jhooth sach 3"]);
+  });
+});
+
 describe("control flow", () => {
   test("if / else if / else", () => {
     const check = (n) =>
