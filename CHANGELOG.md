@@ -16,6 +16,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Playground share links: the **Baantaw 🔗** button copies a link with the code compressed into the part of
   the address after `#`, which never reaches a server. Opening the link loads that code into the editor.
   Damaged links are ignored.
+- Coloured code in the playground editor: keywords, `sach`/`jhooth`/`khaali`, strings, numbers, comments and
+  built-in calls each get a colour as you type. The `{…}` parts of backtick strings are coloured as code, and
+  `se`/`tak`/`kadam`/`me` only inside a `har` header. Half-typed code is coloured too.
 
 ### Changed
 

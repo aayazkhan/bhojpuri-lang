@@ -2,6 +2,7 @@ import {
   run, formatError, BhojpuriError, KEYWORDS, KEYWORD_MEANINGS, BUILTINS, BUILTIN_MEANINGS,
 } from "../src/index.js";
 import { encodeCode, decodeHash } from "./share.js";
+import { highlight } from "./highlight.js";
 
 const EXAMPLES = [
   { file: "hello.bhoj", title: "Pranam duniya" },
@@ -21,6 +22,24 @@ const STORAGE_KEY = "bhojpuri-lang:code";
 const MAX_LOOP_ITERATIONS = 100_000;
 
 const editor = document.getElementById("editor");
+const highlighted = document.getElementById("highlight");
+
+// Redraw the coloured copy under the textarea. The extra newline keeps the last line
+// visible when the code ends with one.
+function paint() {
+  highlighted.innerHTML = highlight(editor.value) + "\n";
+  syncScroll();
+}
+
+function syncScroll() {
+  highlighted.scrollTop = editor.scrollTop;
+  highlighted.scrollLeft = editor.scrollLeft;
+}
+
+function setCode(code) {
+  editor.value = code;
+  paint();
+}
 const output = document.getElementById("output");
 const examples = document.getElementById("examples");
 
@@ -56,7 +75,7 @@ function runCode() {
 
 async function loadExample(file) {
   const res = await fetch(`../examples/${file}`);
-  editor.value = await res.text();
+  setCode(await res.text());
   save();
 }
 
@@ -100,7 +119,7 @@ async function openSharedLink() {
   const code = await decodeHash(location.hash);
   if (location.hash) history.replaceState(null, "", location.pathname + location.search);
   if (code === null) return false;
-  editor.value = code;
+  setCode(code);
   examples.selectedIndex = -1; // it isn't one of the examples
   save();
   output.replaceChildren();
@@ -138,7 +157,11 @@ document.getElementById("share").addEventListener("click", share);
 window.addEventListener("hashchange", openSharedLink);
 document.getElementById("run").addEventListener("click", runCode);
 document.getElementById("clear").addEventListener("click", () => output.replaceChildren());
-editor.addEventListener("input", save);
+editor.addEventListener("input", () => {
+  paint();
+  save();
+});
+editor.addEventListener("scroll", syncScroll);
 
 editor.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
@@ -147,6 +170,7 @@ editor.addEventListener("keydown", (e) => {
   } else if (e.key === "Tab" && !e.shiftKey) {
     e.preventDefault();
     editor.setRangeText("  ", editor.selectionStart, editor.selectionEnd, "end");
+    paint();
     save();
   }
 });
@@ -154,6 +178,6 @@ editor.addEventListener("keydown", (e) => {
 // A share link wins; then the code from last time; then the first example.
 if (!(await openSharedLink())) {
   const saved = restore();
-  if (saved) editor.value = saved;
+  if (saved) setCode(saved);
   else await loadExample(EXAMPLES[0].file);
 }
