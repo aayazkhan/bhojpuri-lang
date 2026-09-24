@@ -23,6 +23,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
   Results, printed output and errors show in the log, and variables and functions carry over. Unclosed
   `{` `(` `[` continue on a `...` line (Shift+Enter always adds a line). ↑/↓ recall earlier lines, `poochh`
   uses the question box, and **Naya shuru** starts a fresh session.
+- VS Code extension in `editors/vscode/` for `.bhoj` files:
+  - colours for keywords, literals, strings, numbers, comments, built-in calls and function names, including
+    the `{…}` in backtick strings and `se`/`tak`/`kadam`/`me` only in a `har` header;
+  - comment toggling, bracket and quote closing, and indentation.
+  Its grammar is generated from `src/keywords.js` by `scripts/build-vscode-grammar.js`, and a test checks it's
+  up to date. Install by copying the folder into `~/.vscode/extensions/`.
 
 ### Changed
 
