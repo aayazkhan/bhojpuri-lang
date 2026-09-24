@@ -142,3 +142,8 @@ playground/          browser playground (uses src/ directly as ES modules)
 scripts/serve.js     zero-dependency static server for the playground
 test/                node:test suite
 ```
+
+## Contributing
+
+Changes go through Git Flow: branch off `develop`, document the change in [CHANGELOG.md](CHANGELOG.md),
+and open a pull request. `main` only receives releases. See [CONTRIBUTING.md](CONTRIBUTING.md).
