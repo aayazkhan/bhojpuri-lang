@@ -1,6 +1,7 @@
 import { tokenize } from "./tokenizer.js";
 import { parseInteractive } from "./parser.js";
-import { Interpreter, display } from "./interpreter.js";
+import { Interpreter } from "./interpreter.js";
+import { display } from "./values.js";
 import { BhojpuriError } from "./errors.js";
 import { MSG } from "./messages.js";
 

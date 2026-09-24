@@ -15,6 +15,6 @@ export function run(source, options) {
 
 export { tokenize, parse, Interpreter };
 export { Session } from "./session.js";
-export { display } from "./interpreter.js";
+export { display } from "./values.js";
 export { BhojpuriError, formatError } from "./errors.js";
 export { KEYWORDS, KEYWORD_MEANINGS, LOOP_WORDS, BUILTINS, BUILTIN_MEANINGS } from "./keywords.js";
