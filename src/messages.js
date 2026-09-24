@@ -23,8 +23,11 @@ export const MSG = {
   returnOutsideFunction: (kw) => `${q(kw)} khali ${q(K.FUNCTION)} ke bhitar chal sakela.`,
   duplicateParam: (name) => `${q(name)} naam duu baar likhal gail ba.`,
 
-  notDeclared: (name) =>
-    `${q(name)} naam ke koi variable na ba. Pahile ${q(`${K.LET} ${name}`)} likh ke banaw.`,
+  // `hint` is a similar name that does exist, when the name looks like a typo.
+  notDeclared: (name, hint) =>
+    hint
+      ? `${q(name)} naam ke koi variable na ba. Kahin ${q(hint)} ta na?`
+      : `${q(name)} naam ke koi variable na ba. Pahile ${q(`${K.LET} ${name}`)} likh ke banaw.`,
   alreadyDeclared: (name) =>
     `${q(name)} pahile se banal ba. Nai value dewe khatir ${q(`${name} = ...`)} likh.`,
   divideByZero: () => `Zero se bhaag na dihal ja sakela.`,
@@ -48,7 +51,10 @@ export const MSG = {
   zeroStep: () => `${q(W.STEP)} 0 na ho sakela, na ta loop kabhi aage na badhi.`,
   notIterable: (type) => `${q(K.FOR)} loop list, string ya kosh pe chal sakela, ${type} pe na.`,
   badKey: (type) => `Kosh ke chaabi string ya sankhya hoe ke chahi, lekin ${type} mil gail.`,
-  missingKey: (key) => `Kosh me ${key} chaabi na ba. Pahile ${q("ba(kosh, chaabi)")} se jaanch l.`,
+  missingKey: (key, hint) =>
+    hint
+      ? `Kosh me ${key} chaabi na ba. Kahin ${q(hint)} ta na?`
+      : `Kosh me ${key} chaabi na ba. Pahile ${q("ba(kosh, chaabi)")} se jaanch l.`,
   notIndexable: (type) => `${type} me [ ] se index na lagawal ja sakela.`,
   badIndex: (got) => `Index pura sankhya (0, 1, 2 ...) hoe ke chahi, lekin ${got} mil gail.`,
   indexOutOfRange: (index, length) => `Index ${index} bahar ba — lambai khali ${length} ba.`,
