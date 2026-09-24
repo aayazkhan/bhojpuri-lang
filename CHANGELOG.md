@@ -11,6 +11,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Functions without names: `kaam(x) { ... }` makes a function wherever a value is expected, e.g.
   `maan la dugna = kaam(x) { lauta da x * 2 };`. It can be passed, returned, stored and called straight away,
   and it keeps its surrounding variables like any function. `kaam naam(...)` still defines a named function.
+- `le aaw "file.bhoj";` runs another file and makes its top-level functions and variables available.
+  - Paths are relative to the file that asks, and `.bhoj` is optional.
+  - Each file runs once; files that bring each other in, and name clashes, are errors.
+  - Errors from another file's code name that file and show its line, even when one of its functions
+    fails later.
+  - It works in the CLI and the interactive prompt. Library users pass `loadFile` (and `file`) to `run()`.
+  - Example: `examples/hisaab.bhoj` with `examples/lib/ganit.bhoj`.
 - Did-you-mean hints: when a variable, function or built-in name isn't found but a similar one exists, the
   error suggests it, e.g. `"naam" naam ke koi variable na ba. Kahin "naamm" ta na?`. Missing kosh keys get
   the same hint. Short names (one or two letters) only get a hint for a difference in capitals.

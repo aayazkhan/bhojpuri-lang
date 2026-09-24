@@ -69,17 +69,20 @@ function matchAt(regex, source, pos) {
 
 /**
  * @param {string} source
- * @param {{ line?: number, col?: number }} [start] where `source` begins, for code inside a
- *   template string's {…}, so errors point at the right place in the whole program.
+ * @param {{ line?: number, col?: number, file?: { name: string, source: string } }} [start]
+ *   where `source` begins, for code inside a template string's {…}, so errors point at the right
+ *   place in the whole program. `file` marks code from a file brought in with `le aaw`: every
+ *   token (and so every error from it) remembers which file it came from.
  * @returns {Token[]}
  */
-export function tokenize(source, { line: startLine = 1, col: startCol = 1 } = {}) {
+export function tokenize(source, { line: startLine = 1, col: startCol = 1, file } = {}) {
   const tokens = [];
   let pos = 0;
   let line = startLine;
   let lineStart = 1 - startCol;
+  const origin = file ? { file } : {};
 
-  const here = () => ({ line, col: pos - lineStart + 1 });
+  const here = () => ({ line, col: pos - lineStart + 1, ...origin });
   const advance = (n) => {
     for (let end = pos + n; pos < end; pos++) {
       if (source[pos] === "\n") {
@@ -165,8 +168,8 @@ export function tokenize(source, { line: startLine = 1, col: startCol = 1 } = {}
           i += 2;
         } else if (c === "{") {
           const end = closingBrace(source, i + 1);
-          if (end === -1) throw syntaxError(MSG.unterminatedTemplateBrace(), { line, col: i - lineStart + 1 });
-          parts.push(text, { source: source.slice(i + 1, end), line, col: i + 1 - lineStart + 1 });
+          if (end === -1) throw syntaxError(MSG.unterminatedTemplateBrace(), { line, col: i - lineStart + 1, ...origin });
+          parts.push(text, { source: source.slice(i + 1, end), line, col: i + 1 - lineStart + 1, ...origin });
           text = "";
           i = end + 1;
         } else {

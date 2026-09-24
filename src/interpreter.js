@@ -2,6 +2,11 @@ import { KEYWORDS, LOOP_WORDS, BUILTINS } from "./keywords.js";
 import { BhojpuriError, runtimeError } from "./errors.js";
 import { MSG } from "./messages.js";
 import { closestName } from "./suggest.js";
+import { tokenize } from "./tokenizer.js";
+import { parse } from "./parser.js";
+
+// Marks a file that is still running, to catch files that bring each other in.
+const LOADING = Symbol("loading");
 
 // Signals returned (not thrown) by statements to unwind to the nearest loop or function.
 const BREAK = Symbol("break");
@@ -360,24 +365,38 @@ function createGlobals({ random, input, call }) {
  *   maxLoopIterations?: number,
  *   random?: () => number,
  *   input?: (question: string) => string | null,
+ *   loadFile?: (path: string, from: string | null) => { id: string, name: string, source: string } | null,
+ *   file?: string,
  * }} InterpreterOptions
  *   print: where `bol ho` output goes (defaults to console.log).
  *   maxLoopIterations: guard against infinite loops, e.g. in the browser playground.
  *   random: source of numbers in [0, 1) for `sanyog` (defaults to Math.random; handy for tests).
  *   input: answers `poochh`. It gets the question ("" if none) and returns the answer, or null
  *     when there is nothing more to read. Without it, `poochh` is a runtime error.
+ *   loadFile: finds a file for `le aaw`. It gets the path as written and the `id` of the file that
+ *     asks for it (`file` for the main program), and returns the file's `id` (e.g. its full path,
+ *     used to run each file once), a `name` for error messages and its `source`, or null if there's
+ *     no such file. Without it, `le aaw` is a runtime error.
+ *   file: the `id` of the main program, so `le aaw` paths can be relative to it.
  */
 
 export class Interpreter {
   /** @param {InterpreterOptions} [options] */
-  constructor({ print = console.log, maxLoopIterations = Infinity, random = Math.random, input = null } = {}) {
+  constructor({
+    print = console.log, maxLoopIterations = Infinity, random = Math.random, input = null, loadFile = null, file = null,
+  } = {}) {
     this.print = print;
     this.maxLoopIterations = maxLoopIterations;
     this.random = random;
     this.input = input;
+    this.loadFile = loadFile;
+    this.currentFile = file;
+    this.files = new Map(); // id -> the names a file defines, or LOADING while it runs
   }
 
   run(program) {
+    // The main program counts as running, so a file that brings it back in is a loop.
+    if (this.currentFile) this.files.set(this.currentFile, LOADING);
     // The program gets its own scope so it can shadow built-in names.
     this.execAll(program.body, this.programScope());
   }
@@ -385,6 +404,39 @@ export class Interpreter {
   programScope() {
     const call = (fn, args, node) => this.call(fn, args, node);
     return new Scope(createGlobals({ random: this.random, input: this.input, call }));
+  }
+
+  /**
+   * Run the file named by `le aaw` (once, however often it's brought in) and return the names
+   * it defines at its top level.
+   */
+  importFile(node) {
+    if (!this.loadFile) throw runtimeError(MSG.noFiles(KEYWORDS.IMPORT), node);
+    const file = this.loadFile(node.path, this.currentFile);
+    if (!file) throw runtimeError(MSG.fileNotFound(node.path), node);
+
+    const known = this.files.get(file.id);
+    if (known === LOADING) throw runtimeError(MSG.circularImport(node.path), node);
+    if (known) return known;
+
+    this.files.set(file.id, LOADING);
+    const outerFile = this.currentFile;
+    this.currentFile = file.id;
+    try {
+      // Tokens from this file remember it, so errors from its code name it, even when one of its
+      // functions fails much later.
+      const tokens = tokenize(file.source, { file: { name: file.name, source: file.source } });
+      const scope = this.programScope();
+      this.execAll(parse(tokens).body, scope);
+      const names = new Map(scope.vars);
+      this.files.set(file.id, names);
+      return names;
+    } catch (err) {
+      this.files.delete(file.id);
+      throw err;
+    } finally {
+      this.currentFile = outerFile;
+    }
   }
 
   /** A scope for the interactive prompt: it lasts between inputs, and names can be declared again. */
@@ -477,6 +529,15 @@ export class Interpreter {
         err.value = value; // what `galti pe (g)` receives, unchanged
         throw err;
       }
+
+      case "Import":
+        for (const [name, value] of this.importFile(node)) {
+          if (scope.vars.has(name) && scope.vars.get(name) !== value && !scope.allowRedeclare) {
+            throw runtimeError(MSG.importClash(name, node.path), node);
+          }
+          scope.vars.set(name, value);
+        }
+        return;
 
       case "Break": return BREAK;
       case "Continue": return CONTINUE;

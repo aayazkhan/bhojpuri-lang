@@ -104,6 +104,7 @@ like `jadi (x > 0) { bol ho "haan" }` read cleanly.
 | `lauta da`           | `return`           |
 | `koshish kara` … `galti pe` | `try` … `catch` |
 | `phenk da`           | `throw`            |
+| `le aaw`             | use another file (`import`) |
 | `sach` / `jhooth`    | `true` / `false`   |
 | `khaali`             | `null`             |
 
@@ -415,6 +416,35 @@ koshish kara {
 - On their own, `koshish`, `galti` and `phenk` are still ordinary names. Only the two-word forms are
   keywords.
 
+### Using other files: le aaw
+
+`le aaw` ("bring it") runs another `.bhoj` file and makes its top-level functions and variables available:
+
+```
+// lib/ganit.bhoj
+ka ho bhaiya
+  maan la PI = 3.14159;
+  kaam varg(n) { lauta da n * n }
+chalat bani bhaiya
+```
+
+```
+// hisaab.bhoj
+ka ho bhaiya
+  le aaw "lib/ganit.bhoj";
+  bol ho varg(7), PI;          // 49 3.14159
+chalat bani bhaiya
+```
+
+- **Paths:** they're relative to the file that says `le aaw`, and `.bhoj` can be left off (`le aaw "lib/ganit"`).
+- **Each file runs once,** however many files bring it in.
+- **Loops and clashes:** files that bring each other in are an error, and so is a name that already exists
+  in the file doing the bringing.
+- **Errors name the file they come from,** with its own line:
+  `Chalat samay galti (lib/ganit.bhoj, line 4, col 23): ...`.
+- **Where it works:** in the `bhojpuri` command and the interactive prompt. The browser playground has no
+  files, so there `le aaw` says it can't be used. See [examples/hisaab.bhoj](examples/hisaab.bhoj).
+
 ### Operators
 
 `+ - * / %`, `== != < > <= >=`, `&& || !`. `+` joins strings, for example `"umar: " + 20`
@@ -505,6 +535,10 @@ session.run(`x + 1`);          // { exit: false, result: "21" }
 session.isComplete(`kaam f() {`); // false: still waiting for the closing }
 ```
 
+For `le aaw`, pass `loadFile(path, from)`, which returns `{ id, name, source }` for the file (or `null`),
+and `file`, the main program's `id`. `id` is how a file is recognised (e.g. its full path), `name` is shown
+in error messages, and `from` is the `id` of the file that asks.
+
 Without an `input` option, `poochh` stops with a Bhojpuri error, because there's no one to answer it.
 There's also a `random` option that replaces `Math.random` for `sanyog`, which is handy in tests.
 
@@ -513,7 +547,7 @@ There's also a `random` option that replaces `Math.random` for `sanyog`, which i
 ```
 bin/bhojpuri.js      CLI
 src/                 tokenizer, parser, interpreter, keywords, messages
-examples/*.bhoj      sample programs
+examples/*.bhoj      sample programs (examples/lib/ holds a file that hisaab.bhoj brings in)
 playground/          browser playground (uses src/ directly as ES modules)
 editors/vscode/      VS Code extension (colours, comments, brackets)
 scripts/serve.js     zero-dependency static server for the playground

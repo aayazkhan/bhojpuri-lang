@@ -4,7 +4,8 @@ export class BhojpuriError extends Error {
   /**
    * @param {"SyntaxError" | "RuntimeError"} kind
    * @param {string} message
-   * @param {{ line?: number, col?: number }} [pos]
+   * @param {{ line?: number, col?: number, file?: { name: string, source: string } }} [pos]
+   *   `file` is set for code from a file brought in with `le aaw`.
    */
   constructor(kind, message, pos) {
     super(message);
@@ -12,6 +13,8 @@ export class BhojpuriError extends Error {
     this.kind = kind;
     this.line = pos?.line ?? null;
     this.col = pos?.col ?? null;
+    this.file = pos?.file?.name;
+    this.source = pos?.file?.source;
   }
 }
 
@@ -25,10 +28,13 @@ export const runtimeError = (message, pos) => new BhojpuriError("RuntimeError", 
  */
 export function formatError(err, source) {
   const label = err.kind === "SyntaxError" ? MSG.syntaxLabel : MSG.runtimeLabel;
-  if (err.line == null) return `${label}: ${err.message}`;
+  // An error inside a file brought in with `le aaw` carries that file's name and source.
+  const where = [err.file, err.line != null && `line ${err.line}, col ${err.col}`].filter(Boolean).join(", ");
+  if (!where) return `${label}: ${err.message}`;
 
-  const header = `${label} (line ${err.line}, col ${err.col}): ${err.message}`;
-  const lineText = source?.split(/\r?\n/)[err.line - 1];
+  const header = `${label} (${where}): ${err.message}`;
+  if (err.line == null) return header;
+  const lineText = (err.source ?? source)?.split(/\r?\n/)[err.line - 1];
   if (lineText == null) return header;
 
   const gutter = String(err.line);

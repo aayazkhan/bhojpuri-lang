@@ -7,7 +7,7 @@ import { KEYWORDS, LOOP_WORDS } from "./keywords.js";
  * Grammar (recursive descent):
  *
  *   program    := PROGRAM_START statement* PROGRAM_END
- *   statement  := let | print | if | while | for | function | return | try | throw
+ *   statement  := let | print | if | while | for | function | return | try | throw | import
  *               | BREAK ";" | CONTINUE ";" | block | ";" | expr ";"
  *   let        := LET IDENT ("=" expr)? ("," IDENT ("=" expr)?)* ";"
  *   print      := PRINT expr ("," expr)* ";"
@@ -21,6 +21,7 @@ import { KEYWORDS, LOOP_WORDS } from "./keywords.js";
  *   return     := RETURN expr? ";"
  *   try        := TRY block CATCH ("(" IDENT ")")? block
  *   throw      := THROW expr ";"
+ *   import     := IMPORT STRING ";"
  *   block      := "{" statement* "}"
  *
  *   expr       := target ("=" | "+=" | "-=" | "*=" | "/=" | "%=") expr | or
@@ -47,7 +48,8 @@ const ASSIGNMENT_OPS = new Set(["=", "+=", "-=", "*=", "/=", "%="]);
 const BINARY_LEVELS = [["||"], ["&&"], ["==", "!="], ["<", ">", "<=", ">="], ["+", "-"], ["*", "/", "%"]];
 const LITERAL_KEYWORDS = { TRUE: true, FALSE: false, NULL: null };
 
-const pos = (token) => ({ line: token.line, col: token.col });
+// A node's position; code from another file (`le aaw`) also records which file.
+const pos = (token) => (token.file ? { line: token.line, col: token.col, file: token.file } : { line: token.line, col: token.col });
 const describe = (token) =>
   token.type === "eof" ? MSG.things.endOfFile : MSG.quote(token.text);
 
@@ -68,9 +70,9 @@ export function parseInteractive(tokens) {
 }
 
 /** Parse the expression inside a template string's {…}. */
-function parseEmbedded({ source, line, col }) {
-  const tokens = tokenize(source, { line, col });
-  if (tokens[0].type === "eof") throw syntaxError(MSG.emptyTemplateExpression(), { line, col: col - 1 });
+function parseEmbedded({ source, line, col, file }) {
+  const tokens = tokenize(source, { line, col, file });
+  if (tokens[0].type === "eof") throw syntaxError(MSG.emptyTemplateExpression(), { line, col: col - 1, file });
   const parser = new Parser(tokens);
   const expression = parser.parseExpression();
   if (parser.peek().type !== "eof") throw parser.unexpected(MSG.quote("}"));
@@ -179,6 +181,7 @@ class Parser {
         case "RETURN": return this.parseReturn();
         case "TRY": return this.parseTry();
         case "THROW": return this.parseThrow();
+        case "IMPORT": return this.parseImport();
         case "CATCH": throw syntaxError(MSG.danglingCatch(t.text), t);
         case "BREAK":
         case "CONTINUE": return this.parseJump();
@@ -339,6 +342,15 @@ class Parser {
     }
     const handler = this.parseBlock();
     return { type: "Try", body, param, handler, ...pos(start) };
+  }
+
+  parseImport() {
+    const start = this.next();
+    const path = this.peek();
+    if (path.type !== "string") throw this.unexpected(MSG.things.fileName);
+    this.next();
+    this.endStatement();
+    return { type: "Import", path: path.value, ...pos(start) };
   }
 
   parseThrow() {

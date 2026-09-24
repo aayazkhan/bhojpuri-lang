@@ -8,7 +8,12 @@ describe("examples", () => {
   for (const file of readdirSync(dir).filter((f) => f.endsWith(".bhoj"))) {
     test(`${file} runs`, () => {
       // Examples that ask questions get no answers, like a run with empty input.
-      const lines = output(readFileSync(new URL(file, dir), "utf8"), { input: () => null });
+      // `le aaw` paths are relative to the examples folder.
+      const loadFile = (path) => {
+        const url = new URL(path.endsWith(".bhoj") ? path : `${path}.bhoj`, dir);
+        return { id: url.href, name: path, source: readFileSync(url, "utf8") };
+      };
+      const lines = output(readFileSync(new URL(file, dir), "utf8"), { input: () => null, loadFile });
       assert.ok(lines.length > 0);
     });
   }
