@@ -23,12 +23,20 @@ and this project follows [Semantic Versioning](https://semver.org/).
   clears the line, and `chalat bani bhaiya` or Ctrl+D leaves. Piped lines run the same way, without
   prompts.
 - `Session` in the library API (`run`, `isComplete`) for building your own prompt.
+- List helpers: `chhaant` (a new sorted list), `ulta` (reverse a list or string), `hissa` (part of a list or
+  string, with an optional end and negative indexes), `khoj` (index of an item or piece of text, or `-1`)
+  and `kul` (sum of a list of numbers). `chhaant`, `ulta` and `hissa` don't change the original.
+- `ba` also works on lists (does it contain the item?) and strings (does it contain the text?).
+- Built-in functions can take optional arguments. The error for a wrong number of arguments then says
+  "2 ya 3".
 
 ### Changed
 
 - The CLI writes output with `fs.writeSync` instead of `console.log`, so questions and answers stay in
   order.
 - CI runs the examples with empty stdin, so examples that ask questions don't wait for input.
+- Examples: `chhatai.bhoj` compares its bubble sort with `chhaant`, and `bazaar.bhoj` uses `kul`, `khoj`,
+  `chhaant` and `ulta`.
 - `bhojpuri` with no arguments opens the interactive prompt, instead of printing help and exiting with
   code 1. Use `bhojpuri --help` for help. Errors from the CLI now go to stderr with `fs.writeSync`.
 

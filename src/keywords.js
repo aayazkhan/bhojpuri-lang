@@ -70,6 +70,11 @@ export const BUILTINS = Object.freeze({
   HAS: "ba",
   REMOVE: "hataw",
   INPUT: "poochh",
+  SORT: "chhaant",
+  REVERSE: "ulta",
+  SLICE: "hissa",
+  FIND: "khoj",
+  SUM: "kul",
 });
 
 export const BUILTIN_MEANINGS = Object.freeze({
@@ -87,7 +92,12 @@ export const BUILTIN_MEANINGS = Object.freeze({
   SPLIT: "split text into a list at each separator",
   JOIN: "join a list into text with a separator",
   KEYS: "list of a kosh's keys, in the order they were added",
-  HAS: "sach if a kosh has the key",
+  HAS: "sach if a kosh has the key, a list has the item, or a string has the text",
   REMOVE: "remove a key from a kosh and return its value (khaali if missing)",
   INPUT: "ask a question and return the typed answer as text (khaali if none)",
+  SORT: "a new list, sorted (all numbers or all strings)",
+  REVERSE: "a list or string, reversed",
+  SLICE: "part of a list or string: hissa(x, start, end); end is optional",
+  FIND: "where an item (or text) first appears, or -1",
+  SUM: "the total of a list of numbers",
 });

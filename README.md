@@ -261,9 +261,14 @@ har k ramu me {                 // loop over the keys
 | `tod(text, sep)`     | split text into a list: `tod("a,b", ",")` is `["a", "b"]` |
 | `jod(list, sep)`     | join a list into text: `jod(["a", "b"], "-")` is `"a-b"` |
 | `chaabi(kosh)`       | list of the keys, in the order they were added |
-| `ba(kosh, key)`      | `sach` if the key exists                 |
+| `ba(x, item)`        | `sach` if a kosh has the key, a list has the item, or a string contains the text |
 | `hataw(kosh, key)`   | remove a key and return its value (`khaali` if it wasn't there) |
 | `poochh(question)`   | ask a question and return the typed answer as text (see [Input](#input)) |
+| `chhaant(list)`      | a new, sorted list: all numbers, or all strings |
+| `ulta(x)`            | a list or string, reversed               |
+| `hissa(x, start, end)` | part of a list or string (see below)   |
+| `khoj(x, item)`      | where `item` first appears in a list (or text in a string), or `-1` |
+| `kul(list)`          | the total of a list of numbers           |
 
 ```
 maan la umar = sankhya("24");
@@ -271,6 +276,21 @@ bol ho "Agila saal:", umar + 1;             // Agila saal: 25
 bol ho jod(tod("aalu pyaaz sattu", " "), ", ");  // aalu, pyaaz, sattu
 bol ho "Paasa:", sanyog(1, 6);
 ```
+
+Working with lists:
+
+```
+maan la ank = [42, 7, 19, 3];
+bol ho chhaant(ank);          // [3, 7, 19, 42]   (ank itself doesn't change)
+bol ho ulta(ank);             // [3, 19, 7, 42]
+bol ho hissa(ank, 1, 3);      // [7, 19]          from index 1 up to (not including) 3
+bol ho hissa(ank, -2);        // [19, 3]          leave out the end to go to the end; negatives count back
+bol ho khoj(ank, 19), kul(ank);   // 2 71
+bol ho ba(ank, 7), ba("namaste", "mas");   // sach sach
+```
+
+`chhaant`, `ulta` and `hissa` return new lists and leave the original alone. `chhaant` sorts numbers by
+size and strings by character code, so capital letters come before lowercase ones.
 
 Giving a built-in the wrong kind of value is an error, not a silent wrong answer: `sankhya("abc")`
 stops the program and says `"abc"` isn't a number.

@@ -174,6 +174,11 @@ function createGlobals({ random, input }) {
   const expectDict = (name, value, node) => {
     if (!isDict(value)) throw runtimeError(MSG.builtinArgType(name, "kosh", typeName(value)), node);
   };
+  const expectListOrString = (name, value, node) => {
+    if (!Array.isArray(value) && typeof value !== "string") {
+      throw runtimeError(MSG.builtinArgType(name, "list ya string", typeName(value)), node);
+    }
+  };
   const expectString = (name, value, node) => {
     if (typeof value !== "string") throw runtimeError(MSG.builtinArgType(name, "string", typeName(value)), node);
   };
@@ -234,6 +239,43 @@ function createGlobals({ random, input }) {
       expectString(BUILTINS.JOIN, separator, node);
       return list.map((item) => display(item)).join(separator);
     }),
+    // A new sorted list; the original is left as it was.
+    new NativeFunction(BUILTINS.SORT, 1, ([list], node) => {
+      expectList(BUILTINS.SORT, list, node);
+      const kind = typeof list[0];
+      for (const item of list) {
+        if ((typeof item !== "number" && typeof item !== "string") || typeof item !== kind) {
+          throw runtimeError(MSG.cantSort(BUILTINS.SORT, typeName(list[0]), typeName(item)), node);
+        }
+      }
+      return [...list].sort(kind === "number" ? (a, b) => a - b : (a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    }),
+    new NativeFunction(BUILTINS.REVERSE, 1, ([value], node) => {
+      expectListOrString(BUILTINS.REVERSE, value, node);
+      return Array.isArray(value) ? [...value].reverse() : value.split("").reverse().join("");
+    }),
+    // Like JS slice: `end` is left out (optional), negative numbers count from the end,
+    // and numbers past either end are clamped.
+    new NativeFunction(BUILTINS.SLICE, 3, ([value, start, end], node) => {
+      expectListOrString(BUILTINS.SLICE, value, node);
+      expectInteger(BUILTINS.SLICE, start, node);
+      if (end !== undefined) expectInteger(BUILTINS.SLICE, end, node);
+      return value.slice(start, end);
+    }, 2),
+    new NativeFunction(BUILTINS.FIND, 2, ([container, item], node) => {
+      expectListOrString(BUILTINS.FIND, container, node);
+      if (typeof container === "string") expectString(BUILTINS.FIND, item, node);
+      return container.indexOf(item);
+    }),
+    new NativeFunction(BUILTINS.SUM, 1, ([list], node) => {
+      expectList(BUILTINS.SUM, list, node);
+      let total = 0;
+      for (const item of list) {
+        if (typeof item !== "number") throw runtimeError(MSG.builtinArgType(BUILTINS.SUM, "sankhya ke list", `${typeName(item)} bhi`), node);
+        total += item;
+      }
+      return total;
+    }),
     // The question is optional. The answer is always text, or khaali when there is
     // nothing more to read (end of input, or Cancel in the playground).
     new NativeFunction(BUILTINS.INPUT, 1, ([question], node) => {
@@ -245,9 +287,15 @@ function createGlobals({ random, input }) {
       expectDict(BUILTINS.KEYS, dict, node);
       return [...dict.keys()];
     }),
-    new NativeFunction(BUILTINS.HAS, 2, ([dict, key], node) => {
-      expectDict(BUILTINS.HAS, dict, node);
-      return dict.has(checkKey(key, node));
+    // A kosh has the key, a list has the item, or a string has the piece of text.
+    new NativeFunction(BUILTINS.HAS, 2, ([container, item], node) => {
+      if (isDict(container)) return container.has(checkKey(item, node));
+      if (Array.isArray(container)) return container.includes(item);
+      if (typeof container === "string") {
+        expectString(BUILTINS.HAS, item, node);
+        return container.includes(item);
+      }
+      throw runtimeError(MSG.builtinArgType(BUILTINS.HAS, "kosh, list ya string", typeName(container)), node);
     }),
     new NativeFunction(BUILTINS.REMOVE, 2, ([dict, key], node) => {
       expectDict(BUILTINS.REMOVE, dict, node);

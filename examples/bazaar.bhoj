@@ -1,4 +1,4 @@
-// Bazaar ke hisaab: list, index, "har ... me" loop aur built-in kaam (lambai, daal, nikaal)
+// Bazaar ke hisaab: list, index aur built-in kaam (lambai, daal, nikaal, kul, khoj, chhaant, ulta)
 ka ho bhaiya
   maan la saaman = ["aalu", "pyaaz", "sattu"];
   maan la daam = [30, 40, 120];
@@ -6,18 +6,12 @@ ka ho bhaiya
   daal(saaman, "litti");
   daal(daam, 50);
 
-  kaam kul_jor(list) {
-    maan la kul = 0;
-    har paisa list me {
-      kul += paisa;
-    }
-    lauta da kul;
-  }
-
   har i = 0 se lambai(saaman) - 1 tak {
     bol ho saaman[i], "—", daam[i], "rupiya";
   }
-  bol ho "Kul hisaab:", kul_jor(daam), "rupiya";
+  bol ho "Kul hisaab:", kul(daam), "rupiya";
+
+  bol ho "Sattu kahan ba?", khoj(saaman, "sattu"), "— mahanga se sasta:", ulta(chhaant(daam));
 
   maan la hataawal = nikaal(saaman);
   bol ho hataawal, "hata dihal gail. Bachal:", saaman;
