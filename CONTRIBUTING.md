@@ -61,7 +61,9 @@ merge after CI passes.
    ```
 4. Merge `main` back into `develop` with a PR so `develop` has the release commit.
 5. GitHub Pages serves the playground from `main`, so it updates on its own a minute or two after the merge.
-6. Optional: `npm publish` from `main` (`prepublishOnly` runs the tests first).
+6. Optional: `npm publish` from `main` (`prepublishOnly` runs the tests first). The package is
+   `@aayazk/bhojpuri-lang`, and `publishConfig` in `package.json` makes it public. npm asks you to confirm
+   with two-factor authentication.
 
 **Hotfixes** follow the same steps, but branch from `main` as `hotfix/x.y.z` and bump the patch version.
 
