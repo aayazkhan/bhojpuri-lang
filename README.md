@@ -3,8 +3,9 @@
 A toy programming language with Bhojpuri keywords, inspired by [Bhailang](https://bhailang.js.org/).
 Written in plain JavaScript with zero dependencies. It runs in Node.js and in the browser.
 
-**[Try it in the playground →](https://aayazkhan.github.io/bhojpuri-lang/)** Write code (with colours as you
-type), run it, and press
+**[Try it in the playground →](https://aayazkhan.github.io/bhojpuri-lang/)** New to programming? Press
+**📘 Sikh** there for 12 short lessons, each with an example and a small exercise that checks your answer.
+Write code (with colours as you type), run it, and press
 **Baantaw 🔗** to copy a link that opens your code for anyone you send it to. The **Console** below the
 editor runs one line at a time, like the [interactive prompt](#interactive-prompt).
 

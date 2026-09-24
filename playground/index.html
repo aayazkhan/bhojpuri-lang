@@ -9,13 +9,39 @@
 </head>
 <body>
   <header class="site-header">
-    <div class="wrap">
-      <h1>Bhojpuri Lang</h1>
-      <p class="tagline">Ek khilauna programming language — Bhojpuri me code likh, browser me chalaw.</p>
+    <div class="wrap header-row">
+      <div>
+        <h1>Bhojpuri Lang</h1>
+        <p class="tagline">Ek khilauna programming language — Bhojpuri me code likh, browser me chalaw.</p>
+      </div>
+      <button id="lesson-toggle" type="button" aria-controls="lesson" aria-expanded="false">📘 Sikh</button>
     </div>
   </header>
 
   <main class="wrap">
+    <section id="lesson" class="panel lesson" aria-label="Sikh (lessons)" hidden>
+      <div class="toolbar">
+        <h2 id="lesson-title"></h2>
+        <div class="actions">
+          <button id="lesson-prev" type="button">◀ Pichhla</button>
+          <span id="lesson-count" class="status"></span>
+          <button id="lesson-next" type="button">Agila ▶</button>
+          <button id="lesson-close" type="button" aria-label="Sikh band kar">✕</button>
+        </div>
+      </div>
+      <div id="lesson-body" class="lesson-body"></div>
+      <p><button id="lesson-example" type="button">Example editor me khol ▶</button></p>
+      <div class="exercise">
+        <h3>Abhyas (exercise)</h3>
+        <div id="lesson-task"></div>
+        <div class="actions">
+          <button id="lesson-check" class="primary" type="button">Jaanch kar ✓</button>
+          <button id="lesson-solution" type="button">Jawab dekhaw</button>
+        </div>
+        <div id="lesson-result" class="lesson-result" role="status"></div>
+      </div>
+    </section>
+
     <div class="workspace">
       <section class="panel">
         <div class="toolbar">
