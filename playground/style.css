@@ -233,6 +233,61 @@ kbd {
   background: var(--surface-2);
 }
 
+/* Console: the interactive prompt in the page. Dark like the editor. */
+.console {
+  margin-top: 16px;
+  background: var(--code-bg);
+  border-color: var(--code-bg);
+}
+.console h2 { color: var(--code-text); }
+
+.console-log {
+  max-height: 320px;
+  overflow: auto;
+  font: 14px/1.6 var(--mono);
+  color: var(--code-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.console-in, .console-out, .console-result, .console-error, .console-note { min-height: 1.6em; }
+.console-result { color: var(--tok-number); }
+.console-error { color: var(--error); }
+.console-note { color: var(--tok-comment); font-style: italic; }
+
+.console-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  border-top: 1px solid #3a332d;
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.console-entry pre,
+.console-entry textarea {
+  flex: none;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  font: 14px/1.6 var(--mono);
+  background: transparent;
+  color: var(--code-text);
+  white-space: pre;
+}
+
+.console-prompt { color: var(--tok-keyword); padding-right: 1ch; user-select: none; }
+.console-entry .console-prompt { width: 11ch; color: var(--tok-keyword); }
+
+.console-entry textarea {
+  flex: 1;
+  resize: none;
+  overflow: hidden;
+  caret-color: var(--tok-keyword);
+}
+.console-entry textarea:focus-visible { box-shadow: none; }
+.console:focus-within { box-shadow: 0 0 0 2px var(--accent); }
+
 .cheatsheet {
   margin: 24px 0 48px;
 }

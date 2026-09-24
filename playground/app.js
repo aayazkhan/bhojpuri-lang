@@ -3,6 +3,7 @@ import {
 } from "../src/index.js";
 import { encodeCode, decodeHash } from "./share.js";
 import { highlight } from "./highlight.js";
+import { setUpConsole } from "./console.js";
 
 const EXAMPLES = [
   { file: "hello.bhoj", title: "Pranam duniya" },
@@ -151,6 +152,13 @@ document.getElementById("keywords").append(
 document.getElementById("builtins").append(
   ...Object.entries(BUILTINS).map(([id, name]) => cheatRow(`${name}(…)`, BUILTIN_MEANINGS[id])),
 );
+
+setUpConsole({
+  log: document.getElementById("console-log"),
+  input: document.getElementById("console-input"),
+  prompt: document.getElementById("console-prompt"),
+  reset: document.getElementById("console-reset"),
+});
 
 examples.addEventListener("change", () => loadExample(examples.value));
 document.getElementById("share").addEventListener("click", share);
