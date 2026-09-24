@@ -387,6 +387,10 @@ koshish kara {
 (a backtick string like `` `umar: {20}` `` is often easier to read).
 The falsy values are `jhooth`, `khaali`, `0` and `""`. Everything else counts as true.
 
+Decimals are shown to 15 significant digits, so `bol ho 0.1 + 0.2` prints `0.3` instead of
+`0.30000000000000004`. Only the display is rounded, not the value. Like most languages, `0.1 + 0.2 == 0.3`
+is still `jhooth`, so compare decimals with `gol` (for example `gol(x * 100) == 30`) rather than `==`.
+
 Comments use `// ...` and `/* ... */`.
 
 ### Errors

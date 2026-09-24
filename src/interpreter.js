@@ -87,6 +87,9 @@ export function display(value, seen = new Set()) {
     seen.delete(value);
     return text;
   }
+  // Numbers are shown to 15 significant digits, so 0.1 + 0.2 shows as 0.3 rather than
+  // 0.30000000000000004. Only the display is rounded; the value itself is unchanged.
+  if (typeof value === "number" && !Number.isInteger(value)) return String(Number(value.toPrecision(15)));
   return String(value);
 }
 

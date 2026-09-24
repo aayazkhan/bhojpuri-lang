@@ -17,6 +17,7 @@ describe("interactive prompt (Session)", () => {
     assert.equal(result(`[1, "a"]`), '[1, "a"]');
     assert.equal(result(`({ "a": 1 })`), '{"a": 1}');
     assert.equal(result("1 < 2"), "sach");
+    assert.equal(result("0.1 + 0.2"), "0.3");
   });
 
   test("shows nothing for statements, assignments and khaali", () => {
