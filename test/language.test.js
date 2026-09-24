@@ -1,6 +1,9 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { spawnSync } from "node:child_process";
 import { run, tokenize, BhojpuriError, formatError } from "../src/index.js";
 
 const program = (body) => `ka ho bhaiya\n${body}\nchalat bani bhaiya`;
@@ -395,6 +398,45 @@ describe("kosh (dictionaries)", () => {
   });
 });
 
+describe("poochh (input)", () => {
+  // Answers the questions in order, then khaali; remembers what was asked.
+  function answering(...answers) {
+    const asked = [];
+    const input = (question) => {
+      asked.push(question);
+      return answers.length ? answers.shift() : null;
+    };
+    return { asked, input };
+  }
+
+  test("returns the typed answer as text", () => {
+    const { asked, input } = answering("Ramu", "24");
+    const lines = output(program(`maan la naam = poochh("Naam? ");\nmaan la umar = poochh("Umar? ");\nbol ho naam, kism(umar), sankhya(umar) + 1;`), { input });
+    assert.deepEqual(lines, ["Ramu shabd 25"]);
+    assert.deepEqual(asked, ["Naam? ", "Umar? "]);
+  });
+
+  test("the question is optional, and any value is shown as text", () => {
+    const { asked, input } = answering("a", "b");
+    assert.deepEqual(output(program(`bol ho poochh(), poochh(42);`), { input }), ["a b"]);
+    assert.deepEqual(asked, ["", "42"]);
+  });
+
+  test("gives khaali when there is nothing more to read", () => {
+    const { input } = answering("ek");
+    assert.deepEqual(output(program(`bol ho poochh("1? "), poochh("2? "), poochh("2? ") == khaali;`), { input }), ["ek khaali sach"]);
+  });
+
+  test("answers that aren't strings are turned into text", () => {
+    assert.deepEqual(output(program(`bol ho kism(poochh()), poochh();`), { input: () => 7 }), ["shabd 7"]);
+  });
+
+  test("errors: no input available, too many arguments", () => {
+    assertError(program(`poochh("Naam? ");`), { kind: "RuntimeError", line: 2, match: /"poochh" ke jawab dewe wala koi na ba/ });
+    assertError(program(`poochh("a", "b");`), { kind: "RuntimeError", match: /"poochh" 0 ya 1 cheez maange la, lekin 2/ });
+  });
+});
+
 describe("standard library", () => {
   const withRandom = (random, body) => output(program(body), { random });
 
@@ -536,7 +578,8 @@ describe("examples", () => {
   const dir = new URL("../examples/", import.meta.url);
   for (const file of readdirSync(dir).filter((f) => f.endsWith(".bhoj"))) {
     test(`${file} runs`, () => {
-      const lines = output(readFileSync(new URL(file, dir), "utf8"));
+      // Examples that ask questions get no answers, like a run with empty input.
+      const lines = output(readFileSync(new URL(file, dir), "utf8"), { input: () => null });
       assert.ok(lines.length > 0);
     });
   }
@@ -544,5 +587,49 @@ describe("examples", () => {
   test("fizzbuzz output", () => {
     const lines = output(readFileSync(new URL("fizzbuzz.bhoj", dir), "utf8"));
     assert.deepEqual(lines, ["1", "2", "Fizz", "4", "Buzz", "Fizz", "7", "8", "Fizz", "Buzz", "11", "Fizz", "13", "14", "FizzBuzz"]);
+  });
+});
+
+describe("cli", () => {
+  const cli = new URL("../bin/bhojpuri.js", import.meta.url).pathname;
+  const example = (file) => new URL(`../examples/${file}`, import.meta.url).pathname;
+  const bhojpuri = (args, input = "") => spawnSync(process.execPath, [cli, ...args], { input, encoding: "utf8" });
+
+  test("runs a file", () => {
+    const result = bhojpuri([example("hello.bhoj")]);
+    assert.equal(result.status, 0);
+    assert.match(result.stdout, /Pranam duniya/);
+  });
+
+  test("poochh reads lines from stdin, and gives khaali at the end", () => {
+    const result = bhojpuri([example("andaaz.bhoj")], "0\n101\r\n");
+    assert.equal(result.status, 0);
+    assert.match(result.stdout, /Koshish 1: 0 chhota ba/);
+    assert.match(result.stdout, /Koshish 2: 101 bada ba/);
+    assert.match(result.stdout, /Koshish 3: \nThik ba, phir kabhi/);
+  });
+
+  test("reads UTF-8 answers and a last line without a newline", () => {
+    const dir = mkdtempSync(join(tmpdir(), "bhojpuri-"));
+    const file = join(dir, "sawal.bhoj");
+    writeFileSync(file, `ka ho bhaiya\nbol ho poochh() + "|" + poochh() + "|" + poochh();\nchalat bani bhaiya`);
+    try {
+      const result = bhojpuri([file], "राम\nश्याम");
+      assert.equal(result.status, 0);
+      assert.equal(result.stdout, "राम|श्याम|khaali\n");
+    } finally {
+      rmSync(dir, { recursive: true });
+    }
+  });
+
+  test("errors go to stderr with exit code 1", () => {
+    const result = bhojpuri([example("andaaz.bhoj")], "das\n");
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /"das" sankhya na ha/);
+  });
+
+  test("--version and --help", () => {
+    assert.equal(bhojpuri(["--version"]).stdout.trim(), JSON.parse(readFileSync(new URL("../package.json", import.meta.url))).version);
+    assert.match(bhojpuri(["--help"]).stdout, /poochh\(…\)/);
   });
 });

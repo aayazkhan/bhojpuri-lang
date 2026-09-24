@@ -13,6 +13,7 @@ const EXAMPLES = [
   { file: "chhatai.bhoj", title: "Chhatai (bubble sort)" },
   { file: "paasa.bhoj", title: "Paasa (built-in kaam)" },
   { file: "ginti.bhoj", title: "Shabd ginti (kosh)" },
+  { file: "andaaz.bhoj", title: "Andaaz lagaw (poochh)" },
 ];
 
 const STORAGE_KEY = "bhojpuri-lang:code";
@@ -27,8 +28,20 @@ function runCode() {
   const lines = [];
   output.replaceChildren();
 
+  // `poochh` uses the browser's own question box. The page can't repaint while it is open, so
+  // the box also shows what was printed since the last question (up to 10 lines). The question
+  // and answer are added to the output so it reads like a conversation; Cancel gives khaali.
+  let shown = 0;
+  const input = (question) => {
+    const recent = lines.slice(Math.max(shown, lines.length - 10));
+    const answer = window.prompt([...recent, question || "poochh():"].join("\n"));
+    lines.push(question + (answer ?? "(khaali)"));
+    shown = lines.length;
+    return answer;
+  };
+
   try {
-    run(source, { print: (line) => lines.push(line), maxLoopIterations: MAX_LOOP_ITERATIONS });
+    run(source, { print: (line) => lines.push(line), input, maxLoopIterations: MAX_LOOP_ITERATIONS });
     output.textContent = lines.length ? lines.join("\n") : "(kuchhu print na bhail)";
   } catch (err) {
     // Show whatever printed before the error, then the error itself.

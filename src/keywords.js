@@ -69,6 +69,7 @@ export const BUILTINS = Object.freeze({
   KEYS: "chaabi",
   HAS: "ba",
   REMOVE: "hataw",
+  INPUT: "poochh",
 });
 
 export const BUILTIN_MEANINGS = Object.freeze({
@@ -88,4 +89,5 @@ export const BUILTIN_MEANINGS = Object.freeze({
   KEYS: "list of a kosh's keys, in the order they were added",
   HAS: "sach if a kosh has the key",
   REMOVE: "remove a key from a kosh and return its value (khaali if missing)",
+  INPUT: "ask a question and return the typed answer as text (khaali if none)",
 });
