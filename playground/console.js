@@ -8,9 +8,10 @@ const MORE = "...       ";
 const MAX_LOOP_ITERATIONS = 100_000;
 
 /**
- * @param {{ log: HTMLElement, input: HTMLTextAreaElement, prompt: HTMLElement, reset: HTMLElement }} elements
+ * @param {{ log: HTMLElement, input: HTMLTextAreaElement, prompt: HTMLElement, reset: HTMLElement,
+ *   loadFile?: Function }} elements `loadFile` lets `le aaw` bring in the playground's other files.
  */
-export function setUpConsole({ log, input, prompt, reset }) {
+export function setUpConsole({ log, input, prompt, reset, loadFile }) {
   const history = [];
   let historyIndex = 0; // history.length means "the line being typed now"
   let draft = "";
@@ -30,6 +31,7 @@ export function setUpConsole({ log, input, prompt, reset }) {
   function start() {
     session = new Session({
       maxLoopIterations: MAX_LOOP_ITERATIONS,
+      loadFile,
       print: (line) => {
         printedSinceQuestion.push(line);
         addLine("console-out", line);

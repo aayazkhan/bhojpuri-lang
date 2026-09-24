@@ -6,6 +6,18 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `le aaw` in the playground: file tabs above the editor (`main.bhoj` plus any files added with
+  **+ Naya file**, including folders like `lib/ganit.bhoj` and Devanagari names).
+  - `le aaw` finds the other tabs using the same path rules as the CLI, and errors name the tab they
+    come from.
+  - **Chalaw** always runs `main.bhoj`, and the console can use `le aaw` too.
+  - Share links carry every file. A single `main.bhoj` still makes the old kind of link, and old links
+    still open.
+  - Examples bring their extra files along, so `hisaab.bhoj` is now in the example list.
+  - Code saved before this version becomes `main.bhoj`.
+
 ### Changed
 
 - Internal: the interpreter is split into smaller files. `src/values.js` holds the kinds of value and how

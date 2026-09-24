@@ -7,7 +7,8 @@ Written in plain JavaScript with zero dependencies. It runs in Node.js and in th
 **📘 Sikh** there for 12 short lessons in Bhojpuri (or English), each with an example and a small exercise
 that checks your answer.
 Write code (with colours as you type), run it, and press
-**Baantaw 🔗** to copy a link that opens your code for anyone you send it to. The **Console** below the
+**Baantaw 🔗** to copy a link that opens your code for anyone you send it to. **+ Naya file** adds more files
+for [`le aaw`](#using-other-files-le-aaw). The **Console** below the
 editor runs one line at a time, like the [interactive prompt](#interactive-prompt).
 
 ```
@@ -448,8 +449,10 @@ chalat bani bhaiya
   in the file doing the bringing.
 - **Errors name the file they come from,** with its own line:
   `Chalat samay galti (lib/ganit.bhoj, line 4, col 23): ...`.
-- **Where it works:** in the `bhojpuri` command and the interactive prompt. The browser playground has no
-  files, so there `le aaw` says it can't be used. See [examples/hisaab.bhoj](examples/hisaab.bhoj).
+- **Where it works:** everywhere. In the `bhojpuri` command and the interactive prompt it reads files from
+  disk. In the playground, **+ Naya file** adds a file tab, and `le aaw` finds the other tabs; the program
+  always starts from `main.bhoj`, and share links carry every file. See
+  [examples/hisaab.bhoj](examples/hisaab.bhoj), which is also in the playground's example list.
 
 ### Operators
 
