@@ -72,7 +72,7 @@ Run `bhojpuri` without a file to try things out one line at a time:
 
 ```
 $ bhojpuri
-Bhojpuri Lang 1.0.0 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
+Bhojpuri Lang 1.1.0 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
 bhojpuri> 2 + 3 * 4
 14
 bhojpuri> maan la naam = "Ramu"
@@ -340,8 +340,11 @@ har k ramu me {                 // loop over the keys
 | `sankhya(text)`      | turn text into a number: `sankhya("42")` is `42` |
 | `shabd(x)`           | turn any value into text: `shabd(42)` is `"42"` |
 | `kism(x)`            | the type of a value: `sankhya`, `shabd`, `list`, `kosh`, `sach/jhooth`, `khaali` or `kaam` |
-| `gol(n)`             | round to the nearest whole number: `gol(2.6)` is `3` |
+| `gol(n)`             | round to the nearest whole number: `gol(2.6)` is `3`. Halves round up: `gol(2.5)` is `3`, `gol(-2.5)` is `-2` |
+| `gol(n, dashamlav)`  | round to that many decimal places (0 to 15): `gol(2.345, 2)` is `2.35`, and `gol(1.005, 2)` is `1.01` |
 | `neeche(n)`          | round down: `neeche(7 / 2)` is `3`       |
+| `upar(n)`            | round up: `upar(7 / 2)` is `4`           |
+| `bina_chinh(n)`      | the number without its sign: `bina_chinh(-5)` is `5` |
 | `sanyog(a, b)`       | random whole number from `a` to `b`, both included |
 | `bada(text)`         | text in UPPER case                       |
 | `chhota(text)`       | text in lower case                       |
@@ -356,6 +359,8 @@ har k ramu me {                 // loop over the keys
 | `hissa(x, start, end)` | part of a list or string (see below)   |
 | `khoj(x, item)`      | where `item` first appears in a list (or text in a string), or `-1` |
 | `kul(list)`          | the total of a list of numbers           |
+| `sabse_bada(list)`   | the largest item (all numbers, or all strings) |
+| `sabse_chhota(list)` | the smallest item                        |
 | `saaf(text)`         | text without the spaces, tabs and newlines at the start and end |
 | `jagah(text, purana, naya)` | text with every `purana` replaced by `naya` |
 | `shuru_me(text, x)`  | `sach` if the text starts with `x`       |

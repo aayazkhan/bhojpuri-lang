@@ -1,6 +1,6 @@
 {
   "name": "@aayazk/bhojpuri-lang",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A toy programming language with Bhojpuri keywords",
   "author": "Ayyaz Khan <khan.shan803@gmail.com>",
   "license": "MIT",

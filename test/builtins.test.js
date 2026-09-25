@@ -69,7 +69,7 @@ describe("standard library", () => {
       out(`maan la l = [42, 7, 19, 3, 88, 1];\nbol ho chhaant(l), l;\nbol ho chhaant(["kela", "aam", "Zebra"]), chhaant([]), chhaant([2.5, -1, 2]);`),
       ["[1, 3, 7, 19, 42, 88] [42, 7, 19, 3, 88, 1]", '["Zebra", "aam", "kela"] [] [-1, 2, 2.5]'],
     );
-    assertError(program(`bol ho chhaant([1, "a"]);`), { kind: "RuntimeError", match: /"chhaant" sirf sab sankhya ya sab shabd .* sankhya aur shabd/ });
+    assertError(program(`bol ho chhaant([1, "a"]);`), { kind: "RuntimeError", match: /"chhaant" ke sab sankhya ya sab shabd wala list chahi, lekin sankhya aur shabd/ });
     assertError(program(`bol ho chhaant([[1], [2]]);`), { kind: "RuntimeError", match: /"chhaant"/ });
     assertError(program(`bol ho chhaant("cba");`), { kind: "RuntimeError", match: /"chhaant" ke list chahi/ });
   });
@@ -124,6 +124,36 @@ describe("standard library", () => {
       ["sach jhooth sach jhooth sach"],
     );
     assertError(program(`bol ho ant_me(["a"], "a");`), { kind: "RuntimeError", match: /"ant_me" ke shabd chahi, lekin list/ });
+  });
+
+  test("gol rounds to decimal places, the way people expect", () => {
+    assert.deepEqual(
+      out(`bol ho gol(2.345, 2), gol(1.005, 2), gol(0.1 + 0.2, 1), gol(123.456, 0), gol(5, 3), gol(1.23456789, 15);`),
+      ["2.35 1.01 0.3 123 5 1.23456789"],
+    );
+    // Halves round up (towards the larger number), as gol(n) always has: gol(-2.5) is -2.
+    assert.deepEqual(out(`bol ho gol(-2.5), gol(-2.345, 2), gol(-2.346, 2);`), ["-2 -2.34 -2.35"]);
+    assert.deepEqual(out(`bol ho gol(2.5), gol(0.000001, 2), gol(12345678901234567000, 5);`), ["3 0 12345678901234567000"]);
+    assertError(program(`bol ho gol(2.5, 1.5);`), { kind: "RuntimeError", match: /"gol" me dashamlav ke baad 0 se 15 tak ke pura sankhya chahi, lekin 1\.5/ });
+    assertError(program(`bol ho gol(2.5, 16);`), { match: /lekin 16/ });
+    assertError(program(`bol ho gol(2.5, -1);`), { match: /lekin -1/ });
+    assertError(program(`bol ho gol(2.5, 1, 2);`), { match: /"gol" 1 ya 2 cheez maange la, lekin 3/ });
+  });
+
+  test("upar rounds up and bina_chinh drops the sign", () => {
+    assert.deepEqual(out(`bol ho upar(2.1), upar(-2.9), upar(-0.5), upar(4), bina_chinh(-5), bina_chinh(3.5), bina_chinh(0);`), ["3 -2 0 4 5 3.5 0"]);
+    assertError(program(`bol ho upar("2");`), { match: /"upar" ke sankhya chahi, lekin shabd/ });
+    assertError(program(`bol ho bina_chinh(khaali);`), { match: /"bina_chinh" ke sankhya chahi, lekin khaali/ });
+  });
+
+  test("sabse_bada and sabse_chhota find the largest and smallest item", () => {
+    assert.deepEqual(
+      out(`bol ho sabse_bada([3, 9, 2]), sabse_chhota([3, 9, 2]), sabse_bada([-1.5]), sabse_bada(["kela", "aam"]), sabse_chhota(["kela", "aam"]);`),
+      ["9 2 -1.5 kela aam"],
+    );
+    assertError(program(`bol ho sabse_bada([]);`), { match: /"sabse_bada" khaali list pe na chal sakela/ });
+    assertError(program(`bol ho sabse_chhota([1, "a"]);`), { match: /"sabse_chhota" ke sab sankhya ya sab shabd wala list chahi/ });
+    assertError(program(`bol ho sabse_bada(5);`), { match: /"sabse_bada" ke list chahi, lekin sankhya/ });
   });
 
   test("new built-in names can be shadowed", () => {
