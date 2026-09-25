@@ -193,7 +193,7 @@
     },
     "builtins": {
       "name": "support.function.builtin.bhojpuri",
-      "match": "(?<![\\p{L}\\p{M}\\p{N}_])(?:shuru_me|sankhya|chhaant|lambai|nikaal|neeche|sanyog|chhota|chaabi|poochh|chhaan|ant_me|shabd|hataw|hissa|badal|jagah|daal|kism|bada|ulta|khoj|saaf|gol|tod|jod|kul|ba)(?=\\s*\\()"
+      "match": "(?<![\\p{L}\\p{M}\\p{N}_])(?:sabse_chhota|sabse_bada|bina_chinh|shuru_me|sankhya|chhaant|lambai|nikaal|neeche|sanyog|chhota|chaabi|poochh|chhaan|ant_me|shabd|hataw|hissa|badal|jagah|daal|kism|bada|ulta|khoj|saaf|upar|gol|tod|jod|kul|ba)(?=\\s*\\()"
     }
   }
 }

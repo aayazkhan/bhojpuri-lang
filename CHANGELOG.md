@@ -6,6 +6,20 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Maths built-ins:
+  - `sabse_bada` and `sabse_chhota`: the largest and smallest item of a list (all numbers or all strings);
+  - `upar`: round up, the partner of `neeche`;
+  - `bina_chinh`: the number without its sign (absolute value).
+- `gol(n, dashamlav)` rounds to 0–15 decimal places: `gol(2.345, 2)` is `2.35`, and `gol(1.005, 2)` is `1.01`
+  (not `1`, as multiplying by 100 would give). Halves round up, as `gol(n)` always has. `gol(n)` is unchanged.
+
+### Changed
+
+- `chhaant`, `sabse_bada` and `sabse_chhota` share one error message for a list that mixes numbers and
+  strings.
+
 ## [1.0.0] - 2026-09-25
 
 The first stable release. From now on, a program that works with 1.x keeps working with every later 1.x:

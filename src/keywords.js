@@ -89,6 +89,10 @@ export const BUILTINS = Object.freeze({
   REPLACE: "jagah",
   STARTS_WITH: "shuru_me",
   ENDS_WITH: "ant_me",
+  MAX: "sabse_bada",
+  MIN: "sabse_chhota",
+  CEIL: "upar",
+  ABS: "bina_chinh",
 });
 
 export const BUILTIN_MEANINGS = Object.freeze({
@@ -98,7 +102,7 @@ export const BUILTIN_MEANINGS = Object.freeze({
   TO_NUMBER: "turn text into a number",
   TO_STRING: "turn any value into text",
   TYPE: "the type of a value (sankhya, shabd, list, kosh, ...)",
-  ROUND: "round to the nearest whole number",
+  ROUND: "round to a whole number, or to some decimal places: gol(2.345, 2) is 2.35",
   FLOOR: "round down to a whole number",
   RANDOM: "random whole number from a to b (inclusive)",
   UPPER: "text in UPPER case",
@@ -120,4 +124,8 @@ export const BUILTIN_MEANINGS = Object.freeze({
   REPLACE: "text with every purana replaced by naya: jagah(text, purana, naya)",
   STARTS_WITH: "sach if the text starts with the given text",
   ENDS_WITH: "sach if the text ends with the given text",
+  MAX: "the largest item of a list (all numbers or all strings)",
+  MIN: "the smallest item of a list (all numbers or all strings)",
+  CEIL: "round up to a whole number",
+  ABS: "the number without its sign: bina_chinh(-5) is 5",
 });
