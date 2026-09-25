@@ -89,7 +89,7 @@ describe("le aaw (using other files)", () => {
       "main.bhoj": program(`bol ho "main";\nle aaw "b";`),
       "b.bhoj": program(`le aaw "main";`),
     };
-    assert.match(errorWith(files), /^Chalat samay galti \(b\.bhoj, line 2, col 1\): "main" ghuma-phira ke khud ke le aawat ba/);
+    assert.match(errorWith(files), /^Chalat samay galti \(b\.bhoj, line 2, col 1\): "main" ghuma-phira ke apna-aap ke le aawat ba/);
   });
 
   test("a name that already exists is a clash", () => {
@@ -97,7 +97,7 @@ describe("le aaw (using other files)", () => {
       "ek.bhoj": program(`kaam f() { lauta da 1 }`),
       "main.bhoj": program(`kaam f() { lauta da 2 }\nle aaw "ek";`),
     };
-    assert.match(errorWith(files), /"f" pahile se banal ba, aur "ek" bhi ek "f" deta/);
+    assert.match(errorWith(files), /"f" pahile se banal ba, aur "ek" bhi ek "f" det ba/);
   });
 
   test("missing files, no file loader, and a path that isn't a string", () => {

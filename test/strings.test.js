@@ -39,7 +39,7 @@ describe("text in strings (backtick strings)", () => {
 
   test("errors point inside the string", () => {
     assertError(program(`bol ho \`a {naam\`;`), { kind: "SyntaxError", line: 2, match: /"\{" band na bhail/ });
-    assertError(program(`bol ho \`a {}\`;`), { kind: "SyntaxError", match: /"\{ \}" ke bhitar kuchh likh/ });
+    assertError(program(`bol ho \`a {}\`;`), { kind: "SyntaxError", match: /"\{ \}" ke bhitar kuchhu likha/ });
     assertError(program(`bol ho \`a {1 2}\`;`), { kind: "SyntaxError", match: /"\}" chahi rahe, lekin "2"/ });
     assertError(program(`bol ho \`abc;`), { kind: "SyntaxError", match: /String band na bhail/ });
     assert.throws(

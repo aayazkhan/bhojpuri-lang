@@ -4,10 +4,10 @@ A toy programming language with Bhojpuri keywords, inspired by [Bhailang](https:
 Written in plain JavaScript with zero dependencies. It runs in Node.js and in the browser.
 
 **[Try it in the playground →](https://aayazkhan.github.io/bhojpuri-lang/)** New to programming? Press
-**📘 Sikh** there for 12 short lessons in Bhojpuri (or English), each with an example and a small exercise
+**📘 Seekha** there for 12 short lessons in Bhojpuri (or English), each with an example and a small exercise
 that checks your answer.
 Write code (with colours as you type), run it, and press
-**Baantaw 🔗** to copy a link that opens your code for anyone you send it to. **+ Naya file** adds more files
+**Baanta 🔗** to copy a link that opens your code for anyone you send it to. **+ Naya file** adds more files
 for [`le aaw`](#using-other-files-le-aaw). The **Console** below the
 editor runs one line at a time, like the [interactive prompt](#interactive-prompt).
 
@@ -19,9 +19,9 @@ chalat bani bhaiya
 ```
 
 > **Bhojpuri me:** Bhojpuri Lang ek khilauna programming language ha, jekar keyword Bhojpuri me ba. Browser me
-> [playground](https://aayazkhan.github.io/bhojpuri-lang/) khol ke turant code likh aur chalaw. **📘 Sikh**
+> [playground](https://aayazkhan.github.io/bhojpuri-lang/) khol ke turant code likha aur chalawa. **📘 Seekha**
 > dabawe pe 12 go chhot-chhot paath milela, har paath ke saath ek abhyas bhi. Apna computer pe chalawe
-> khatir `npx @aayazk/bhojpuri-lang` likh. Neeche ke puri jaankari angrezi me ba.
+> khatir `npx @aayazk/bhojpuri-lang` likha. Neeche ke puri jaankari angrezi me ba.
 
 ## Install
 
@@ -344,7 +344,7 @@ har k ramu me {                 // loop over the keys
 | `gol(n, dashamlav)`  | round to that many decimal places (0 to 15): `gol(2.345, 2)` is `2.35`, and `gol(1.005, 2)` is `1.01` |
 | `neeche(n)`          | round down: `neeche(7 / 2)` is `3`       |
 | `upar(n)`            | round up: `upar(7 / 2)` is `4`           |
-| `bina_chinh(n)`      | the number without its sign: `bina_chinh(-5)` is `5` |
+| `bina_chinh(n)`      | the number without its sign (absolute value): `bina_chinh(-5)` is `5` |
 | `sanyog(a, b)`       | random whole number from `a` to `b`, both included |
 | `bada(text)`         | text in UPPER case                       |
 | `chhota(text)`       | text in lower case                       |

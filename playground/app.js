@@ -18,7 +18,7 @@ const EXAMPLES = [
   { file: "chhatai.bhoj", title: "Chhatai (bubble sort)" },
   { file: "paasa.bhoj", title: "Paasa (built-in kaam)" },
   { file: "ginti.bhoj", title: "Shabd ginti (kosh)" },
-  { file: "andaaz.bhoj", title: "Andaaz lagaw (poochh)" },
+  { file: "andaaz.bhoj", title: "Andaaz lagawa (poochh)" },
   { file: "hisaab.bhoj", title: "Hisaab (le aaw, duu file)" },
 ];
 
@@ -212,7 +212,7 @@ async function share() {
     await navigator.clipboard.writeText(url);
     showStatus(files.length > 1 ? `Link copy ho gail (${files.length} file)!` : "Link copy ho gail!");
   } catch {
-    window.prompt("Ee link copy kar:", url); // e.g. clipboard blocked by the browser
+    window.prompt("Ee link copy kara:", url); // e.g. clipboard blocked by the browser
   }
 }
 
