@@ -42,7 +42,9 @@ export const MSG = {
     `${q(name)} ${expected} cheez maange la, lekin ${got} dihal gail.`,
   builtinArgType: (name, expected, got) => `${q(name)} ke ${expected} chahi, lekin ${got} mil gail.`,
   noInput: (name) => `Ihaan ${q(name)} ke jawab dewe wala koi na ba (input na mil sakela).`,
-  cantSort: (name, a, b) => `${q(name)} sirf sab sankhya ya sab shabd wala list chhaant sakela, lekin ${a} aur ${b} mil gail.`,
+  mixedList: (name, a, b) => `${q(name)} ke sab sankhya ya sab shabd wala list chahi, lekin ${a} aur ${b} mil gail.`,
+  emptyList: (name) => `${q(name)} khaali list pe na chal sakela.`,
+  badDecimalPlaces: (name, got) => `${q(name)} me dashamlav ke baad 0 se 15 tak ke pura sankhya chahi, lekin ${got} mil gail.`,
   // An error thrown with `phenk da` that nobody caught: show the value itself.
   thrown: (text) => text,
   emptySearch: (name) => `${q(name)} ke khoje wala text khaali ("") na ho sakela.`,

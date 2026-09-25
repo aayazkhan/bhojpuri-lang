@@ -22,6 +22,23 @@ export function createBuiltins({ random, input, call }) {
   const expectDict = (name, value, node) => {
     if (!isDict(value)) throw runtimeError(MSG.builtinArgType(name, "kosh", typeName(value)), node);
   };
+  // A list that can be put in order: all numbers or all strings. Returns how to compare two items.
+  const orderOf = (name, list, node) => {
+    const kind = typeof list[0];
+    for (const item of list) {
+      if ((typeof item !== "number" && typeof item !== "string") || typeof item !== kind) {
+        throw runtimeError(MSG.mixedList(name, typeName(list[0]), typeName(item)), node);
+      }
+    }
+    return kind === "number" ? (a, b) => a - b : (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+  };
+  // The largest (sign 1) or smallest (sign -1) item of a non-empty list.
+  const extreme = (name, sign) => ([list], node) => {
+    expectList(name, list, node);
+    if (list.length === 0) throw runtimeError(MSG.emptyList(name), node);
+    const compare = orderOf(name, list, node);
+    return list.reduce((best, item) => (sign * compare(item, best) > 0 ? item : best));
+  };
   const expectFunction = (name, value, node) => {
     if (!isFunction(value)) throw runtimeError(MSG.builtinArgType(name, "kaam", typeName(value)), node);
   };
@@ -54,13 +71,32 @@ export function createBuiltins({ random, input, call }) {
     new NativeFunction(BUILTINS.TYPE, 1, ([value]) => typeName(value)),
 
     // ---- Numbers ----
-    new NativeFunction(BUILTINS.ROUND, 1, ([value], node) => {
+    // gol(n) rounds to a whole number; gol(n, places) to that many decimal places.
+    new NativeFunction(BUILTINS.ROUND, 2, ([value, places], node) => {
       expectNumber(BUILTINS.ROUND, value, node);
-      return Math.round(value);
-    }),
+      if (places === undefined) return Math.round(value);
+      if (!Number.isInteger(places) || places < 0 || places > 15) {
+        throw runtimeError(MSG.badDecimalPlaces(BUILTINS.ROUND, display(places)), node);
+      }
+      // Beyond what a number can hold anyway, or nothing after the point: nothing to round.
+      if (Number.isInteger(value) || Math.abs(value) * 10 ** places >= 1e21) return value;
+      // Shift the decimal point in the text ("1.005e2"), not by multiplying, so 1.005 rounds to
+      // 1.01 as people expect, rather than to 1 because of how decimals are stored.
+      const [digits, exponent] = value.toExponential().split("e");
+      const shifted = Math.round(Number(`${digits}e${Number(exponent) + places}`));
+      return Number(`${shifted}e-${places}`);
+    }, 1),
     new NativeFunction(BUILTINS.FLOOR, 1, ([value], node) => {
       expectNumber(BUILTINS.FLOOR, value, node);
       return Math.floor(value);
+    }),
+    new NativeFunction(BUILTINS.CEIL, 1, ([value], node) => {
+      expectNumber(BUILTINS.CEIL, value, node);
+      return Math.ceil(value) || 0; // never -0
+    }),
+    new NativeFunction(BUILTINS.ABS, 1, ([value], node) => {
+      expectNumber(BUILTINS.ABS, value, node);
+      return Math.abs(value);
     }),
     new NativeFunction(BUILTINS.RANDOM, 2, ([low, high], node) => {
       expectInteger(BUILTINS.RANDOM, low, node);
@@ -122,14 +158,10 @@ export function createBuiltins({ random, input, call }) {
     // A new sorted list; the original is left as it was.
     new NativeFunction(BUILTINS.SORT, 1, ([list], node) => {
       expectList(BUILTINS.SORT, list, node);
-      const kind = typeof list[0];
-      for (const item of list) {
-        if ((typeof item !== "number" && typeof item !== "string") || typeof item !== kind) {
-          throw runtimeError(MSG.cantSort(BUILTINS.SORT, typeName(list[0]), typeName(item)), node);
-        }
-      }
-      return [...list].sort(kind === "number" ? (a, b) => a - b : (a, b) => (a < b ? -1 : a > b ? 1 : 0));
+      return [...list].sort(orderOf(BUILTINS.SORT, list, node));
     }),
+    new NativeFunction(BUILTINS.MAX, 1, extreme(BUILTINS.MAX, 1)),
+    new NativeFunction(BUILTINS.MIN, 1, extreme(BUILTINS.MIN, -1)),
     new NativeFunction(BUILTINS.REVERSE, 1, ([value], node) => {
       expectListOrString(BUILTINS.REVERSE, value, node);
       return Array.isArray(value) ? [...value].reverse() : letters(value).reverse().join("");
