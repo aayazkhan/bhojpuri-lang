@@ -47,7 +47,8 @@ npx @aayazk/bhojpuri-lang program.bhoj
 The command exits with code `0` when the program finishes, and `1` for a syntax or runtime error (printed
 to stderr) or a file that can't be read.
 
-From 1.0, [STABILITY.md](STABILITY.md) says what stays the same between versions.
+Since 1.0, [STABILITY.md](STABILITY.md) says what stays the same between versions: a program that works
+with 1.x keeps working with every later 1.x.
 
 ## Quick start (from a clone of this repo)
 
@@ -71,7 +72,7 @@ Run `bhojpuri` without a file to try things out one line at a time:
 
 ```
 $ bhojpuri
-Bhojpuri Lang 0.7.0 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
+Bhojpuri Lang 1.0.0 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
 bhojpuri> 2 + 3 * 4
 14
 bhojpuri> maan la naam = "Ramu"

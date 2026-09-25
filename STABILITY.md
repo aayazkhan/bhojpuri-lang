@@ -3,8 +3,8 @@
 From version 1.0, Bhojpuri Lang follows [Semantic Versioning](https://semver.org/): a program that works
 with 1.x keeps working with every later 1.x. This page says exactly what that promise covers.
 
-Until 1.0 (versions 0.x), anything may still change between minor versions, and the
-[changelog](CHANGELOG.md) says what did.
+Before 1.0 (versions 0.x), anything could change between minor versions. The [changelog](CHANGELOG.md)
+records what did.
 
 ## Covered by the promise
 
