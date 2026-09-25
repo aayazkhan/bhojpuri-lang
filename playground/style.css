@@ -273,7 +273,7 @@ kbd {
   background: var(--surface-2);
 }
 
-/* Sikh (lessons) panel. */
+/* Lessons (paath) panel. */
 .lesson { margin-bottom: 16px; }
 .lesson-body p, .exercise p { margin: 0 0 8px; }
 .lesson code, .exercise code {

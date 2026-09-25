@@ -1,11 +1,11 @@
 import { run, BhojpuriError, formatError } from "../src/index.js";
 
-// The "Sikh" (learn) lessons: each has an explanation, an example to open in the editor,
-// and an exercise whose output is checked. `input` answers `poochh` during the check.
+// The lessons ("paath"), opened with the playground's "Seekha" (learn) button. Each has an
+// explanation, an example to open in the editor, and an exercise whose output is checked. `input` answers `poochh` during the check.
 //
 // Text comes in two languages: `bho` (Bhojpuri in Roman letters, shown by default) and `en`
-// (English). To improve the Bhojpuri wording, edit the `bho` strings; the tests check that both
-// languages ask for the same code in each exercise.
+// (English). To improve the Bhojpuri wording, edit the `bho` strings (the wording rules are at the top of
+// src/messages.js); the tests check that both languages ask for the same code in each exercise.
 
 const program = (body) => `ka ho bhaiya\n${body.replace(/^\n|\n$/g, "")}\nchalat bani bhaiya\n`;
 
@@ -15,7 +15,7 @@ export const LESSONS = [
     body: {
       bho: `<p>Har program <code>ka ho bhaiya</code> se shuru hola aur <code>chalat bani bhaiya</code> pe khatam
         hola. <code>bol ho</code> screen pe likh ke dekhawela, aur har line ke ant me <code>;</code> lagela.</p>
-        <p><code>bol ho</code> ke comma laga ke kai go cheez de sakela: sab ek line me, beech me space ke saath
+        <p><code>bol ho</code> ke comma laga ke kai go cheez dihal ja sakela: sab ek line me, beech me space ke saath
         chhapi.</p>`,
       en: `<p>Every program starts with <code>ka ho bhaiya</code> and ends with <code>chalat bani bhaiya</code>.
         <code>bol ho</code> prints, and every statement ends with <code>;</code>.</p>
@@ -26,7 +26,7 @@ export const LESSONS = [
   bol ho "Ek", "do", 3;`),
     exercise: {
       task: {
-        bho: `<code>Hum Bhojpuri me code likhat bani</code> chhaap ke dekhaw.`,
+        bho: `<code>Hum Bhojpuri me code likhat bani</code> chhaap ke dekhawa.`,
         en: `Print <code>Hum Bhojpuri me code likhat bani</code>.`,
       },
       expected: ["Hum Bhojpuri me code likhat bani"],
@@ -37,7 +37,7 @@ export const LESSONS = [
   {
     title: { bho: "Variable: maan la", en: "Variables: maan la" },
     body: {
-      bho: `<p><code>maan la</code> se variable banela: ek dabba, jeme koi maan (value) rakhal jaala. Nai value
+      bho: `<p><code>maan la</code> se variable banela: ek dabba, jekra me kauno maan (value) rakhal jaala. Nai value
         <code>=</code> se dihal jaala, aur <code>+=</code>, <code>-=</code>, <code>*=</code>, <code>/=</code> se
         badlal jaala.</p>`,
       en: `<p><code>maan la</code> makes a variable. Give it a new value with <code>=</code>, or change it with
@@ -50,8 +50,8 @@ export const LESSONS = [
   bol ho naam, umar;`),
     exercise: {
       task: {
-        bho: `<code>paisa</code> naam ke variable bana, ose <code>100</code> rakh, <code>30</code> ghata, phir
-          dugna kar ke chhaap. (Jawab <code>140</code> aai.)`,
+        bho: `<code>paisa</code> naam ke variable banawa, okra me <code>100</code> rakha, <code>30</code> ghatawa,
+          phir dugna ka ke chhaapa. (Jawab <code>140</code> aai.)`,
         en: `Make a variable <code>paisa</code> with <code>100</code>, take away <code>30</code>, then double it,
           and print it. (The answer is <code>140</code>.)`,
       },
@@ -81,8 +81,8 @@ export const LESSONS = [
   bol ho \`Pranam {naam}, agila saal {umar + 1} ke ho jaiba\`;`),
     exercise: {
       task: {
-        bho: `<code>maan la a = 12, b = 30;</code> le ke, backtick string se <code>12 + 30 = 42</code> chhaap
-          (42 ke <code>{a + b}</code> se nikaal).`,
+        bho: `<code>maan la a = 12, b = 30;</code> le ke, backtick string se <code>12 + 30 = 42</code> chhaapa
+          (42 ke <code>{a + b}</code> se nikaala).`,
         en: `With <code>maan la a = 12, b = 30;</code>, use a backtick string to print
           <code>12 + 30 = 42</code> (work out the 42 with <code>{a + b}</code>).`,
       },
@@ -111,12 +111,12 @@ export const LESSONS = [
   } na ta jadi (marks >= 40) {
     bol ho "Pass";
   } na ta {
-    bol ho "Phir se koshish kar";
+    bol ho "Phir se koshish kara";
   }`),
     exercise: {
       task: {
         bho: `<code>maan la n = 15;</code> le ke: agar <code>n</code> 3 se pura bhaag hoe
-          (<code>n % 3 == 0</code>) ta <code>teen se bhaag</code> chhaap, na ta <code>na</code>.`,
+          (<code>n % 3 == 0</code>) ta <code>teen se bhaag</code> chhaapa, na ta <code>na</code>.`,
         en: `With <code>maan la n = 15;</code>, print <code>teen se bhaag</code> if <code>n</code> divides by 3
           (<code>n % 3 == 0</code>), otherwise print <code>na</code>.`,
       },
@@ -135,7 +135,7 @@ export const LESSONS = [
     body: {
       bho: `<p><code>jab le</code> block ke baar-baar chalawela, jab le shart sach rahe. <code>bas kara</code>
         loop rok dela, aur <code>aage badha</code> agila chakkar pe kood jaala.</p>
-        <p>Variable badalal mat bhula, na ta loop kabhi khatam na hoi.</p>`,
+        <p>Variable badle ke mat bhula, na ta loop kabhio khatam na hoi.</p>`,
       en: `<p><code>jab le</code> (while) repeats a block as long as its condition is true.
         <code>bas kara</code> stops the loop, and <code>aage badha</code> skips to the next round.</p>
         <p>Don't forget to change the variable, or the loop never ends.</p>`,
@@ -148,7 +148,7 @@ export const LESSONS = [
   }`),
     exercise: {
       task: {
-        bho: `<code>jab le</code> se 5 se 1 tak ulta gin, har sankhya alag line me.`,
+        bho: `<code>jab le</code> se 5 se 1 tak ulta gina, har sankhya alag line me.`,
         en: `Use <code>jab le</code> to count down from 5 to 1, one number per line.`,
       },
       expected: ["5", "4", "3", "2", "1"],
@@ -179,7 +179,7 @@ export const LESSONS = [
   }`),
     exercise: {
       task: {
-        bho: `<code>kadam</code> se 2 se 10 tak ke jor (even) sankhya chhaap, har ek alag line me.`,
+        bho: `<code>kadam</code> se 2 se 10 tak ke jor (even) sankhya chhaapa, har ek alag line me.`,
         en: `Print the even numbers from 2 to 10, one per line, using <code>kadam</code>.`,
       },
       expected: ["2", "4", "6", "8", "10"],
@@ -193,7 +193,7 @@ export const LESSONS = [
     title: { bho: "Aapan kaam: kaam", en: "Functions: kaam" },
     body: {
       bho: `<p><code>kaam naam(a, b) { }</code> se aapan kaam (function) banela, aur <code>lauta da</code> jawab
-        waapas dela. Bolawe khatir <code>naam(1, 2)</code> likh.</p>`,
+        waapas dela. Bolawe khatir <code>naam(1, 2)</code> likha.</p>`,
       en: `<p><code>kaam naam(a, b) { }</code> makes a function, and <code>lauta da</code> (return) gives back
         its answer. Call it with <code>naam(1, 2)</code>.</p>`,
     },
@@ -204,7 +204,7 @@ export const LESSONS = [
   bol ho jodo(2, 3), jodo(10, 20);`),
     exercise: {
       task: {
-        bho: `<code>kaam varg(n)</code> likh jaun <code>n * n</code> lautawe, phir <code>varg(7)</code> chhaap.`,
+        bho: `<code>kaam varg(n)</code> likha jaun <code>n * n</code> lautawe, phir <code>varg(7)</code> chhaapa.`,
         en: `Write <code>kaam varg(n)</code> that gives back <code>n * n</code>, then print <code>varg(7)</code>.`,
       },
       expected: ["49"],
@@ -234,8 +234,8 @@ export const LESSONS = [
   bol ho saaman;`),
     exercise: {
       task: {
-        bho: `<code>maan la ank = [4, 8, 15];</code> se shuru kar, <code>daal</code> se <code>16</code> aur
-          <code>23</code> jod, phir list ke lambai aur aakhri cheez chhaap (<code>5 23</code>).`,
+        bho: `<code>maan la ank = [4, 8, 15];</code> se shuru kara, <code>daal</code> se <code>16</code> aur
+          <code>23</code> joda, phir list ke lambai aur aakhri cheez chhaapa (<code>5 23</code>).`,
         en: `Start with <code>maan la ank = [4, 8, 15];</code>, add <code>16</code> and <code>23</code> with
           <code>daal</code>, then print the list's length and its last item (<code>5 23</code>).`,
       },
@@ -251,7 +251,7 @@ export const LESSONS = [
     title: { bho: "Kosh", en: "Kosh (dictionaries)" },
     body: {
       bho: `<p><code>kosh</code> me maan chaabi (key) ke saath rakhal jaala: <code>{ "aam": 30, "kela": 10 }</code>.
-        <code>d["aam"]</code> se padh, aur <code>d["seb"] = 50</code> se jod ya badal.</p>
+        <code>d["aam"]</code> se padha, aur <code>d["seb"] = 50</code> se joda ya badla.</p>
         <p><code>ba(d, chaabi)</code> batawela ki chaabi ba ki na, aur <code>har k d me</code> sab chaabi pe
         ghumela.</p>`,
       en: `<p>A <code>kosh</code> stores values under keys: <code>{ "aam": 30, "kela": 10 }</code>. Read with
@@ -267,7 +267,7 @@ export const LESSONS = [
     exercise: {
       task: {
         bho: `<code>maan la daam = { "aam": 30, "kela": 10, "seb": 50 };</code> le ke, <code>har</code> loop se
-          sab daam jod ke kul chhaap (<code>90</code>).`,
+          sab daam jod ke kul chhaapa (<code>90</code>).`,
         en: `With <code>maan la daam = { "aam": 30, "kela": 10, "seb": 50 };</code>, add up all the prices with a
           <code>har</code> loop and print the total (<code>90</code>).`,
       },
@@ -286,8 +286,8 @@ export const LESSONS = [
     body: {
       bho: `<p>Built-in kaam roj ke kaam kar dela: <code>chhaant</code> kram me lagawela, <code>kul</code> jodela,
         <code>khoj</code> khojela, <code>jod</code> text jodela, <code>bada</code> capital banawela, aur bahut
-        kuchh (neeche ke list dekh).</p>
-        <p><code>kaam(x) { ... }</code> bina naam ke turant ek kaam banawela. <code>badal(list, kaam)</code> ose
+        kuchhu (neeche ke list dekha).</p>
+        <p><code>kaam(x) { ... }</code> bina naam ke turant ek kaam banawela. <code>badal(list, kaam)</code> okra ke
         har cheez pe lagawela, aur <code>chhaan(list, kaam)</code> uhe cheez rakhela jekra khatir kaam
         <code>sach</code> kahe.</p>`,
       en: `<p>Built-ins do common jobs: <code>chhaant</code> sorts, <code>kul</code> adds up,
@@ -303,7 +303,7 @@ export const LESSONS = [
   bol ho chhaan(ank, kaam(x) { lauta da x > 4 });`),
     exercise: {
       task: {
-        bho: `<code>maan la ank = [5, 3, 8, 1];</code> ke sankhya kram me laga ke, dugna kar ke chhaap:
+        bho: `<code>maan la ank = [5, 3, 8, 1];</code> ke sankhya kram me laga ke, dugna ka ke chhaapa:
           <code>[2, 6, 10, 16]</code>.`,
         en: `From <code>maan la ank = [5, 3, 8, 1];</code>, print the numbers sorted and doubled:
           <code>[2, 6, 10, 16]</code>.`,
@@ -318,7 +318,7 @@ export const LESSONS = [
     title: { bho: "Sawal: poochh", en: "Asking: poochh" },
     body: {
       bho: `<p><code>poochh("Sawal? ")</code> program chalawe wala se poochhela aur jawab text ke roop me dela.
-        Sankhya chahi ta <code>sankhya(...)</code> laga.</p>
+        Sankhya chahi ta <code>sankhya(...)</code> lagawa.</p>
         <p>Playground me ek sawal wala dabba khulela. Neeche wala jaanch me jawab <code>Ramu</code> maanal
         jaai.</p>`,
       en: `<p><code>poochh("Question? ")</code> asks the person running the program and gives back their answer
@@ -332,7 +332,7 @@ export const LESSONS = [
   bol ho \`Agila saal {umar + 1}\`;`),
     exercise: {
       task: {
-        bho: `<code>poochh</code> se naam poochh aur <code>Pranam &lt;naam&gt;, swagat ba!</code> chhaap (jawab
+        bho: `<code>poochh</code> se naam poochha aur <code>Pranam &lt;naam&gt;, swagat ba!</code> chhaapa (jawab
           <code>Ramu</code> hoe ta: <code>Pranam Ramu, swagat ba!</code>).`,
         en: `Ask for a name with <code>poochh</code> and print <code>Pranam &lt;naam&gt;, swagat ba!</code>
           (with the answer <code>Ramu</code>: <code>Pranam Ramu, swagat ba!</code>).`,
@@ -347,7 +347,7 @@ export const LESSONS = [
   {
     title: { bho: "Galti pakad: koshish kara", en: "Catching errors: koshish kara" },
     body: {
-      bho: `<p>Kuchh galat hoe ta program galti deke ruk jaala. <code>koshish kara { }</code> block chalawela, aur
+      bho: `<p>Kuchhu galat hoe ta program galti de ke ruk jaala. <code>koshish kara { }</code> block chalawela, aur
         agar u fail hoe ta <code>galti pe (g) { }</code> chalela, aur <code>g</code> me galti ke sandesh
         rahela.</p>
         <p><code>phenk da</code> se aapan galti phenkal jaala.</p>`,
@@ -365,8 +365,8 @@ export const LESSONS = [
   bol ho "Program chalat rahal.";`),
     exercise: {
       task: {
-        bho: `<code>koshish kara</code> ke bhitar <code>phenk da "paisa kam ba";</code> likh. Ose pakad ke
-          <code>Pakdail: paisa kam ba</code> chhaap.`,
+        bho: `<code>koshish kara</code> ke bhitar <code>phenk da "paisa kam ba";</code> likha. Okra ke pakad
+          ke <code>Pakdail: paisa kam ba</code> chhaapa.`,
         en: `Inside <code>koshish kara</code>, <code>phenk da "paisa kam ba";</code>. Catch it and print
           <code>Pakdail: paisa kam ba</code>.`,
       },

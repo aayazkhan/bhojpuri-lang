@@ -1,6 +1,6 @@
 import { LESSONS, LANGUAGES, checkExercise } from "./lessons.js";
 
-// The "Sikh" panel above the editor: one lesson at a time, with its example and exercise.
+// The lessons ("paath") panel above the editor: one lesson at a time, with its example and exercise.
 
 const LESSON_KEY = "bhojpuri-lang:lesson";
 const OPEN_KEY = "bhojpuri-lang:lesson-open";
@@ -37,7 +37,7 @@ export function setUpLessons({ setCode, getCode, runCode, firstVisit }) {
     store(LESSON_KEY, String(i));
     const lesson = LESSONS[i];
     $("lesson-count").textContent = `${i + 1} / ${LESSONS.length}`;
-    $("lesson-title").textContent = `Sikh ${i + 1}: ${lesson.title[language]}`;
+    $("lesson-title").textContent = `Paath ${i + 1}: ${lesson.title[language]}`;
     // Lesson text is our own static HTML from lessons.js, not user input.
     $("lesson-body").innerHTML = lesson.body[language];
     $("lesson-task").innerHTML = lesson.exercise.task[language];
@@ -45,7 +45,7 @@ export function setUpLessons({ setCode, getCode, runCode, firstVisit }) {
     // The button offers the other language.
     const other = language === "en" ? "bho" : "en";
     languageButton.textContent = LANGUAGES[other];
-    languageButton.title = other === "en" ? "Read the lessons in English" : "Sikh Bhojpuri me padh";
+    languageButton.title = other === "en" ? "Read the lessons in English" : "Paath Bhojpuri me padha";
     $("lesson-prev").disabled = i === 0;
     $("lesson-next").disabled = i === LESSONS.length - 1;
     result.replaceChildren();
@@ -64,7 +64,7 @@ export function setUpLessons({ setCode, getCode, runCode, firstVisit }) {
     result.replaceChildren();
     const message = document.createElement("p");
     if (ok) {
-      message.textContent = index < LESSONS.length - 1 ? "Sahi ba! 🎉 Agila sikh pe chalal jaaw." : "Sahi ba! 🎉 Sab sikh pura ho gail — shabaash!";
+      message.textContent = index < LESSONS.length - 1 ? "Sahi ba! 🎉 Agila paath pe chalal jaaw." : "Sahi ba! 🎉 Sab paath pura ho gail — shabaash!";
       result.className = "lesson-result ok";
       result.append(message);
       return;

@@ -26,7 +26,7 @@ describe("did-you-mean hints", () => {
   });
 
   test("a misspelled variable, function or built-in gets a hint", () => {
-    assertError(program(`maan la naamm = 1;\nbol ho naam;`), { kind: "RuntimeError", line: 3, match: /^"naam" naam ke koi variable na ba\. Kahin "naamm" ta na\?$/ });
+    assertError(program(`maan la naamm = 1;\nbol ho naam;`), { kind: "RuntimeError", line: 3, match: /^"naam" naam ke kauno variable na ba\. Kahin "naamm" ta na\?$/ });
     assertError(program(`kaam jodo(a, b) { lauta da a + b }\nbol ho jdoo(1, 2);`), { match: /Kahin "jodo" ta na\?/ });
     assertError(program(`bol ho lambaai("ab");`), { match: /Kahin "lambai" ta na\?/ });
     assertError(program(`maan la umar = 1;\nbol ho Umar;`), { match: /Kahin "umar" ta na\?/ });

@@ -195,7 +195,7 @@ describe("poochh (input)", () => {
   });
 
   test("errors: no input available, too many arguments", () => {
-    assertError(program(`poochh("Naam? ");`), { kind: "RuntimeError", line: 2, match: /"poochh" ke jawab dewe wala koi na ba/ });
+    assertError(program(`poochh("Naam? ");`), { kind: "RuntimeError", line: 2, match: /"poochh" ke jawab dewe wala kehu na ba/ });
     assertError(program(`poochh("a", "b");`), { kind: "RuntimeError", match: /"poochh" 0 ya 1 cheez maange la, lekin 2/ });
   });
 });

@@ -47,7 +47,7 @@ describe("har loops", () => {
   });
 
   test("the loop variable only exists inside the loop, and each round gets its own", () => {
-    assertError(program(`har i = 1 se 2 tak {}\nbol ho i;`), { kind: "RuntimeError", line: 3, match: /"i" naam ke koi variable na ba/ });
+    assertError(program(`har i = 1 se 2 tak {}\nbol ho i;`), { kind: "RuntimeError", line: 3, match: /"i" naam ke kauno variable na ba/ });
     assert.deepEqual(
       out(`maan la kaam_list = [];\nhar i = 1 se 3 tak {\n  kaam dekhaw() { lauta da i; }\n  daal(kaam_list, dekhaw);\n}\nbol ho kaam_list[0](), kaam_list[2]();`),
       ["1 3"],

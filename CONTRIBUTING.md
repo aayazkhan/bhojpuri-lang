@@ -34,7 +34,7 @@ merge after CI passes.
 ## Reporting bugs and ideas
 
 Open an [issue](https://github.com/aayazkhan/bhojpuri-lang/issues/new/choose). The bug report form asks for a
-short program that shows the problem. In the playground, **Baantaw 🔗** copies a link to your code.
+short program that shows the problem. In the playground, **Baanta 🔗** copies a link to your code.
 
 ## Making a change
 
@@ -95,4 +95,5 @@ may include breaking language changes, and a patch bump (`0.2.1`) contains fixes
 
 - Plain modern JavaScript (ES modules). There are no runtime dependencies; please keep it that way.
 - Put all Bhojpuri words in `src/keywords.js` and all user-facing error text in `src/messages.js`.
+  Follow the wording rules at the top of `src/messages.js` for anything written in Bhojpuri.
 - Match the style of the surrounding code.

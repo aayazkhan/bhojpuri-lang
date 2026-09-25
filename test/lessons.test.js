@@ -5,7 +5,7 @@ import { LESSONS, LANGUAGES, checkExercise } from "../playground/lessons.js";
 // The code snippets in some lesson text, in order-independent form.
 const codeIn = (html) => [...html.matchAll(/<code>(.*?)<\/code>/gs)].map((m) => m[1].replace(/\s+/g, " ")).sort();
 
-describe("playground lessons (Sikh)", () => {
+describe("playground lessons (paath)", () => {
   test("there are lessons from bol ho up to koshish kara", () => {
     assert.ok(LESSONS.length >= 10);
     assert.match(LESSONS[0].example, /bol ho/);
@@ -48,7 +48,7 @@ describe("playground lessons (Sikh)", () => {
     assert.deepEqual(checkExercise("ka ho bhaiya bol ho 70; chalat bani bhaiya", exercise), { ok: false, output: ["70"], error: null });
     const broken = checkExercise("ka ho bhaiya bol ho paisa; chalat bani bhaiya", exercise);
     assert.equal(broken.ok, false);
-    assert.match(broken.error, /"paisa" naam ke koi variable/);
+    assert.match(broken.error, /"paisa" naam ke kauno variable/);
   });
 
   test("trailing spaces don't matter, but everything else does", () => {
