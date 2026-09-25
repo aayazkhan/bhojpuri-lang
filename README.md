@@ -47,7 +47,8 @@ npx @aayazk/bhojpuri-lang program.bhoj
 The command exits with code `0` when the program finishes, and `1` for a syntax or runtime error (printed
 to stderr) or a file that can't be read.
 
-From 1.0, [STABILITY.md](STABILITY.md) says what stays the same between versions.
+Since 1.0, [STABILITY.md](STABILITY.md) says what stays the same between versions: a program that works
+with 1.x keeps working with every later 1.x.
 
 ## Quick start (from a clone of this repo)
 
@@ -71,7 +72,7 @@ Run `bhojpuri` without a file to try things out one line at a time:
 
 ```
 $ bhojpuri
-Bhojpuri Lang 0.7.0 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
+Bhojpuri Lang 1.0.0 — "chalat bani bhaiya" likh ke ya Ctrl+D se bahar nikal.
 bhojpuri> 2 + 3 * 4
 14
 bhojpuri> maan la naam = "Ramu"
@@ -153,6 +154,19 @@ them. A backslash starts an escape:
 | `\n` `\t` `\r` `\0` | new line, tab, carriage return, the zero character |
 | `\"` `\'` `\\` | the quote or backslash itself |
 | `\` + anything else | that character, e.g. `\{` in a backtick string |
+
+Text is counted in **letters as people see them**, so a Devanagari letter and its vowel signs count as one.
+This applies to `lambai`, indexes, `ulta`, `hissa`, `khoj`, `tod(text, "")` and `har … me`:
+
+```
+maan la s = "किताब";
+bol ho lambai(s), s[0], ulta(s);     // 3 कि बताकि
+har c "नाम" me { bol ho c; }         // ना, then म
+```
+
+Unicode calls these letters *grapheme clusters*. An emoji with a skin tone is also one letter. How some
+Devanagari conjuncts (like स्ते in नमस्ते) are grouped follows the Unicode version of the browser or Node.js
+running the program. Newer versions keep a conjunct together, so `lambai("नमस्ते")` is 3.
 
 ### Text in strings
 

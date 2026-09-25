@@ -3,8 +3,8 @@
 From version 1.0, Bhojpuri Lang follows [Semantic Versioning](https://semver.org/): a program that works
 with 1.x keeps working with every later 1.x. This page says exactly what that promise covers.
 
-Until 1.0 (versions 0.x), anything may still change between minor versions, and the
-[changelog](CHANGELOG.md) says what did.
+Before 1.0 (versions 0.x), anything could change between minor versions. The [changelog](CHANGELOG.md)
+records what did.
 
 ## Covered by the promise
 
@@ -17,7 +17,10 @@ These only change in a new **major** version (2.0, 3.0, …), and the changelog 
   - the syntax: statements, expressions, operators and their precedence, strings, backtick strings,
     comments, and where a `;` may be left out;
   - what each statement and operator does, including truthiness, `==` for lists and kosh, integer and
-    decimal maths, and indexes starting at 0.
+    decimal maths, and indexes starting at 0;
+  - text counted in letters as people see them (Unicode grapheme clusters). How some Devanagari
+    conjuncts are grouped follows the Unicode version of the browser or Node.js running the program, and
+    isn't something Bhojpuri Lang itself can promise.
 - **The built-in functions**: their names (`BUILTINS`), the arguments they take and what they return.
 - **Output**: what `bol ho`, backtick strings, `shabd` and `jod` print for each kind of value, including
   decimals shown to 15 significant digits, lists as `[1, "a"]` and kosh as `{"k": 1}`.

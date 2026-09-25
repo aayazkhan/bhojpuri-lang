@@ -2,6 +2,7 @@ import { BUILTINS } from "./keywords.js";
 import { runtimeError } from "./errors.js";
 import { MSG } from "./messages.js";
 import { NativeFunction, isFunction, isDict, display, typeName, truthy, checkKey } from "./values.js";
+import { letters, letterIndexOf } from "./text.js";
 
 /**
  * The built-in functions, grouped by topic. Their names come from BUILTINS in keywords.js.
@@ -37,7 +38,8 @@ export function createBuiltins({ random, input, call }) {
   return [
     // ---- Any kind of value ----
     new NativeFunction(BUILTINS.LENGTH, 1, ([value], node) => {
-      if (Array.isArray(value) || typeof value === "string") return value.length;
+      if (Array.isArray(value)) return value.length;
+      if (typeof value === "string") return letters(value).length;
       if (isDict(value)) return value.size;
       throw runtimeError(MSG.builtinArgType(BUILTINS.LENGTH, "list, shabd ya kosh", typeName(value)), node);
     }),
@@ -83,7 +85,7 @@ export function createBuiltins({ random, input, call }) {
     new NativeFunction(BUILTINS.SPLIT, 2, ([text, separator], node) => {
       expectString(BUILTINS.SPLIT, text, node);
       expectString(BUILTINS.SPLIT, separator, node);
-      return text.split(separator);
+      return separator === "" ? letters(text) : text.split(separator);
     }),
     new NativeFunction(BUILTINS.JOIN, 2, ([list, separator], node) => {
       expectList(BUILTINS.JOIN, list, node);
@@ -130,7 +132,7 @@ export function createBuiltins({ random, input, call }) {
     }),
     new NativeFunction(BUILTINS.REVERSE, 1, ([value], node) => {
       expectListOrString(BUILTINS.REVERSE, value, node);
-      return Array.isArray(value) ? [...value].reverse() : value.split("").reverse().join("");
+      return Array.isArray(value) ? [...value].reverse() : letters(value).reverse().join("");
     }),
     // Like JS slice: `end` is left out (optional), negative numbers count from the end,
     // and numbers past either end are clamped.
@@ -138,12 +140,12 @@ export function createBuiltins({ random, input, call }) {
       expectListOrString(BUILTINS.SLICE, value, node);
       expectInteger(BUILTINS.SLICE, start, node);
       if (end !== undefined) expectInteger(BUILTINS.SLICE, end, node);
-      return value.slice(start, end);
+      return Array.isArray(value) ? value.slice(start, end) : letters(value).slice(start, end).join("");
     }, 2),
     new NativeFunction(BUILTINS.FIND, 2, ([container, item], node) => {
       expectListOrString(BUILTINS.FIND, container, node);
       if (typeof container === "string") expectString(BUILTINS.FIND, item, node);
-      return container.indexOf(item);
+      return typeof container === "string" ? letterIndexOf(container, item) : container.indexOf(item);
     }),
     new NativeFunction(BUILTINS.SUM, 1, ([list], node) => {
       expectList(BUILTINS.SUM, list, node);

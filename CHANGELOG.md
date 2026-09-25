@@ -6,6 +6,19 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-09-25
+
+The first stable release. From now on, a program that works with 1.x keeps working with every later 1.x:
+[STABILITY.md](STABILITY.md) says exactly what that covers. Changes since 0.7.0:
+
+### Changed
+
+- Text is counted in letters as people see them (Unicode grapheme clusters), so a Devanagari letter with
+  its vowel signs, or an emoji with a skin tone, is one letter. Before, `lambai("नाम")` was 3; now it's 2,
+  and `ulta`, indexes, `hissa`, `khoj`, `tod(text, "")` and `har … me` no longer split letters apart
+  (`ulta("नमस्ते")` was `ेत्समन`). English text is unaffected. How some Devanagari conjuncts group
+  follows the Unicode version of the browser or Node.js.
+
 ## [0.7.0] - 2026-09-24
 
 ### Added
@@ -245,7 +258,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Browser playground (`npm run playground`).
 - Example programs and a `node:test` test suite.
 
-[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.7.0...v1.0.0
 [0.7.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.4.1...v0.5.0
