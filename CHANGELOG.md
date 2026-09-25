@@ -6,6 +6,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-09-25
+
 ### Changed
 
 - A review of the Bhojpuri wording in error messages, the lessons and the playground (only the words
@@ -289,7 +291,8 @@ The first stable release. From now on, a program that works with 1.x keeps worki
 - Browser playground (`npm run playground`).
 - Example programs and a `node:test` test suite.
 
-[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/aayazkhan/bhojpuri-lang/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.7.0...v1.0.0
 [0.7.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.6.0...v0.7.0
