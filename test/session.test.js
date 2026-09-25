@@ -66,7 +66,7 @@ describe("interactive prompt (Session)", () => {
 
   test("an error doesn't end the session", () => {
     const { s, result } = session();
-    assert.throws(() => result(`naam`), (err) => err instanceof BhojpuriError && /"naam" naam ke koi variable/.test(err.message));
+    assert.throws(() => result(`naam`), (err) => err instanceof BhojpuriError && /"naam" naam ke kauno variable/.test(err.message));
     assert.throws(() => result(`bol ho (`), (err) => err.kind === "SyntaxError");
     result(`maan la naam = "Ramu"`);
     assert.equal(s.run(`naam`).exit, false);

@@ -127,5 +127,5 @@ export const BUILTIN_MEANINGS = Object.freeze({
   MAX: "the largest item of a list (all numbers or all strings)",
   MIN: "the smallest item of a list (all numbers or all strings)",
   CEIL: "round up to a whole number",
-  ABS: "the number without its sign: bina_chinh(-5) is 5",
+  ABS: "the number without its sign (absolute value): bina_chinh(-5) is 5",
 });

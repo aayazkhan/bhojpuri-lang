@@ -48,7 +48,7 @@ describe("koshish kara / galti pe / phenk da", () => {
   });
 
   test("the error variable and variables inside the blocks stay inside", () => {
-    assertError(program(`koshish kara { phenk da 1; } galti pe (g) {}\nbol ho g;`), { kind: "RuntimeError", line: 3, match: /"g" naam ke koi variable/ });
+    assertError(program(`koshish kara { phenk da 1; } galti pe (g) {}\nbol ho g;`), { kind: "RuntimeError", line: 3, match: /"g" naam ke kauno variable/ });
   });
 
   test("catches runaway recursion and the loop guard", () => {
@@ -68,6 +68,6 @@ describe("koshish kara / galti pe / phenk da", () => {
     assertError(program(`galti pe { bol ho 1; }`), { kind: "SyntaxError", match: /"galti pe" se pahile "koshish kara"/ });
     assertError(program(`koshish kara bol ho 1;`), { kind: "SyntaxError", match: /"\{" chahi/ });
     assertError(program(`koshish kara {} galti pe (5) {}`), { kind: "SyntaxError", match: /variable ke naam/ });
-    assertError(program(`phenk da;`), { kind: "SyntaxError", match: /koi value/ });
+    assertError(program(`phenk da;`), { kind: "SyntaxError", match: /kauno value/ });
   });
 });

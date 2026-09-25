@@ -6,6 +6,23 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-09-25
+
+### Changed
+
+- A review of the Bhojpuri wording in error messages, the lessons and the playground (only the words
+  changed, none of the behaviour):
+  - Instructions use the same polite `-a` form as the keywords (`maan la`, `lauta da`): `likha`, `chalawa`,
+    `badla`, `chhaapa` instead of the curt `likh`, `chalaw`, `badal`, `chhaap`.
+  - Bhojpuri words replace Hindi ones: `kauno`/`kehu` instead of `koi` ("koi variable na ba" is now
+    "kauno variable na ba"), `kabhio` instead of `kabhi`, `apna-aap` instead of `khud`, `okra` instead of `ose`.
+  - In the playground, the lessons button is **📘 Seekha** (learn) and each lesson is a *Paath*, as the
+    README already called them. "Sikh" could be read as the name of a religion. **Baantaw 🔗** is now
+    **Baanta 🔗**.
+  - "Only" stays `sirf`: `khaali` is the keyword for nothing, and `bas` would read like `bas kara`.
+  - `bina_chinh` keeps its name (renaming a built-in needs a major version); its description now says
+    "absolute value" too.
+
 ## [1.1.0] - 2026-09-25
 
 ### Added
@@ -274,7 +291,8 @@ The first stable release. From now on, a program that works with 1.x keeps worki
 - Browser playground (`npm run playground`).
 - Example programs and a `node:test` test suite.
 
-[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/aayazkhan/bhojpuri-lang/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/aayazkhan/bhojpuri-lang/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.7.0...v1.0.0
 [0.7.0]: https://github.com/aayazkhan/bhojpuri-lang/compare/v0.6.0...v0.7.0

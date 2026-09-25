@@ -36,7 +36,7 @@ describe("functions without names", () => {
 
   test("lauta da inside, bas kara not", () => {
     assertError(program(`jab le (sach) { maan la f = kaam() { bas kara } }`), { kind: "SyntaxError", match: /"bas kara" sirf/ });
-    assertError(program(`maan la f = kaam(x, x) {};`), { kind: "SyntaxError", match: /"x" naam duu baar/ });
+    assertError(program(`maan la f = kaam(x, x) {};`), { kind: "SyntaxError", match: /"x" naam du baar/ });
   });
 });
 
